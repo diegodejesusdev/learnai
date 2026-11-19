@@ -1,0 +1,27 @@
+# Dependencias y builds
+node_modules
+dist
+dist-ssr
+coverage
+*.tsbuildinfo
+
+# Variables de entorno: nunca se suben (solo la plantilla)
+.env*
+!.env.example
+*.local
+
+# Supabase y Vercel (archivos locales)
+supabase/.temp
+supabase/.branches
+.vercel
+
+# Logs
+*.log
+npm-debug.log*
+
+# Editores y sistema
+.vscode/*
+!.vscode/extensions.json
+.idea
+.DS_Store
+*.sw?

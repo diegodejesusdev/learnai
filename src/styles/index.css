@@ -1,0 +1,108 @@
+@import 'tailwindcss';
+
+/* El modo oscuro depende de data-theme en <html> (lo pone index.html y luego ThemeProvider). */
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+/*
+  Tokens de color. Los componentes usan solo estos nombres semánticos
+  (bg-surface, text-fg-muted, bg-accent…), nunca colores sueltos.
+*/
+:root {
+  color-scheme: light;
+
+  --bg: #f7f8fa;
+  --surface: #ffffff;
+  --surface-muted: #f1f3f6;
+  --surface-raised: #ffffff;
+  --border: #e3e6eb;
+  --fg: #151a23;
+  --fg-muted: #5a6372;
+
+  --accent: #0f766e;
+  --accent-hover: #115e59;
+  --accent-fg: #ffffff;
+  --accent-soft: #ccfbf1;
+  --accent-soft-fg: #115e59;
+
+  --pending: #4b5463;
+  --pending-soft: #eef0f3;
+  --progress: #92400e;
+  --progress-soft: #fef3c7;
+  --done: #166534;
+  --done-soft: #dcfce7;
+
+  --danger: #b91c1c;
+  --danger-fg: #ffffff;
+}
+
+[data-theme='dark'] {
+  color-scheme: dark;
+
+  --bg: #0e1116;
+  --surface: #161a21;
+  --surface-muted: #1f242d;
+  --surface-raised: #2e3542;
+  --border: #2a303a;
+  --fg: #eef1f5;
+  --fg-muted: #9aa3b2;
+
+  --accent: #2dd4bf;
+  --accent-hover: #5eead4;
+  --accent-fg: #042f2e;
+  --accent-soft: #12302d;
+  --accent-soft-fg: #5eead4;
+
+  --pending: #aab2bf;
+  --pending-soft: #232831;
+  --progress: #fcd34d;
+  --progress-soft: #3a2a0c;
+  --done: #86efac;
+  --done-soft: #0f2e1c;
+
+  --danger: #f87171;
+  --danger-fg: #1f0707;
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-surface-raised: var(--surface-raised);
+  --color-border: var(--border);
+  --color-fg: var(--fg);
+  --color-fg-muted: var(--fg-muted);
+
+  --color-accent: var(--accent);
+  --color-accent-hover: var(--accent-hover);
+  --color-accent-fg: var(--accent-fg);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-soft-fg: var(--accent-soft-fg);
+
+  --color-pending: var(--pending);
+  --color-pending-soft: var(--pending-soft);
+  --color-progress: var(--progress);
+  --color-progress-soft: var(--progress-soft);
+  --color-done: var(--done);
+  --color-done-soft: var(--done-soft);
+
+  --color-danger: var(--danger);
+  --color-danger-fg: var(--danger-fg);
+
+  --font-sans: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  body {
+    @apply bg-bg font-sans text-base text-fg antialiased;
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+}

@@ -1,0 +1,213 @@
+{
+  "version": 1,
+  "title": "Ruta de aprendizaje: Automatización para negocios",
+  "goal": "Poder vender e implementar automatizaciones a pequeños negocios en unas 20 semanas (10 h/semana).",
+  "phases": [
+    {
+      "id": "f0",
+      "order": 0,
+      "title": "Procesos de negocio",
+      "summary": "Aprender a ver un negocio como procesos y decidir qué vale la pena automatizar.",
+      "estimated_weeks": 1,
+      "topics": [
+        { "id": "f0-t1", "title": "Qué es un proceso", "details": "Disparador, pasos, entradas, salidas, responsable y puntos de falla." },
+        { "id": "f0-t2", "title": "Mapeo de procesos y BPMN básico", "details": "Diagramas de flujo, eventos, tareas, compuertas y carriles. Herramientas: draw.io, Miro o Whimsical." },
+        { "id": "f0-t3", "title": "Cómo elegir qué automatizar", "details": "Tarea frecuente, con reglas claras, bajo riesgo, entrada y salida claras, descriptible en unas 10 líneas." },
+        { "id": "f0-t4", "title": "Casos típicos en pequeños negocios", "details": "Leads, preguntas frecuentes, recordatorios de citas, conciliar pagos, cotizaciones y facturas, reportes, inventario." },
+        { "id": "f0-t5", "title": "Entrevista de diagnóstico", "details": "Qué preguntar al dueño y a quien hace la tarea: tiempo, frecuencia, errores, apps que usan." },
+        { "id": "f0-t6", "title": "Cálculo de ahorro (ROI)", "details": "Horas ahorradas al mes × costo de la hora, frente a tu precio más el costo de herramientas." },
+        { "id": "f0-t7", "title": "Documentar el proceso (SOP)", "details": "Escribir el proceso antes y después para entregarlo al cliente." },
+        { "id": "f0-t8", "title": "Flujo fijo o agente de IA", "details": "Por defecto flujo con pasos definidos; agente solo cuando no se pueden listar los pasos de antemano." }
+      ],
+      "project": { "title": "Mapear 3 procesos", "description": "Mapea 3 procesos de un negocio que conozcas y calcula el ahorro de automatizar cada uno." }
+    },
+    {
+      "id": "f1",
+      "order": 1,
+      "title": "Bases técnicas: APIs, JSON y webhooks",
+      "summary": "Cómo se mueven los datos entre apps. Con esto, cualquier plataforma se aprende rápido.",
+      "estimated_weeks": 2,
+      "topics": [
+        { "id": "f1-t1", "title": "HTTP", "details": "Métodos GET, POST, PUT, PATCH, DELETE; códigos 200, 201, 400, 401, 403, 404, 429, 500; headers, query params y body." },
+        { "id": "f1-t2", "title": "APIs REST", "details": "Leer documentación, endpoints, paginación, límites de uso y reintentos." },
+        { "id": "f1-t3", "title": "JSON", "details": "Objetos, arreglos, datos anidados; recorrer, aplanar, dividir y agrupar." },
+        { "id": "f1-t4", "title": "Otros formatos", "details": "CSV, XML (factura electrónica) y form-data para archivos." },
+        { "id": "f1-t5", "title": "Webhooks", "details": "Qué son, diferencia con polling, cómo probarlos y validarlos." },
+        { "id": "f1-t6", "title": "Autenticación", "details": "API key, Bearer token, Basic Auth y OAuth2 (Google, Meta, Microsoft)." },
+        { "id": "f1-t7", "title": "JavaScript básico", "details": "Variables, condicionales, arreglos, map, filter y fechas (n8n usa expresiones en JS)." },
+        { "id": "f1-t8", "title": "Expresiones cron", "details": "Programar tareas; ej. 0 8 * * 1-5 = lunes a viernes a las 8 a.m." },
+        { "id": "f1-t9", "title": "Regex básico", "details": "Extraer correos, teléfonos, números de factura o NIT de un texto." },
+        { "id": "f1-t10", "title": "Fechas y zonas horarias", "details": "Colombia es UTC-5; fuente común de errores." },
+        { "id": "f1-t11", "title": "Herramientas de prueba", "details": "Postman o Insomnia para APIs, webhook.site para webhooks." }
+      ],
+      "project": { "title": "Primera API y webhook", "description": "Con Postman consulta una API pública, autentícate con una API key y envía un webhook a webhook.site." }
+    },
+    {
+      "id": "f2",
+      "order": 2,
+      "title": "Plataformas: n8n, Make y Zapier",
+      "summary": "Dominar n8n a fondo y conocer Make y Zapier para trabajar con lo que el cliente ya tenga.",
+      "estimated_weeks": 4,
+      "topics": [
+        { "id": "f2-t1", "title": "Comparar plataformas y su modelo de cobro", "details": "Zapier cobra por paso, Make por módulo, n8n por ejecución. n8n Community es gratis en tu servidor. Power Automate para clientes en Microsoft 365." },
+        { "id": "f2-t2", "title": "n8n: interfaz y flujo de datos", "details": "Ejecuciones y revisar la entrada y salida de cada nodo." },
+        { "id": "f2-t3", "title": "n8n: disparadores", "details": "Manual, Schedule, Webhook, Form y disparadores de apps (Gmail, Sheets, Telegram)." },
+        { "id": "f2-t4", "title": "n8n: nodos de datos", "details": "Edit Fields, IF, Switch, Merge, Filter, Split Out, Aggregate, Loop Over Items, Wait." },
+        { "id": "f2-t5", "title": "n8n: expresiones y fechas", "details": "Expresiones en JavaScript y manejo de fechas." },
+        { "id": "f2-t6", "title": "n8n: credenciales y OAuth2", "details": "Conectar Google y Microsoft." },
+        { "id": "f2-t7", "title": "n8n: HTTP Request", "details": "Cualquier API sin nodo propio, con paginación y autenticación." },
+        { "id": "f2-t8", "title": "n8n: Code node", "details": "JavaScript o Python para transformaciones complejas." },
+        { "id": "f2-t9", "title": "n8n: manejo de errores", "details": "Error workflows, reintentos y alertas por Telegram o correo." },
+        { "id": "f2-t10", "title": "n8n: subflujos", "details": "Sub-workflows para reutilizar piezas." },
+        { "id": "f2-t11", "title": "n8n: bases de datos", "details": "PostgreSQL, MySQL y Supabase." },
+        { "id": "f2-t12", "title": "n8n: nodos de IA", "details": "Agentes, memoria, herramientas y vector stores (se profundiza en la fase 6)." },
+        { "id": "f2-t13", "title": "n8n: plantillas de la comunidad", "details": "Usarlas para aprender, no para copiar a ciegas." },
+        { "id": "f2-t14", "title": "Make: lo esencial", "details": "Escenarios, módulos, routers, filtros, iteradores, agregadores, data stores y errores." },
+        { "id": "f2-t15", "title": "Zapier: lo esencial", "details": "Zaps, filtros, Paths, Formatter y Webhooks by Zapier." }
+      ],
+      "project": { "title": "Cinco flujos base", "description": "1) Enviar por correo datos de un Google Sheet. 2) Notificar por Telegram cada formulario. 3) Reporte diario programado. 4) Leads de formulario a CRM con manejo de errores. 5) Rehacer el flujo 2 en Make y en Zapier." }
+    },
+    {
+      "id": "f3",
+      "order": 3,
+      "title": "Herramientas que usan los negocios",
+      "summary": "Conocer por dentro Excel, Google, CRM y la facturación electrónica colombiana.",
+      "estimated_weeks": 2,
+      "topics": [
+        { "id": "f3-t1", "title": "Google Sheets avanzado", "details": "Tablas, BUSCARX, QUERY, IMPORTRANGE, validación de datos, protección de rangos." },
+        { "id": "f3-t2", "title": "Google Forms", "details": "Formularios como entrada de datos." },
+        { "id": "f3-t3", "title": "Apps Script", "details": "Menús, disparadores por tiempo y formulario, correos, PDF desde plantillas, UrlFetchApp. Límite de 6 min por ejecución y cuotas diarias." },
+        { "id": "f3-t4", "title": "Google Calendar y Drive", "details": "Citas, carpetas por cliente y archivos generados." },
+        { "id": "f3-t5", "title": "Microsoft 365", "details": "Excel con tablas y Power Query, Outlook, OneDrive y Power Automate." },
+        { "id": "f3-t6", "title": "Airtable y Notion", "details": "Bases de datos ligeras para clientes." },
+        { "id": "f3-t7", "title": "CRM", "details": "HubSpot (gratis), Kommo o Pipedrive: contactos, etapas, tareas y API." },
+        { "id": "f3-t8", "title": "Facturación electrónica DIAN", "details": "XML, CUFE, documento soporte, nota crédito y nómina electrónica. Siigo y Alegra con API. La API de Alegra no tiene idempotencia: validar antes de reintentar." },
+        { "id": "f3-t9", "title": "Pagos en Colombia", "details": "Wompi, Mercado Pago, PayU o Bold y sus webhooks de pago aprobado." },
+        { "id": "f3-t10", "title": "Tiendas en línea", "details": "Shopify y WooCommerce: pedidos, inventario, clientes." },
+        { "id": "f3-t11", "title": "Agendamiento", "details": "Calendly o Cal.com." },
+        { "id": "f3-t12", "title": "Documentos automáticos", "details": "Cotizaciones, contratos y certificados en PDF desde plantilla." }
+      ],
+      "project": { "title": "Del pedido a la cotización", "description": "Formulario → Sheets → cotización en PDF → correo → contacto en el CRM. Primero con Apps Script, luego con n8n." }
+    },
+    {
+      "id": "f4",
+      "order": 4,
+      "title": "WhatsApp, correo y chatbots",
+      "summary": "El servicio más pedido en Colombia. Aprenderlo con la API oficial desde el inicio.",
+      "estimated_weeks": 2,
+      "topics": [
+        { "id": "f4-t1", "title": "Configurar WhatsApp Cloud API", "details": "Meta Business Manager, verificación, número, app en Meta for Developers, token permanente y webhook." },
+        { "id": "f4-t2", "title": "Ventana de 24 horas", "details": "Respuesta libre dentro de la ventana; fuera de ella solo plantillas aprobadas." },
+        { "id": "f4-t3", "title": "Plantillas y categorías", "details": "Marketing, utilidad, autenticación y servicio." },
+        { "id": "f4-t4", "title": "Precios de WhatsApp", "details": "Cobro por mensaje desde julio de 2025; desde octubre de 2026 también los de servicio, con 1.000 gratis al mes por número. Revisar tabla oficial antes de cotizar." },
+        { "id": "f4-t5", "title": "Proveedores BSP", "details": "360dialog, YCloud o Twilio: facilitan el alta pero cobran recargo." },
+        { "id": "f4-t6", "title": "Mensajes enriquecidos", "details": "Medios, botones, listas y catálogo." },
+        { "id": "f4-t7", "title": "APIs no oficiales y su riesgo", "details": "Evolution API (Baileys), WAHA: violan los términos y el número puede ser bloqueado. Solo para practicar." },
+        { "id": "f4-t8", "title": "Correo", "details": "SMTP, Gmail API, Outlook (Microsoft Graph), transaccional con Brevo o Resend." },
+        { "id": "f4-t9", "title": "Entregabilidad", "details": "SPF, DKIM y DMARC." },
+        { "id": "f4-t10", "title": "Leer y clasificar correos", "details": "Facturas, pedidos y soporte." },
+        { "id": "f4-t11", "title": "Formularios", "details": "Google Forms, Tally, Jotform." },
+        { "id": "f4-t12", "title": "Bots de Telegram", "details": "Para practicar y para alertas internas." },
+        { "id": "f4-t13", "title": "Instagram y Messenger", "details": "Mensajes directos por la API de Meta." },
+        { "id": "f4-t14", "title": "Bandeja compartida", "details": "Chatwoot para que varios empleados atiendan el mismo WhatsApp." },
+        { "id": "f4-t15", "title": "Diseño de conversaciones", "details": "Menús, preguntas frecuentes, captura de datos y paso a humano." }
+      ],
+      "project": { "title": "Bot de WhatsApp de citas", "description": "Con la API oficial: responde preguntas frecuentes, agenda en Google Calendar y envía recordatorio con plantilla un día antes." }
+    },
+    {
+      "id": "f5",
+      "order": 5,
+      "title": "Python, bases de datos y despliegue",
+      "summary": "Código para lo que las plataformas no hacen bien, y saber alojar n8n para tus clientes.",
+      "estimated_weeks": 3,
+      "topics": [
+        { "id": "f5-t1", "title": "Python: APIs y secretos", "details": "requests, httpx y python-dotenv." },
+        { "id": "f5-t2", "title": "Python: archivos de oficina", "details": "pandas, openpyxl, python-docx y PDF con WeasyPrint o ReportLab." },
+        { "id": "f5-t3", "title": "Extraer datos de PDF e imágenes", "details": "pdfplumber, OCR con Tesseract o modelos con visión." },
+        { "id": "f5-t4", "title": "Scraping", "details": "BeautifulSoup y Playwright; respetar términos y robots.txt." },
+        { "id": "f5-t5", "title": "RPA", "details": "Playwright para web; Power Automate Desktop o UiPath para escritorio." },
+        { "id": "f5-t6", "title": "API propia con FastAPI", "details": "Lógica propia que se llama desde n8n." },
+        { "id": "f5-t7", "title": "PostgreSQL y Supabase", "details": "Diseño simple para clientes e historial de ejecuciones para evitar duplicados." },
+        { "id": "f5-t8", "title": "Linux, SSH y Git", "details": "Lo básico del servidor y respaldar flujos exportados en Git." },
+        { "id": "f5-t9", "title": "Docker y docker compose", "details": "n8n + PostgreSQL + proxy en un archivo." },
+        { "id": "f5-t10", "title": "VPS, dominio y HTTPS", "details": "Hetzner, DigitalOcean o Hostinger; DNS; Caddy o Nginx con Let's Encrypt." },
+        { "id": "f5-t11", "title": "Respaldos y monitoreo", "details": "Respaldos automáticos, actualizaciones de n8n, Uptime Kuma." },
+        { "id": "f5-t12", "title": "Instancia por cliente o compartida", "details": "Ventajas, riesgos y cómo cobrar cada opción." }
+      ],
+      "project": { "title": "Tu propio servidor n8n", "description": "Despliega n8n con PostgreSQL y HTTPS en un VPS con docker compose, conecta un dominio, programa respaldo diario y migra tus flujos." }
+    },
+    {
+      "id": "f6",
+      "order": 6,
+      "title": "IA aplicada: LLMs, RAG y agentes",
+      "summary": "IA solo en el paso que necesita criterio; el resto como flujo fijo.",
+      "estimated_weeks": 3,
+      "topics": [
+        { "id": "f6-t1", "title": "Cómo funcionan los LLM", "details": "Tokens, contexto, temperatura; OpenAI, Anthropic, Gemini y modelos locales con Ollama." },
+        { "id": "f6-t2", "title": "Prompts para producción", "details": "Instrucción de sistema, ejemplos, restricciones y pruebas con casos reales." },
+        { "id": "f6-t3", "title": "Salida estructurada", "details": "JSON con esquema fijo para el siguiente nodo." },
+        { "id": "f6-t4", "title": "Casos de un solo paso", "details": "Clasificar, extraer datos, resumir, traducir, redactar respuestas." },
+        { "id": "f6-t5", "title": "Visión y documentos", "details": "Leer facturas, cédulas, recibos y fotos de pedidos." },
+        { "id": "f6-t6", "title": "Voz", "details": "Transcribir notas de voz de WhatsApp y responder." },
+        { "id": "f6-t7", "title": "RAG", "details": "Embeddings, chunking, pgvector, Qdrant o Pinecone; responder 'no sé' sin información suficiente." },
+        { "id": "f6-t8", "title": "Agentes en n8n", "details": "Nodo AI Agent con modelo, memoria y herramientas; cuándo usar uno y cuándo no." },
+        { "id": "f6-t9", "title": "Memoria de conversación", "details": "Por sesión o por teléfono, en Postgres o Redis." },
+        { "id": "f6-t10", "title": "MCP", "details": "n8n como cliente y como servidor MCP." },
+        { "id": "f6-t11", "title": "Humano en el ciclo", "details": "Aprobación antes de acciones delicadas." },
+        { "id": "f6-t12", "title": "Evaluación", "details": "Probar contra un conjunto de casos (n8n Evaluations)." },
+        { "id": "f6-t13", "title": "Costos de IA", "details": "Tokens por conversación y elegir el modelo más barato que cumpla." },
+        { "id": "f6-t14", "title": "Límites y riesgos", "details": "Alucinaciones, prompt injection y mínimo acceso para el agente." }
+      ],
+      "project": { "title": "Agente de WhatsApp con RAG", "description": "Responde con catálogo y políticas, transcribe audios, toma pedidos en Postgres, pasa a humano. Evalúalo con 30 preguntas." }
+    },
+    {
+      "id": "f7",
+      "order": 7,
+      "title": "Seguridad, datos personales y mantenimiento",
+      "summary": "Mover datos de terceros con responsabilidad legal y técnica.",
+      "estimated_weeks": 1,
+      "topics": [
+        { "id": "f7-t1", "title": "Ley 1581: roles", "details": "El negocio es Responsable; tú normalmente Encargado; si eres ambos, cumples los dos deberes." },
+        { "id": "f7-t2", "title": "Autorización del titular", "details": "Previa, informada y con prueba consultable después." },
+        { "id": "f7-t3", "title": "Principios y datos sensibles", "details": "Finalidad, libertad, veracidad, transparencia, acceso restringido, seguridad y confidencialidad. Decreto 1377 de 2013." },
+        { "id": "f7-t4", "title": "Transferencias internacionales", "details": "Prohibidas a países sin nivel adecuado, salvo excepciones. Relevante para nubes e IA fuera de Colombia." },
+        { "id": "f7-t5", "title": "Sanciones y práctica", "details": "Multas de la SIC hasta 2.000 SMMLV. Política, aviso de privacidad, contrato de transmisión, RNBD." },
+        { "id": "f7-t6", "title": "Seguridad técnica", "details": "Credenciales fuera del código, mínimo privilegio, webhooks firmados, HTTPS, 2FA, registros sin datos sensibles, respaldos probados." },
+        { "id": "f7-t7", "title": "Mantenimiento", "details": "Alertas de error, monitoreo de tokens vencidos, versiones en Git, documentación de entrega y acuerdo de soporte." }
+      ],
+      "project": { "title": "Kit de cumplimiento", "description": "Plantilla de autorización de datos para un bot, plantilla de documentación de entrega y alertas de error en todos tus flujos." }
+    },
+    {
+      "id": "f8",
+      "order": 8,
+      "title": "Negocio: vender y entregar",
+      "summary": "Diagnosticar, cobrar bien y garantizar que todo siga funcionando. En paralelo desde la fase 3.",
+      "estimated_weeks": 2,
+      "topics": [
+        { "id": "f8-t1", "title": "Elegir nicho", "details": "Consultorios, restaurantes, ferreterías, inmobiliarias, tiendas en línea, academias." },
+        { "id": "f8-t2", "title": "Paquetes productizados", "details": "Bot de WhatsApp, leads a CRM, cotizaciones y facturas automáticas, reporte semanal." },
+        { "id": "f8-t3", "title": "Modelo de cobro", "details": "Implementación + mensualidad; precio por valor; costos de terceros separados." },
+        { "id": "f8-t4", "title": "Proceso con el cliente", "details": "Diagnóstico, propuesta, contrato, implementación por etapas, entrega, control de cambios, revisión mensual." },
+        { "id": "f8-t5", "title": "Conseguir clientes", "details": "Portafolio con casos medidos, conocidos, Cámara de Comercio, LinkedIn, prospección con demo." },
+        { "id": "f8-t6", "title": "Aspectos formales en Colombia", "details": "RUT, régimen tributario, factura electrónica si aplica, contrato de prestación de servicios. Consultar contador." }
+      ],
+      "project": { "title": "Primer cliente piloto", "description": "Oferta de 1 página para un nicho, propuesta modelo y conseguir tu primer cliente piloto." }
+    }
+  ],
+  "final_checklist": [
+    { "id": "c1", "text": "Mapeo un proceso y calculo su ahorro en menos de una hora." },
+    { "id": "c2", "text": "Consumo cualquier API leyendo su documentación, con OAuth2 incluido." },
+    { "id": "c3", "text": "Construyo en n8n flujos con errores controlados, subflujos y alertas." },
+    { "id": "c4", "text": "Rehago un flujo sencillo en Make y en Zapier." },
+    { "id": "c5", "text": "Automatizo Sheets y Gmail con Apps Script." },
+    { "id": "c6", "text": "Conecto un formulario a un CRM y a Siigo o Alegra." },
+    { "id": "c7", "text": "Tengo un bot de WhatsApp con la API oficial funcionando." },
+    { "id": "c8", "text": "Escribo scripts en Python que leen PDF y Excel y generan documentos." },
+    { "id": "c9", "text": "Tengo n8n desplegado en mi propio VPS con HTTPS y respaldos." },
+    { "id": "c10", "text": "Construyo un agente con RAG, memoria y paso a humano, y lo evalúo." },
+    { "id": "c11", "text": "Pido autorización de datos y protejo credenciales y webhooks." },
+    { "id": "c12", "text": "Tengo 3 casos en mi portafolio con resultados medidos." },
+    { "id": "c13", "text": "Tengo una oferta, una propuesta modelo y un contrato listos." },
+    { "id": "c14", "text": "Conseguí mi primer cliente pagando." }
+  ]
+}

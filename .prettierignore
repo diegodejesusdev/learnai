@@ -1,0 +1,8 @@
+dist
+coverage
+node_modules
+package-lock.json
+*.md
+# El contenido de la ruta se mantiene tal como lo escribió Diego
+curriculum.json
+src/data/curriculum.json

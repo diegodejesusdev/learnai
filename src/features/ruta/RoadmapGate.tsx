@@ -1,0 +1,34 @@
+import { Route, TriangleAlert } from 'lucide-react'
+import type { ReactNode } from 'react'
+import { Button } from '@/components/ui/Button'
+import { EmptyState } from '@/components/ui/EmptyState'
+import { LoadingState } from '@/components/ui/LoadingState'
+import type { Roadmap } from './roadmapApi'
+import { useRoadmap } from './useRoadmap'
+
+/** Carga la ruta desde Supabase y muestra cargando / error / vacía antes del contenido. */
+export function RoadmapGate({ children }: { children: (roadmap: Roadmap) => ReactNode }) {
+  const query = useRoadmap()
+
+  if (query.isPending) return <LoadingState label="Cargando la ruta…" />
+  if (query.isError) {
+    return (
+      <EmptyState
+        icon={TriangleAlert}
+        title="No pudimos cargar la ruta"
+        description="Revisa tu conexión e inténtalo de nuevo."
+        action={<Button onClick={() => void query.refetch()}>Reintentar</Button>}
+      />
+    )
+  }
+  if (query.data.phases.length === 0) {
+    return (
+      <EmptyState
+        icon={Route}
+        title="La ruta está vacía"
+        description="Carga el contenido de curriculum.json con npm run seed."
+      />
+    )
+  }
+  return children(query.data)
+}

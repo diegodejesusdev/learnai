@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="description" content="Tu ruta de estudio en automatización para negocios." />
+    <meta name="theme-color" content="#f7f8fa" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <title>LearnAI</title>
+    <script>
+      // Aplica el tema antes de pintar para evitar un destello claro en modo oscuro.
+      // La clave debe coincidir con THEME_STORAGE_KEY en src/lib/theme.ts.
+      ;(function () {
+        var pref = 'system'
+        try {
+          pref = localStorage.getItem('learnai-theme') || 'system'
+        } catch (e) {}
+        var dark =
+          pref === 'dark' ||
+          (pref !== 'light' && window.matchMedia('(prefers-color-scheme: dark)').matches)
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light'
+      })()
+    </script>
+  </head>
+  <body>
+    <div id="root"></div>
+    <script type="module" src="/src/main.tsx"></script>
+  </body>
+</html>
