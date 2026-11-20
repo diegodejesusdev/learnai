@@ -3,25 +3,42 @@ import type { ReactNode } from 'react'
 import { Button } from '@/components/ui/Button'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { LoadingState } from '@/components/ui/LoadingState'
+import type { ProgressSnapshot } from './progressApi'
 import type { Roadmap } from './roadmapApi'
+import { useProgress } from './useProgress'
 import { useRoadmap } from './useRoadmap'
 
-/** Carga la ruta desde Supabase y muestra cargando / error / vacía antes del contenido. */
-export function RoadmapGate({ children }: { children: (roadmap: Roadmap) => ReactNode }) {
-  const query = useRoadmap()
+export interface RoadmapData {
+  roadmap: Roadmap
+  progress: ProgressSnapshot
+}
 
-  if (query.isPending) return <LoadingState label="Cargando la ruta…" />
-  if (query.isError) {
+/** Carga la ruta y tu progreso, y muestra cargando / error / vacía antes del contenido. */
+export function RoadmapGate({ children }: { children: (data: RoadmapData) => ReactNode }) {
+  const roadmap = useRoadmap()
+  const progress = useProgress()
+
+  if (roadmap.isPending || progress.isPending) return <LoadingState label="Cargando la ruta…" />
+  if (roadmap.isError || progress.isError) {
     return (
       <EmptyState
         icon={TriangleAlert}
         title="No pudimos cargar la ruta"
         description="Revisa tu conexión e inténtalo de nuevo."
-        action={<Button onClick={() => void query.refetch()}>Reintentar</Button>}
+        action={
+          <Button
+            onClick={() => {
+              void roadmap.refetch()
+              void progress.refetch()
+            }}
+          >
+            Reintentar
+          </Button>
+        }
       />
     )
   }
-  if (query.data.phases.length === 0) {
+  if (roadmap.data.phases.length === 0) {
     return (
       <EmptyState
         icon={Route}
@@ -30,5 +47,5 @@ export function RoadmapGate({ children }: { children: (roadmap: Roadmap) => Reac
       />
     )
   }
-  return children(query.data)
+  return children({ roadmap: roadmap.data, progress: progress.data })
 }

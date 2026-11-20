@@ -71,6 +71,13 @@ LearnAI/
 - Dentro de cada feature van sus componentes, sus hooks de datos (`use*.ts` con TanStack Query, desde la fase 2) y su lógica propia con su `*.test.ts` al lado.
 - La lógica que usan varias features (fechas, progreso, tema) va en `src/lib/`.
 - Acceso a datos por feature: `<algo>Api.ts` hace las llamadas a Supabase y lanza el error si lo hay, y `use<Algo>.ts` las envuelve con TanStack Query. Ejemplo: `features/ruta/roadmapApi.ts` + `useRoadmap.ts`. Los componentes no llaman a `supabase` directamente.
+- **Mutaciones optimistas:** sigue el patrón de `features/ruta/useProgress.ts`:
+  - `onMutate` aplica una función pura sobre la caché (como en `progressModel.ts`);
+  - `onError` restaura el valor anterior y avisa con `toast.error(...)` de `lib/toast.ts`;
+  - `onSettled` invalida.
+  - Los textos con autoguardado usan `useDebouncedSave` + `SaveIndicator` y no revierten lo escrito.
+- **Datos que cambian en otro dispositivo** (progreso, sesiones): `staleTime: 0`, para que se refresquen al volver a la app.
+- **Tests de integración de UI:** usa `renderApp(ruta)` de `src/test/renderApp.tsx` y simula los `*Api.ts` con `vi.mock`.
 - Imports con el alias `@/` → `src/` (por ejemplo `@/components/ui/Button`).
 
 ## Convenciones

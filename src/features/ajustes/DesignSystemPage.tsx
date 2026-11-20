@@ -8,6 +8,8 @@ import { ProgressBar } from '@/components/ui/ProgressBar'
 import { Section } from '@/components/ui/Section'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { TextField } from '@/components/ui/TextField'
+import { SaveIndicator } from '@/components/ui/SaveIndicator'
+import { toast } from '@/lib/toast'
 import { ColorSwatches } from './ColorSwatches'
 
 /** Catálogo del sistema de diseño para revisarlo en claro y oscuro. */
@@ -62,6 +64,26 @@ export function DesignSystemPage() {
           </Card>
         </Section>
 
+        <Section title="Guardado y avisos">
+          <Card className="flex flex-col gap-3">
+            <SaveIndicator status="saving" />
+            <SaveIndicator status="saved" />
+            <SaveIndicator status="offline" />
+            <SaveIndicator status="error" onRetry={() => toast.success('Reintentando…')} />
+            <div className="flex flex-wrap gap-2">
+              <Button variant="secondary" onClick={() => toast.success('Cambios guardados.')}>
+                Aviso de éxito
+              </Button>
+              <Button
+                variant="secondary"
+                onClick={() => toast.error('No se pudo guardar. Se restauró el anterior.')}
+              >
+                Aviso de error
+              </Button>
+            </div>
+          </Card>
+        </Section>
+
         <Section title="Formularios y vacíos">
           <Card className="flex flex-col gap-4">
             <TextField
@@ -69,6 +91,12 @@ export function DesignSystemPage() {
               type="url"
               placeholder="https://github.com/…"
               hint="Opcional"
+            />
+            <TextField
+              label="Enlace a la demo"
+              type="url"
+              defaultValue="mi-demo.com"
+              error="Escribe el enlace completo, empezando por https://"
             />
             <EmptyState
               icon={BookOpen}

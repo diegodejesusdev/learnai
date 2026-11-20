@@ -1,4 +1,5 @@
 import { Outlet, ScrollRestoration } from 'react-router'
+import { Toaster } from '@/components/ui/Toaster'
 import { BottomNav } from './BottomNav'
 import { MobileHeader } from './MobileHeader'
 import { Sidebar } from './Sidebar'
@@ -21,6 +22,7 @@ export function AppShell() {
         </div>
       </main>
       <BottomNav />
+      <Toaster />
       <ScrollRestoration />
     </div>
   )

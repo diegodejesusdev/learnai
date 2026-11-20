@@ -104,25 +104,39 @@ A partir de la fase 2, también `npx supabase test db`.
 
 ---
 
-## Fase 3: Ruta y progreso
+## Fase 3: Ruta y progreso ✅ (19 nov 2026)
 
 **Objetivo:** el módulo Ruta funcionando con datos reales.
 
+**Cambios respecto al plan original (pedidos por Diego)**
+- **Progreso por temas:** el de una fase = temas hechos / total y el de la ruta = temas hechos / 100. Los proyectos y la checklist se muestran aparte.
+- **Etiqueta del tutor:** «Preguntarle al tutor».
+- **Movido a la fase 4:** guardar el tema visual en `user_settings`, junto con los demás ajustes.
+
 **Entregables**
-- El contenido ya viene de Supabase (fase 2). Ahora los estados y el progreso de fases y temas también salen de Supabase, en lugar de `src/data/demo.ts`.
-- Cambio de estado con actualización optimista y `completed_at`.
-- Notas por tema con autoguardado e indicador de estado.
-- Proyecto por fase: estado, `repo_url`, `demo_url` (validadas) y notas.
-- Checklist final con fecha de marcado.
-- Funciones puras de progreso (por fase y total) con tests.
-- Progreso total visible en Ruta y en Inicio.
-- Ajustes: el tema se guarda en `user_settings` (movido desde la fase 2).
+- **Datos:**
+  - `features/ruta/progressApi.ts`: lectura de todo el progreso, upserts y minutos por tema.
+  - `progressModel.ts`: cambios puros sobre la caché.
+  - `useProgress.ts`: query y mutaciones optimistas con reversión y aviso.
+- **Página Ruta:** progreso total, proyectos y checklist; «Siguiente tema»; fases con barra, estado y filtros; checklist final que se guarda.
+- **Página de fase:** temas con estado que cambia de un toque (`StatusToggle`), filtros y editor del proyecto (estado, enlaces validados y notas con autoguardado).
+- **Página de tema:** estado, minutos estudiados, «Estudiar este tema», «Preguntarle al tutor» y notas con autoguardado e indicador.
+- **Inicio:** «Siguiente tema» y progreso de la ruta con datos reales (minutos y racha siguen de ejemplo).
+- **Infraestructura de UI:** `lib/toast.ts` + `Toaster`, `useDebouncedSave`, `SaveIndicator` y campos con `error`.
+- **Tests:**
+  - Lógica de progreso, siguiente tema, filtros y cambios optimistas.
+  - Integración con la UI: un toque, optimismo, reversión con aviso, filtro por URL, autoguardado y checklist.
 
 **Cómo verificarla**
-- Los tests de progreso pasan (fase vacía, fase completa, proyecto sin temas hechos).
-- **PC:** marcar temas y el proyecto y comprobar que las barras se actualizan. Escribir notas, recargar y ver que siguen ahí.
-- **Móvil:** el cambio hecho en el PC aparece al abrir o recargar en el móvil.
-- **Sin conexión:** activar el modo avión en el móvil, cambiar un estado, quitar el modo avión y comprobar que el cambio llega.
+- `npm test`: los tests de `lib/progress.test.ts`, `progressModel.test.ts` y `ruta.test.tsx` pasan.
+- **PC:**
+  - Marcar temas con un toque y ver subir la barra de la fase y la total.
+  - Usar los filtros.
+  - Escribir notas, esperar «Guardado», recargar y ver que siguen.
+  - Poner un enlace sin `https://` y ver el error.
+- **Móvil (mismo usuario):** cambiar algo en el PC y volver a la app en el móvil; el cambio aparece sin recargar.
+- **Sin conexión:** modo avión, cambiar un estado (se ve al instante), quitar el modo avión y comprobar en el otro dispositivo que llegó.
+- **Error:** si el guardado falla, el estado vuelve atrás y aparece un aviso.
 
 ---
 
@@ -138,7 +152,7 @@ A partir de la fase 2, también `npx supabase test db`.
 - Avisos con la app abierta (sonido, vibración, notificación en escritorio) y opción de mantener la pantalla encendida (Wake Lock).
 - Formulario de fin de sesión: duración editable, notas, regla de 12 h, descarte de menos de 1 min y paso automático del tema a «En curso».
 - Registro de sesión manual.
-- Ajustes del Pomodoro en `user_settings`.
+- Ajustes del Pomodoro en `user_settings`, junto con la meta semanal y el tema visual (este último, movido desde la fase 3).
 - Inicio: minutos de hoy y «Seguir estudiando».
 
 **Cómo verificarla**
@@ -202,7 +216,7 @@ A partir de la fase 2, también `npx supabase test db`.
   - Markdown seguro;
   - botón para detener;
   - eliminar conversación.
-- **Accesos:** «Preguntar al tutor» en cada tema, «Revisar con el tutor» en cada proyecto y «¿Qué estudio hoy?» en Inicio.
+- **Accesos:** «Preguntarle al tutor» en cada tema, «Revisar con el tutor» en cada proyecto y «¿Qué estudio hoy?» en Inicio.
 
 **Cómo verificarla**
 - `npx supabase functions serve tutor`: probar los 4 modos y repetir con `AI_PROVIDER=anthropic`.

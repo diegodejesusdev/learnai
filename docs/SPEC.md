@@ -36,24 +36,49 @@ LearnAI es una app web personal para estudiar la ruta «Automatización para neg
 ### 4.1 Ruta
 
 **Qué hace**
-- Lista de fases en orden, con título, resumen, semanas estimadas y barra de progreso.
-- Detalle de fase: temas con su estado, el proyecto de la fase y el progreso.
-- Detalle de tema: título, detalles, selector de estado, notas y accesos a «Estudiar este tema» (temporizador) y «Preguntar al tutor».
-- Proyecto de fase:
-  - estado (pendiente / en curso / hecho);
-  - enlace al repositorio y enlace a la demo (los dos opcionales y validados como URL);
-  - notas.
-- Checklist final: los 14 ítems con casilla y la fecha en que se marcaron.
+- **Página Ruta:**
+  - Arriba, el progreso total de la ruta y, aparte, proyectos (x/9) y checklist (x/14).
+  - Después, la tarjeta «Siguiente tema».
+  - Las 9 fases como tarjetas con título, resumen, semanas estimadas, barra (temas hechos / total) y estado de la fase.
+  - Al final, la checklist final en su propia sección.
+- **Página de fase:**
+  - Progreso de la fase.
+  - Lista de temas con su estado, que se cambia con un toque.
+  - El proyecto de la fase, con estado, enlace al repositorio, enlace a la demo y notas.
+- **Página de tema:**
+  - Título y detalles.
+  - Estado (selector de tres opciones).
+  - Minutos estudiados en ese tema (suma de sus sesiones).
+  - Botones «Estudiar este tema» (`/estudiar?tema=<id>`) y «Preguntarle al tutor» (`/tutor?tema=<id>`).
+  - Notas con autoguardado.
+- **Checklist final:** los 14 ítems con casilla y la fecha en que se lograron.
 
 **Reglas**
 - **Estados:** `pendiente` → «Pendiente», `en_curso` → «En curso», `hecho` → «Hecho» (enum `progress_status`). Si un tema no tiene fila de progreso, se considera pendiente.
-- **Al pasar a «Hecho»** se guarda `completed_at`. Si vuelve a otro estado, `completed_at` se limpia.
-- **Notas:** texto plano con autoguardado (debounce de ~1 s) y un indicador «Guardando… / Guardado».
-- **Progreso de una fase** = (temas hechos + proyecto hecho) / (temas de la fase + 1).
-- **Progreso total** = (temas hechos + proyectos hechos) / (100 + 9).
-- **Checklist:** se muestra aparte como «x / 14».
-- **Qué cuenta:** solo lo que está «Hecho». «En curso» no suma.
-- **Actualizaciones optimistas:** el cambio se ve al instante y se revierte con un aviso si falla.
+- **Un toque** en el estado de un tema avanza pendiente → en curso → hecho → pendiente.
+- **Al pasar a «Hecho»** se guarda `completed_at`. Si vuelve a otro estado, `completed_at` se limpia (trigger de la base; la app lo imita en el cambio optimista).
+- **Progreso** (decisión de Diego en la fase 3):
+  - de una fase = temas hechos / temas de la fase;
+  - total = temas hechos / 100;
+  - los proyectos y la checklist se muestran aparte.
+  - Solo cuenta lo «hecho»; «en curso» no suma.
+- **Estado de una fase** (para la tarjeta y el filtro): «hecho» si todos sus temas lo están, «en curso» si alguno está empezado, «pendiente» si ninguno.
+- **Siguiente tema:** el primer tema «en curso» en el orden de la ruta; si no hay, el primer «pendiente». Si todo está hecho, se muestra una felicitación.
+- **Filtros:** Todos / Pendientes / En curso / Hechos.
+  - En Ruta filtran las fases (por su estado) y en la página de fase filtran los temas.
+  - Cada filtro muestra cuántos elementos hay.
+  - El filtro vive en la URL (`?estado=en_curso`), así que se conserva al volver atrás o al recargar.
+- **Actualizaciones optimistas** (TanStack Query):
+  - El cambio se ve al instante.
+  - Si falla, se restaura el valor anterior y aparece un aviso.
+  - Sin conexión, el cambio queda en pausa y se envía al volver la conexión (mientras la app siga abierta).
+- **Notas y textos del proyecto:**
+  - Se guardan solos 0,8 s después de dejar de escribir, una vez por pausa y no por letra.
+  - También se guardan al salir del campo, al cambiar de app o al salir de la página.
+  - El indicador muestra «Guardando… / Guardado / Sin conexión: se guardará al volver / No se guardó · Reintentar».
+  - Si falla, el texto escrito no se borra.
+- **Enlaces del proyecto:** opcionales. Si se escribe uno, debe empezar por `http://` o `https://` (igual que el check de la base). Mientras sea inválido, no se guarda y el campo muestra el error.
+- **Sincronización entre dispositivos:** el progreso se vuelve a pedir cada vez que la app vuelve a primer plano (o al recuperar la conexión). Un cambio hecho en el PC aparece en el móvil al abrir o volver a la app.
 
 ### 4.2 Temporizador (sección «Estudiar»)
 
@@ -162,14 +187,15 @@ Todos los días y semanas se calculan en hora de Bogotá. Una sesión cuenta en 
 - El plan gratuito de la API de Gemini puede usar lo enviado para mejorar sus productos.
 - Por eso no se pegan datos personales de clientes en el tutor (relacionado con la fase 7 de la ruta, Ley 1581).
 
-**Accesos al tutor:** «Preguntar al tutor» en cada tema, «Revisar con el tutor» en cada proyecto y «¿Qué estudio hoy?» en Inicio.
+**Accesos al tutor:** «Preguntarle al tutor» en cada tema, «Revisar con el tutor» en cada proyecto y «¿Qué estudio hoy?» en Inicio.
 
 ### 4.5 Inicio
 
 - **Minutos de hoy** (Bogotá).
 - **Racha actual.**
 - **Meta semanal:** barra con los minutos de la semana sobre la meta.
-- **Último tema:** el de la sesión más reciente. Si no hay sesiones, el tema con progreso actualizado más recientemente. Si tampoco hay, el primer tema pendiente.
+- **Siguiente tema** (desde la fase 3): la misma sugerencia que en Ruta, con «Estudiar este tema» y «Ver tema». En la fase 4 se decide si se prioriza el tema de la última sesión.
+- **Progreso de la ruta** (temas hechos / 100), que enlaza a Ruta.
 - **Botón «Seguir estudiando»:** si hay un temporizador activo, lo reanuda; si no, abre el temporizador con el último tema elegido.
 - **Acceso a «¿Qué estudio hoy?»** del tutor.
 

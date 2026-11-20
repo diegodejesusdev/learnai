@@ -1,27 +1,5 @@
-// Datos de ejemplo para la fase 1. Se eliminan cuando la app lea de Supabase (fases 2–5).
-import type { StatusMap, StudyMode } from '@/types/progress'
-import { phases } from './curriculum'
-
-const firstPhaseDone = Object.fromEntries(
-  phases[0]?.topics.map((topic) => [topic.id, 'hecho']) ?? [],
-)
-
-export const demoTopicStatuses: StatusMap = {
-  ...firstPhaseDone,
-  'f1-t1': 'hecho',
-  'f1-t2': 'hecho',
-  'f1-t3': 'hecho',
-  'f1-t4': 'hecho',
-  'f1-t5': 'en_curso',
-  'f1-t6': 'en_curso',
-}
-
-export const demoProjectStatuses: StatusMap = {
-  f0: 'hecho',
-  f1: 'en_curso',
-}
-
-export const demoChecklistDone: readonly string[] = ['c1']
+// Datos de ejemplo: minutos, racha y sesiones. Se eliminan en las fases 4 y 5.
+import type { StudyMode } from '@/types/progress'
 
 export const demoStats = {
   todayMinutes: 45,

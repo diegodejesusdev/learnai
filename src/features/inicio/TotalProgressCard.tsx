@@ -1,12 +1,12 @@
 import { ChevronRight, Route } from 'lucide-react'
 import { CardLink } from '@/components/ui/CardLink'
 import { ProgressBar } from '@/components/ui/ProgressBar'
-import { phases } from '@/data/curriculum'
-import { demoProjectStatuses, demoTopicStatuses } from '@/data/demo'
 import { totalProgress } from '@/lib/progress'
+import { topicStatuses } from '@/features/ruta/progressModel'
+import type { RoadmapData } from '@/features/ruta/RoadmapGate'
 
-export function TotalProgressCard() {
-  const progress = totalProgress(phases, demoTopicStatuses, demoProjectStatuses)
+export function TotalProgressCard({ roadmap, progress }: RoadmapData) {
+  const total = totalProgress(roadmap.phases, topicStatuses(progress))
   return (
     <CardLink to="/ruta" className="flex flex-col gap-3">
       <div className="flex items-center justify-between gap-2">
@@ -17,10 +17,10 @@ export function TotalProgressCard() {
         <ChevronRight className="size-5 text-fg-muted" />
       </div>
       <p className="text-lg font-semibold">
-        {progress.done}{' '}
-        <span className="font-normal text-fg-muted">de {progress.total} temas y proyectos</span>
+        {total.done}{' '}
+        <span className="font-normal text-fg-muted">de {total.total} temas hechos</span>
       </p>
-      <ProgressBar value={progress.ratio} label="Progreso total de la ruta" showLabel />
+      <ProgressBar value={total.ratio} label="Progreso total de la ruta" showLabel />
     </CardLink>
   )
 }

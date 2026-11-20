@@ -2,22 +2,32 @@ import { ChevronDown } from 'lucide-react'
 import { useId, type SelectHTMLAttributes } from 'react'
 import { cn } from '@/lib/cn'
 import { Field } from './Field'
+import { describedById } from './fieldA11y'
 import { fieldControlClasses } from './styles'
 
 interface SelectFieldProps extends SelectHTMLAttributes<HTMLSelectElement> {
   label: string
   hint?: string
+  error?: string | null
 }
 
 /** Select nativo: en el móvil abre el selector del sistema, que es el más cómodo. */
-export function SelectField({ label, hint, className, children, ...props }: SelectFieldProps) {
+export function SelectField({
+  label,
+  hint,
+  error,
+  className,
+  children,
+  ...props
+}: SelectFieldProps) {
   const id = useId()
   return (
-    <Field id={id} label={label} hint={hint}>
+    <Field id={id} label={label} hint={hint} error={error}>
       <div className="relative">
         <select
           id={id}
-          aria-describedby={hint ? `${id}-hint` : undefined}
+          aria-describedby={describedById(id, hint, error)}
+          aria-invalid={error ? true : undefined}
           className={cn(fieldControlClasses, 'min-h-11 appearance-none pr-10', className)}
           {...props}
         >

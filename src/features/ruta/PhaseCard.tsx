@@ -1,17 +1,23 @@
 import { ChevronRight } from 'lucide-react'
 import { CardLink } from '@/components/ui/CardLink'
 import { ProgressBar } from '@/components/ui/ProgressBar'
-import { phaseLabel } from '@/data/curriculum'
-import { demoProjectStatuses, demoTopicStatuses } from '@/data/demo'
-import { phaseProgress } from '@/lib/progress'
+import { StatusBadge } from '@/components/ui/StatusBadge'
+import type { Progress } from '@/lib/progress'
+import { phaseLabel } from '@/lib/roadmap'
 import type { Phase } from '@/types/curriculum'
+import type { ProgressStatus } from '@/types/progress'
 
 function weeksLabel(weeks: number): string {
   return weeks === 1 ? '1 semana' : `${weeks} semanas`
 }
 
-export function PhaseCard({ phase }: { phase: Phase }) {
-  const progress = phaseProgress(phase, demoTopicStatuses, demoProjectStatuses)
+interface PhaseCardProps {
+  phase: Phase
+  progress: Progress
+  status: ProgressStatus
+}
+
+export function PhaseCard({ phase, progress, status }: PhaseCardProps) {
   return (
     <CardLink to={`/ruta/${phase.id}`} className="flex flex-col gap-3">
       <div className="flex items-start justify-between gap-3">
@@ -32,8 +38,9 @@ export function PhaseCard({ phase }: { phase: Phase }) {
           className="flex-1"
         />
         <span className="text-xs text-fg-muted tabular-nums">
-          {progress.done}/{progress.total}
+          {progress.done}/{progress.total} temas
         </span>
+        <StatusBadge status={status} />
       </div>
     </CardLink>
   )
