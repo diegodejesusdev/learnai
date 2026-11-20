@@ -1,12 +1,11 @@
 import { useState } from 'react'
 import { Card } from '@/components/ui/Card'
-import { LoadingState } from '@/components/ui/LoadingState'
 import { SaveIndicator } from '@/components/ui/SaveIndicator'
 import { Section } from '@/components/ui/Section'
 import { TextField } from '@/components/ui/TextField'
 import { saveStatus } from '@/lib/saveStatus'
 import { useDebouncedSave } from '@/lib/useDebouncedSave'
-import type { UserSettings } from './settingsApi'
+import { defaultSettings, type UserSettings } from './settingsApi'
 import { useSaveUserSettings, useUserSettings } from './useUserSettings'
 
 type Patch = Partial<UserSettings>
@@ -16,7 +15,13 @@ function intInRange(value: string, min: number, max: number): number | null {
   return Number.isInteger(number) && number >= min && number <= max ? number : null
 }
 
-function StudySettingsForm({ settings }: { settings: UserSettings }) {
+interface StudySettingsFormProps {
+  settings: UserSettings
+  /** Mientras llegan los ajustes de la cuenta: el formulario ocupa su lugar, deshabilitado. */
+  disabled: boolean
+}
+
+function StudySettingsForm({ settings, disabled }: StudySettingsFormProps) {
   const save = useSaveUserSettings()
   const autosave = useDebouncedSave((patch: Patch) => save.mutate(patch))
   const [form, setForm] = useState({
@@ -50,7 +55,11 @@ function StudySettingsForm({ settings }: { settings: UserSettings }) {
 
   return (
     <Card className="flex flex-col gap-4">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+      <fieldset
+        disabled={disabled}
+        aria-busy={disabled}
+        className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2"
+      >
         <TextField
           label="Meta semanal (horas)"
           type="number"
@@ -92,7 +101,7 @@ function StudySettingsForm({ settings }: { settings: UserSettings }) {
           onChange={(event) => update('rest', event.target.value)}
           error={rest === null ? 'Entre 1 y 60 minutos.' : null}
         />
-      </div>
+      </fieldset>
       <p className="text-xs text-fg-muted">
         Los minutos del Pomodoro aplican a las sesiones nuevas; la que está en curso conserva los
         suyos.
@@ -112,7 +121,12 @@ export function StudySettingsSection() {
       title="Estudio"
       description="Se guardan en tu cuenta y valen en todos tus dispositivos."
     >
-      {settings.data ? <StudySettingsForm settings={settings.data} /> : <LoadingState />}
+      {/* Mismo formulario mientras carga (deshabilitado): así lo de abajo no se mueve. */}
+      <StudySettingsForm
+        key={settings.data ? 'cuenta' : 'cargando'}
+        settings={settings.data ?? defaultSettings}
+        disabled={!settings.data}
+      />
     </Section>
   )
 }

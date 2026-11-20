@@ -1,6 +1,6 @@
 import { supabase } from '@/lib/supabase'
 import type { Tables, TablesInsert } from '@/types/database'
-import type { ActiveTimer, StudyTargetRef } from './timerModel'
+import type { ActiveTimer, StudyTargetRef, TimerMode } from './timerModel'
 
 /** La sesión ya no existe en Supabase (se terminó o descartó en otro dispositivo). */
 export class TimerGoneError extends Error {
@@ -21,6 +21,7 @@ function toTimer(row: Tables<'active_timer'>): ActiveTimer {
     ? { topicId: row.topic_id, projectPhaseId: null }
     : { topicId: null, projectPhaseId: row.project_phase_id ?? '' }
   return {
+    sessionId: row.session_id,
     mode: row.mode,
     ...ref,
     startedAt: row.started_at,
@@ -34,6 +35,7 @@ function toTimer(row: Tables<'active_timer'>): ActiveTimer {
 
 function toRow(timer: ActiveTimer): TablesInsert<'active_timer'> {
   return {
+    session_id: timer.sessionId,
     mode: timer.mode,
     topic_id: timer.topicId,
     project_phase_id: timer.projectPhaseId,
@@ -52,10 +54,17 @@ export async function fetchActiveTimer(): Promise<ActiveTimer | null> {
   return data ? toTimer(data) : null
 }
 
-/** Iniciar: insert (no upsert) para no pisar una sesión iniciada en otro dispositivo. */
+/**
+ * Iniciar: insert (no upsert) para no pisar una sesión iniciada en otro dispositivo.
+ * Si ya hay uno y es este mismo (lo subió la copia local al volver la conexión), está bien.
+ */
 export async function insertActiveTimer(timer: ActiveTimer): Promise<void> {
   const { error } = await supabase.from('active_timer').insert(toRow(timer))
-  if (error?.code === '23505') throw new TimerConflictError()
+  if (error?.code === '23505') {
+    const current = await fetchActiveTimer()
+    if (current?.sessionId === timer.sessionId) return
+    throw new TimerConflictError()
+  }
   if (error) throw error
 }
 
@@ -83,27 +92,43 @@ export async function deleteActiveTimer(userId: string): Promise<void> {
   if (error) throw error
 }
 
+/** Todo lo necesario para guardar la sesión de un temporizador, aunque nunca llegara a la base. */
 export interface FinishInput {
+  sessionId: string
+  startedAt: string
+  mode: TimerMode
+  topicId: string | null
+  projectPhaseId: string | null
   endedAt: string
   durationMinutes: number
   notes: string
   markDone: boolean
 }
 
-/** Guarda la sesión y borra el temporizador en una sola transacción (función SQL). */
+/**
+ * Guarda la sesión y borra el temporizador en una sola transacción (función SQL).
+ * Va con el id del temporizador: si se reintenta desde la cola, no se duplica.
+ */
 export async function finishActiveTimer(input: FinishInput): Promise<string> {
   const { data, error } = await supabase.rpc('finish_active_timer', {
+    p_session_id: input.sessionId,
+    p_started_at: input.startedAt,
     p_ended_at: input.endedAt,
     p_duration_minutes: input.durationMinutes,
+    p_mode: input.mode,
+    ...(input.topicId !== null
+      ? { p_topic_id: input.topicId }
+      : { p_project_phase_id: input.projectPhaseId ?? '' }),
     p_notes: input.notes,
     p_mark_done: input.markDone,
   })
-  if (error?.code === 'P0002') throw new TimerGoneError()
   if (error) throw error
   return data
 }
 
 export interface ManualSessionInput {
+  /** Id generado en el dispositivo: si se reintenta desde la cola, no se duplica. */
+  id: string
   target: StudyTargetRef
   startedAt: string
   endedAt: string
@@ -124,6 +149,7 @@ export async function recordManualSession(input: ManualSessionInput): Promise<st
       : { p_project_phase_id: target.projectPhaseId }),
     p_notes: input.notes,
     p_mark_done: input.markDone,
+    p_id: input.id,
   })
   if (error) throw error
   return data

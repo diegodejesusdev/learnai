@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { syncScope } from '@/lib/offline'
 import { topicMinutesKey } from '@/lib/sessionQueries'
 import { toast } from '@/lib/toast'
 import type { ProgressStatus } from '@/types/progress'
@@ -15,6 +16,11 @@ import {
 import { withChecklistItem, withProject, withTopicNotes, withTopicStatus } from './progressModel'
 
 export const progressKey = ['progress'] as const
+// Una clave por tipo de cambio: la cola sin conexión sabe qué función reanudar (offlineMutations.ts).
+export const topicStatusKey = [...progressKey, 'topic-status'] as const
+export const topicNotesKey = [...progressKey, 'topic-notes'] as const
+export const projectKey = [...progressKey, 'project'] as const
+export const checklistKey = [...progressKey, 'checklist'] as const
 
 /**
  * staleTime 0: cada vez que vuelves a la app (o a la pestaña) se vuelve a pedir el progreso,
@@ -33,6 +39,7 @@ export function useTopicMinutes(topicId: string) {
 }
 
 interface ProgressMutationOptions<TVariables> {
+  mutationKey: readonly unknown[]
   save: (variables: TVariables) => Promise<void>
   /** Aplica el cambio sobre la caché antes de que responda el servidor. */
   apply: (snapshot: ProgressSnapshot, variables: TVariables, now: string) => ProgressSnapshot
@@ -42,6 +49,7 @@ interface ProgressMutationOptions<TVariables> {
 
 /** Mutación optimista: se ve al instante y, si falla, se revierte y avisa. */
 function useProgressMutation<TVariables>({
+  mutationKey,
   save,
   apply,
   errorMessage,
@@ -49,7 +57,9 @@ function useProgressMutation<TVariables>({
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationKey: progressKey,
+    mutationKey,
+    // En fila con los demás cambios: sin conexión esperan en la cola y llegan en orden.
+    scope: syncScope,
     mutationFn: save,
     onMutate: async (variables) => {
       await queryClient.cancelQueries({ queryKey: progressKey })
@@ -74,6 +84,7 @@ function useProgressMutation<TVariables>({
 
 export function useSetTopicStatus() {
   return useProgressMutation<{ topicId: string; status: ProgressStatus }>({
+    mutationKey: topicStatusKey,
     save: ({ topicId, status }) => saveTopicStatus(topicId, status),
     apply: (snapshot, { topicId, status }, now) => withTopicStatus(snapshot, topicId, status, now),
     errorMessage: 'No se pudo cambiar el estado del tema. Se restauró el anterior.',
@@ -82,6 +93,7 @@ export function useSetTopicStatus() {
 
 export function useSaveTopicNotes() {
   return useProgressMutation<{ topicId: string; notes: string }>({
+    mutationKey: topicNotesKey,
     save: ({ topicId, notes }) => saveTopicNotes(topicId, notes),
     apply: (snapshot, { topicId, notes }) => withTopicNotes(snapshot, topicId, notes),
     errorMessage: null,
@@ -90,6 +102,7 @@ export function useSaveTopicNotes() {
 
 export function useSaveProject(errorMessage: string | null) {
   return useProgressMutation<{ phaseId: string; patch: ProjectPatch }>({
+    mutationKey: projectKey,
     save: ({ phaseId, patch }) => saveProject(phaseId, patch),
     apply: (snapshot, { phaseId, patch }, now) => withProject(snapshot, phaseId, patch, now),
     errorMessage,
@@ -98,6 +111,7 @@ export function useSaveProject(errorMessage: string | null) {
 
 export function useSetChecklistItem() {
   return useProgressMutation<{ itemId: string; done: boolean }>({
+    mutationKey: checklistKey,
     save: ({ itemId, done }) => saveChecklistItem(itemId, done),
     apply: (snapshot, { itemId, done }, now) => withChecklistItem(snapshot, itemId, done, now),
     errorMessage: 'No se pudo guardar la checklist. Se restauró el estado anterior.',

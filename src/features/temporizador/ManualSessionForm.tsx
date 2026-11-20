@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { onlineManager, useMutation, useQueryClient } from '@tanstack/react-query'
 import { Check } from 'lucide-react'
 import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router'
@@ -13,11 +13,14 @@ import type { RoadmapData } from '@/features/ruta/RoadmapGate'
 import { progressKey } from '@/features/ruta/useProgress'
 import { formatDuration, toDateInputValue, toTimeInputValue } from '@/lib/dates'
 import { nextTopic } from '@/lib/progress'
+import { syncScope } from '@/lib/offline'
 import { invalidateSessionQueries } from '@/lib/sessionQueries'
 import { toast } from '@/lib/toast'
+import { newId } from '@/lib/uuid'
 import { parseManualSession } from './manualSession'
 import { studyTargets } from './studyTargets'
 import { TargetPicker } from './TargetPicker'
+import { manualSessionKey } from './useActiveTimer'
 import { recordManualSession } from './timerApi'
 
 const DEFAULT_MINUTES = 30
@@ -54,6 +57,8 @@ export function ManualSessionForm({ roadmap, progress }: RoadmapData) {
   )
 
   const save = useMutation({
+    mutationKey: manualSessionKey,
+    scope: syncScope,
     mutationFn: recordManualSession,
     onSuccess: (_id, input) => {
       void queryClient.invalidateQueries({ queryKey: progressKey })
@@ -75,7 +80,23 @@ export function ManualSessionForm({ roadmap, progress }: RoadmapData) {
         event.preventDefault()
         setSubmitted(true)
         if (!parsed.ok || !selected) return
-        save.mutate({ target: selected.ref, ...parsed, notes: form.notes.trim(), markDone })
+        const { startedAt, endedAt, durationMinutes } = parsed
+        save.mutate({
+          id: newId(),
+          target: selected.ref,
+          startedAt,
+          endedAt,
+          durationMinutes,
+          notes: form.notes.trim(),
+          markDone,
+        })
+        // Sin conexión, la sesión espera en la cola: no tiene sentido quedarse esperando aquí.
+        if (!onlineManager.isOnline()) {
+          toast.success(
+            `Sin conexión: la sesión (${formatDuration(durationMinutes)}) quedó en este dispositivo y se subirá al volver internet.`,
+          )
+          void navigate('/estudiar')
+        }
       }}
     >
       <TargetPicker targets={targets} selected={selected} onSelect={setSelectedKey} />

@@ -1,6 +1,7 @@
 import { NavLink } from 'react-router'
 import { cn } from '@/lib/cn'
 import { Brand } from './Brand'
+import { ConnectionStatus } from './ConnectionStatus'
 import { mainNavItems, settingsNavItem, type NavItem } from './navItems'
 
 function SidebarLink({ to, label, icon: Icon, end }: NavItem) {
@@ -27,8 +28,9 @@ function SidebarLink({ to, label, icon: Icon, end }: NavItem) {
 export function Sidebar() {
   return (
     <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-border bg-surface px-3 py-5 lg:flex">
-      <div className="px-2">
+      <div className="flex flex-col gap-2 px-2">
         <Brand />
+        <ConnectionStatus />
       </div>
       <nav aria-label="Navegación principal" className="mt-6 flex flex-1 flex-col">
         <ul className="flex flex-col gap-1">

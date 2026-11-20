@@ -135,14 +135,18 @@ describe('terminar', () => {
     await userEvent.click(screen.getByLabelText('Marcar «Webhooks» como hecho'))
     await userEvent.click(screen.getByRole('button', { name: 'Guardar sesión' }))
     await waitFor(() => expect(finishActiveTimer).toHaveBeenCalled())
+    const timer = runningTimer(40, { mode: 'free' })
     expect(vi.mocked(finishActiveTimer).mock.calls[0]?.[0]).toMatchObject({
+      // Con el id y los datos del temporizador: se puede guardar aunque nunca llegara a la base.
+      sessionId: expect.any(String) as string,
+      mode: 'free',
+      topicId: timer.topicId,
+      projectPhaseId: null,
       durationMinutes: 40,
       notes: 'Probar webhooks con webhook.site',
       markDone: true,
     })
-    expect(await screen.findByRole('status')).toHaveTextContent(
-      'Sesión guardada: 40 min en «Webhooks».',
-    )
+    expect(await screen.findByText('Sesión guardada: 40 min en «Webhooks».')).toBeInTheDocument()
   })
 })
 

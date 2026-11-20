@@ -38,7 +38,8 @@ LearnAI/
 ├── scripts/                   # seed-curriculum.ts (npm run seed) + curriculumRows.ts (lógica pura, con test)
 ├── src/
 │   ├── main.tsx               # Monta providers + router
-│   ├── app/                   # routes.tsx, Providers, ThemeProvider, 404, pantalla de error
+│   ├── app/                   # routes.tsx, Providers (caché persistida), ThemeProvider, 404, error,
+│   │                          #   UpdatePrompt (versión nueva), offlineMutations.ts (cola sin conexión)
 │   ├── components/
 │   │   ├── ui/                # Sistema de diseño: Button, Card, Badge, StatusBadge, ProgressBar,
 │   │   │                      #   SegmentedControl, TextField, SelectField, PageHeader, Section…
@@ -83,6 +84,11 @@ LearnAI/
   - `onSettled` invalida.
   - Los textos con autoguardado usan `useDebouncedSave` + `SaveIndicator` y no revierten lo escrito.
 - **Datos que cambian en otro dispositivo** (progreso, sesiones): `staleTime: 0`, para que se refresquen al volver a la app.
+- **Sin conexión (cola):**
+  - Una mutación que deba funcionar sin internet lleva una `mutationKey` propia y `scope: syncScope` (`lib/offline.ts`), y se registra en `src/app/offlineMutations.ts` con `setMutationDefaults`. Así se reanuda aunque se cierre la app.
+  - Sus variables deben ser JSON plano.
+  - Si inserta filas, lleva un id del dispositivo (`newId()` de `lib/uuid.ts`) y la función SQL ignora un id repetido.
+  - Lo que exige conexión (editar o borrar sesiones, exportar) usa `networkMode: 'always'`, para fallar enseguida en vez de quedar esperando.
 - **Operaciones de varios pasos en la base** (p. ej. guardar una sesión, borrar el temporizador y actualizar el tema): una función SQL `security invoker` en una migración, con sus pruebas pgTAP, que se llama con `supabase.rpc(...)`. Ver `finish_active_timer`.
 - **Temporizador:** el tiempo se calcula siempre desde la hora de inicio guardada (`timerModel.ts`). Nunca se cuentan segundos en memoria; `useNow` solo sirve para repintar.
 - **Sesiones y totales:**
@@ -101,6 +107,10 @@ LearnAI/
   - El mapa de calor usa los tokens `heat-0` … `heat-4`.
 - **Tests de integración de UI:** usa `renderApp(ruta)` de `src/test/renderApp.tsx` y simula los `*Api.ts` con `vi.mock`. `src/test/setup.ts` ya simula `timerApi`, `settingsApi`, `historyApi` y `sessionsApi` (sin temporizador, con los ajustes por defecto y sin sesiones); cámbialos por test con `vi.mocked(...)`. `vi.clearAllMocks()` no deshace `mockResolvedValue`: vuelve a los valores por defecto en `beforeEach`.
 - Imports con el alias `@/` → `src/` (por ejemplo `@/components/ui/Button`).
+- **Secciones nuevas:**
+  - Se agregan en `src/app/routes.tsx` con `lazy` (se descargan al abrirlas).
+  - Las librerías pesadas que no se usan en todas las páginas (Recharts, react-markdown) se cargan con `lazy` donde se usan.
+  - Sin esto, el rendimiento móvil de Lighthouse baja de 90.
 
 ## Convenciones
 
@@ -142,6 +152,7 @@ npm run dev           # Servidor de desarrollo en http://localhost:5173
 npm run dev:host      # Igual, pero accesible desde el móvil en la misma Wi-Fi
 npm run build         # Typecheck + build de producción en dist/
 npm run preview       # Sirve dist/ localmente (preview:host para el móvil)
+npm run pwa:icons     # Regenera los íconos de la PWA desde public/favicon.svg
 npm run typecheck     # tsc -b
 npm run lint          # ESLint
 npm run format        # Prettier (format:check solo verifica)

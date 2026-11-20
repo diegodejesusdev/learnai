@@ -14,12 +14,12 @@ LearnAI es una app web personal para estudiar la ruta «Automatización para neg
 | Requisito | Detalle |
 |---|---|
 | Mobile-first | Diseño pensado primero para 360 px. En escritorio se aprovecha el ancho. |
-| PWA instalable | Manifiesto en español, iconos (incluido *maskable* y `apple-touch-icon`) y aviso cuando hay una versión nueva. |
+| PWA instalable | `vite-plugin-pwa`: manifiesto en español (`standalone`, `lang: es-CO`, atajos a Estudiar y «Hoy»), íconos de 64/192/512, *maskable* y `apple-touch-icon` (generados desde `public/favicon.svg` con `npm run pwa:icons`). El service worker guarda todo el build, así que la app abre sin conexión. Cuando hay una versión nueva, aparece «Hay una versión nueva de LearnAI» con el botón «Actualizar»; nunca se actualiza sola a mitad de algo. |
 | Sincronización | Los datos viven en Supabase. Al iniciar sesión en otro dispositivo se ve lo mismo. |
 | Login | Enlace mágico por correo (el mismo correo trae un código de respaldo) y Google, con Supabase Auth. Los registros públicos se desactivan después de crear la cuenta. |
 | Aislamiento | Toda fila de datos de usuario lleva `user_id` y RLS, aunque haya un solo usuario. |
 | Clave de IA | Nunca va en el navegador. El tutor se llama desde una Edge Function. |
-| Sin conexión | El app shell y los últimos datos se ven sin internet (caché de TanStack Query persistida). Los cambios se reintentan al volver la conexión y el temporizador sigue funcionando. |
+| Sin conexión | La caché de TanStack Query se guarda en el dispositivo (`localStorage`, 7 días). La ruta, las notas, el progreso y el historial se ven sin internet; el tutor no se guarda. Los cambios sin conexión (estados, notas, proyecto, checklist, ajustes, sesiones manuales y terminar el temporizador) quedan en una **cola**: mutaciones en pausa que se guardan con la caché, sobreviven a cerrar la app y se envían en orden al volver la conexión. **Sin duplicar:** cada sesión lleva un id generado en el dispositivo (el temporizador lo crea al empezar); la base ignora un segundo envío con el mismo id. Editar o borrar sesiones, el tutor y exportar necesitan conexión y lo dicen. Un indicador en la cabecera (móvil) y en la barra lateral muestra «Sin conexión · N sin subir», «Sincronizando…» y «Sincronizado». |
 
 ## 3. Navegación y diseño
 
@@ -328,6 +328,11 @@ Todos los días y semanas se calculan en hora de Bogotá. Una sesión cuenta en 
 - Mínimo diario para la racha, en minutos (de 1 a 240; por defecto 15).
 - Minutos de trabajo y descanso del Pomodoro.
 - Tema visual.
+- **Instalar la app:**
+  - botón «Instalar app» cuando el navegador lo permite (Chrome y Edge);
+  - en iPhone y iPad, los pasos Compartir → Agregar a inicio;
+  - si ya está instalada, lo dice.
+- **Exportar mis datos (JSON):** ajustes, progreso con notas, sesiones, conversaciones con el tutor (con sus mensajes) y resultados de quiz, más un resumen. No incluye `user_id`. Archivo `learnai-datos-AAAA-MM-DD.json`.
 - Cerrar sesión.
 
 ### 4.7 Autenticación
@@ -490,6 +495,18 @@ append_project_notes(p_phase_id, p_text)    lo mismo con las notas del proyecto
   - En producción, con `supabase secrets set`.
 - **Antes de cada despliegue:** se busca en `dist/` que no haya claves de IA ni la clave secreta de Supabase.
 - **Markdown del tutor:** se renderiza sin HTML crudo.
+- **Prueba de seguridad en la base** (`supabase/tests/database/security.test.sql`). Falla si:
+  - una tabla queda sin RLS;
+  - una tabla con `user_id` no tiene política con `auth.uid()`;
+  - `anon` recibe permisos sobre alguna tabla;
+  - el contenido deja de ser de solo lectura;
+  - `anon` puede ejecutar alguna función.
+- **Cabeceras en Vercel** (`vercel.json`):
+  - `X-Content-Type-Options: nosniff`;
+  - `Referrer-Policy: strict-origin-when-cross-origin`;
+  - `X-Frame-Options: DENY`;
+  - `Permissions-Policy` sin cámara, micrófono ni ubicación;
+  - `sw.js` y el manifiesto sin caché (`must-revalidate`).
 
 ## 7. Variables de entorno
 
@@ -512,6 +529,10 @@ Las variables de la Edge Function van en `supabase/functions/.env` en local y co
 - **Avisos del Pomodoro:** sin notificaciones push. El tiempo es correcto porque se calcula desde la hora de inicio. Con la app abierta suena o vibra, y se puede mantener la pantalla encendida.
 - **Tema:** claro/oscuro automático con interruptor manual.
 - **CLIs:** Supabase CLI como dependencia de desarrollo (`npx supabase`). Vercel sin CLI, conectado a GitHub desde su panel.
+- **PWA y sin conexión (fase 7):**
+  - La cola usa las mutaciones en pausa de TanStack Query, persistidas con la caché, y no una cola propia. Cada tipo de cambio tiene su clave y su función registrada (`src/app/offlineMutations.ts`), así se reanuda tras cerrar la app.
+  - Las sesiones no se duplican gracias a un id del dispositivo: `record_study_session(p_id)` y `finish_active_timer(p_session_id, …)`, con `active_timer.session_id`. Terminar el temporizador ya no depende de que esté en la base: funciona aunque se empezara sin conexión.
+  - Si dos dispositivos terminan el mismo temporizador, vale el primero.
 - **Tutor (fase 6):**
   - Variables `TUTOR_PROVIDER` / `TUTOR_MODEL` (las pidió Diego; reemplazan `AI_PROVIDER` y un modelo por proveedor).
   - Límite de 50 mensajes al día.

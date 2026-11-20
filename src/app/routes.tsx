@@ -1,21 +1,15 @@
 import type { RouteObject } from 'react-router'
 import { AppShell } from '@/components/layout/AppShell'
+import { LoadingState } from '@/components/ui/LoadingState'
 import { LoginPage } from '@/features/acceso/LoginPage'
 import { RequireAuth } from '@/features/acceso/RequireAuth'
-import { DesignSystemPage } from '@/features/ajustes/DesignSystemPage'
-import { SettingsPage } from '@/features/ajustes/SettingsPage'
-import { HistoryPage } from '@/features/historial/HistoryPage'
-import { SessionEditPage } from '@/features/historial/SessionEditPage'
 import { HomePage } from '@/features/inicio/HomePage'
-import { PhasePage } from '@/features/ruta/PhasePage'
-import { RoadmapPage } from '@/features/ruta/RoadmapPage'
-import { TopicPage } from '@/features/ruta/TopicPage'
-import { ManualSessionPage } from '@/features/temporizador/ManualSessionPage'
-import { StudyPage } from '@/features/temporizador/StudyPage'
 import { NotFoundPage } from './NotFoundPage'
 import { RouteErrorPage } from './RouteErrorPage'
 import { TutorRoute } from './TutorRoute'
 
+// Inicio y el login van en el fragmento principal; cada otra sección se descarga al abrirla
+// (el service worker las deja guardadas, así que también abren sin conexión).
 export const routes: RouteObject[] = [
   { path: '/login', element: <LoginPage />, errorElement: <RouteErrorPage /> },
   {
@@ -26,18 +20,68 @@ export const routes: RouteObject[] = [
     children: [
       {
         element: <AppShell />,
+        // Mientras se descarga la sección.
+        hydrateFallbackElement: <LoadingState />,
         children: [
           { index: true, element: <HomePage /> },
-          { path: 'ruta', element: <RoadmapPage /> },
-          { path: 'ruta/:phaseId', element: <PhasePage /> },
-          { path: 'ruta/tema/:topicId', element: <TopicPage /> },
-          { path: 'estudiar', element: <StudyPage /> },
-          { path: 'estudiar/manual', element: <ManualSessionPage /> },
-          { path: 'historial', element: <HistoryPage /> },
-          { path: 'historial/sesion/:sessionId', element: <SessionEditPage /> },
+          {
+            path: 'ruta',
+            lazy: () =>
+              import('@/features/ruta/RoadmapPage').then((m) => ({ Component: m.RoadmapPage })),
+          },
+          {
+            path: 'ruta/:phaseId',
+            lazy: () =>
+              import('@/features/ruta/PhasePage').then((m) => ({ Component: m.PhasePage })),
+          },
+          {
+            path: 'ruta/tema/:topicId',
+            lazy: () =>
+              import('@/features/ruta/TopicPage').then((m) => ({ Component: m.TopicPage })),
+          },
+          {
+            path: 'estudiar',
+            lazy: () =>
+              import('@/features/temporizador/StudyPage').then((m) => ({
+                Component: m.StudyPage,
+              })),
+          },
+          {
+            path: 'estudiar/manual',
+            lazy: () =>
+              import('@/features/temporizador/ManualSessionPage').then((m) => ({
+                Component: m.ManualSessionPage,
+              })),
+          },
+          {
+            path: 'historial',
+            lazy: () =>
+              import('@/features/historial/HistoryPage').then((m) => ({
+                Component: m.HistoryPage,
+              })),
+          },
+          {
+            path: 'historial/sesion/:sessionId',
+            lazy: () =>
+              import('@/features/historial/SessionEditPage').then((m) => ({
+                Component: m.SessionEditPage,
+              })),
+          },
           { path: 'tutor', element: <TutorRoute /> },
-          { path: 'ajustes', element: <SettingsPage /> },
-          { path: 'ajustes/diseno', element: <DesignSystemPage /> },
+          {
+            path: 'ajustes',
+            lazy: () =>
+              import('@/features/ajustes/SettingsPage').then((m) => ({
+                Component: m.SettingsPage,
+              })),
+          },
+          {
+            path: 'ajustes/diseno',
+            lazy: () =>
+              import('@/features/ajustes/DesignSystemPage').then((m) => ({
+                Component: m.DesignSystemPage,
+              })),
+          },
           { path: '*', element: <NotFoundPage /> },
         ],
       },

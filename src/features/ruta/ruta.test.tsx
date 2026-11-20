@@ -1,4 +1,5 @@
-import { screen, waitFor, within } from '@testing-library/react'
+import { onlineManager } from '@tanstack/react-query'
+import { act, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { phases } from '@/data/curriculum'
@@ -182,5 +183,26 @@ describe('checklist final', () => {
     await waitFor(() => expect(item).toBeChecked())
     expect(saveChecklistItem).toHaveBeenCalledWith('c2', true)
     expect(await screen.findByText('2 de 14 logros')).toBeInTheDocument()
+  })
+})
+
+describe('sin conexión', () => {
+  afterEach(() => onlineManager.setOnline(true))
+
+  it('el cambio se ve al instante, espera en la cola y se sube una sola vez al volver', async () => {
+    renderApp('/ruta/f1')
+    await toggleFor('f1-t1', 'Pendiente')
+    act(() => onlineManager.setOnline(false))
+
+    await userEvent.click(await toggleFor('f1-t1', 'Pendiente'))
+    expect(await toggleFor('f1-t1', 'En curso')).toBeInTheDocument()
+    expect(saveTopicStatus).not.toHaveBeenCalled()
+    expect((await screen.findAllByText('Sin conexión · 1 sin subir')).length).toBeGreaterThan(0)
+
+    act(() => onlineManager.setOnline(true))
+    await waitFor(() => expect(saveTopicStatus).toHaveBeenCalledTimes(1))
+    expect(saveTopicStatus).toHaveBeenCalledWith('f1-t1', 'en_curso')
+    expect((await screen.findAllByText('Sincronizado')).length).toBeGreaterThan(0)
+    expect(await toggleFor('f1-t1', 'En curso')).toBeInTheDocument()
   })
 })

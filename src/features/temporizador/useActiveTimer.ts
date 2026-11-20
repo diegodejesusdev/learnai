@@ -1,4 +1,10 @@
-import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query'
+import {
+  onlineManager,
+  useMutation,
+  useQuery,
+  useQueryClient,
+  type QueryClient,
+} from '@tanstack/react-query'
 import { useAuth } from '@/features/acceso/AuthContext'
 import { progressKey } from '@/features/ruta/useProgress'
 import { invalidateSessionQueries } from '@/lib/sessionQueries'
@@ -18,6 +24,8 @@ import type { ActiveTimer } from './timerModel'
 import { readStoredTimer, reconcileTimer, writeStoredTimer } from './timerStorage'
 
 export const activeTimerKey = ['active-timer'] as const
+export const finishSessionKey = ['study-sessions', 'finish'] as const
+export const manualSessionKey = ['study-sessions', 'manual'] as const
 
 function useUserId(): string {
   const auth = useAuth()
@@ -64,7 +72,7 @@ function clearTimer(queryClient: QueryClient, userId: string) {
 }
 
 // Todas las acciones del temporizador van en fila (scope): llegan a Supabase en orden.
-const timerScope = { id: 'active-timer' }
+export const timerScope = { id: 'active-timer' }
 
 /** Iniciar, pausar, reanudar o descartar: se ve al instante y se guarda en Supabase. */
 export function useTimerChange() {
@@ -119,25 +127,26 @@ export function useTimerChange() {
   })
 }
 
-/** Terminar: guarda la sesión en study_sessions y borra el temporizador. */
+/**
+ * Terminar: guarda la sesión en study_sessions y borra el temporizador.
+ * Sin conexión, el temporizador se cierra ya en este dispositivo y la sesión espera en la cola
+ * (persistida) hasta que vuelva internet; lleva el id del temporizador, así que no se duplica.
+ */
 export function useFinishSession() {
   const userId = useUserId()
   const queryClient = useQueryClient()
 
   return useMutation({
-    mutationKey: ['finish-session'],
+    mutationKey: finishSessionKey,
     scope: timerScope,
     mutationFn: (input: FinishInput) => finishActiveTimer(input),
+    onMutate: () => {
+      if (!onlineManager.isOnline()) clearTimer(queryClient, userId)
+    },
     onSuccess: () => {
       clearTimer(queryClient, userId)
       void queryClient.invalidateQueries({ queryKey: progressKey })
       invalidateSessionQueries(queryClient)
-    },
-    onError: (error) => {
-      if (error instanceof TimerGoneError) {
-        clearTimer(queryClient, userId)
-        toast.error('Esta sesión ya se guardó o descartó en otro dispositivo.')
-      }
     },
   })
 }

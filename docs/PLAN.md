@@ -280,40 +280,66 @@ A partir de la fase 2, también `npx supabase test db`.
 
 ---
 
-## Fase 7: PWA y despliegue
+## Fase 7: PWA y despliegue ✅ (20 nov 2026, también en la nube)
 
-**Objetivo:** la app instalada en el móvil y en el PC, en producción.
+**Objetivo:** la app instalada en el móvil y en el PC, en producción y usable sin conexión.
 
-**Requisitos previos**
-- Repositorio en GitHub.
-- Cuenta de Vercel conectada al repo desde su panel (sin CLI).
-
-**Al iniciar, decidir:** dominio (el de Vercel o uno propio) e iconos finales.
+**Decisiones de esta fase**
+- **Dominio:** el de Vercel (`learnai-tan.vercel.app`).
+- **Íconos:** generados desde `public/favicon.svg` con `@vite-pwa/assets-generator` (`npm run pwa:icons`).
+- **Cola sin conexión:** mutaciones en pausa de TanStack Query, persistidas con la caché (`@tanstack/react-query-persist-client`, en `localStorage`) y reanudadas con funciones registradas por clave. Ver SPEC §2.
+- **Sin duplicar:** ids generados en el dispositivo para las sesiones (migración `20261120151456_offline_sync.sql`). Si no hay `crypto.randomUUID`, como al probar por la IP de la Wi-Fi, se usa `getRandomValues`.
+- **CORS:** se dejó `*` en la función del tutor (sin `ALLOWED_ORIGINS`): no usa cookies y exige un token válido.
+- **Lighthouse:** desde la versión 12 ya no tiene categoría «PWA». La instalabilidad se revisa a mano: manifiesto, service worker e íconos.
+- **Rendimiento:**
+  - Cada sección se descarga al abrirla (`lazy` en `routes.tsx`), y el Markdown del tutor también va aparte.
+  - El código común va en dos fragmentos, `vendor` y `shared` (`codeSplitting` en `vite.config.ts`). Antes eran unos 45 archivos diminutos en la primera carga.
+  - Inicio espera todos sus datos antes de pintar, y Ajustes muestra el formulario deshabilitado mientras carga. Así no hay saltos (CLS 0).
+  - Al abrir la app sin conexión, el estado de conexión arranca con `navigator.onLine`.
+  - La caché y la cola se guardan enseguida al ocultar o cerrar la página.
 
 **Entregables**
-- **vite-plugin-pwa:**
-  - manifiesto en español (nombre, colores, `display: standalone`);
-  - iconos 192/512, *maskable* y `apple-touch-icon`;
-  - precache del app shell;
-  - aviso «Hay una versión nueva».
-- **Caché de datos:** la caché de TanStack Query se persiste, así que los últimos datos se ven sin conexión.
-- **Vercel:**
-  - variables de entorno de producción;
-  - `vercel.json` con rewrites de SPA;
-  - deploys de preview por cada push.
-- **Supabase de producción:**
-  - Site URL y redirect URLs;
-  - secrets de la función;
-  - `functions deploy tutor`;
-  - `ALLOWED_ORIGINS` con el dominio final.
-- **Checklist de seguridad** de `docs/SPEC.md` §6, revisada.
+- **PWA:**
+  - manifiesto en español con atajos;
+  - íconos (64, 192, 512, *maskable*, `apple-touch-icon`, `favicon.ico`);
+  - service worker con precache del build;
+  - aviso de versión nueva con «Actualizar» (`src/app/UpdatePrompt.tsx`).
+- **Sin conexión:**
+  - caché persistida;
+  - cola persistida y en orden;
+  - indicador «Sin conexión · N sin subir / Sincronizando… / Sincronizado»;
+  - Ruta sin datos guardados muestra «Sin conexión» en vez de cargar para siempre;
+  - el tutor avisa que necesita internet.
+- **Base:** `active_timer.session_id`, `record_study_session(p_id)` y `finish_active_timer(p_session_id, …)` idempotentes; pruebas pgTAP de reintentos y de terminar sin conexión; prueba de seguridad general (`security.test.sql`).
+- **Ajustes:** «Instalar app» (con los pasos para iPhone) y «Exportar mis datos (JSON)».
+- **Vercel:** cabeceras de seguridad y de caché del service worker en `vercel.json`.
+- **README** con cómo correr, desplegar y actualizar la ruta.
+- **Tests:**
+  - cola: el cambio queda en pausa, se envía una vez al volver y sobrevive a «cerrar la app»;
+  - indicador de conexión;
+  - errores de red;
+  - id del dispositivo;
+  - instalar;
+  - exportación.
+
+**Resultado de Lighthouse** (móvil simulado, build local, carga en frío con sesión, 20 nov 2026):
+
+| Página | Rendimiento | Accesibilidad | Buenas prácticas |
+|---|---|---|---|
+| `/login` | 95 | 100 | 100 |
+| Inicio, Ruta, fase, Estudiar, Tutor | 91 | 100 | 100 |
+| Historial, Ajustes | 100 | 100 | 100 |
 
 **Cómo verificarla**
-- Lighthouse en PC sobre la URL de producción, con 90 o más en rendimiento, accesibilidad y buenas prácticas.
-- **Android (Chrome):** instalar la app, abrirla desde el icono, iniciar sesión y usar el temporizador.
-- **iPhone (Safari):** Compartir → «Añadir a pantalla de inicio», abrirla, iniciar sesión, cambiar el estado de un tema y verlo en el PC.
-- Con el modo avión puesto, la app instalada abre y muestra los últimos datos.
-- Tras un nuevo deploy, aparece el aviso de versión nueva.
+- `npm test`, `npm run db:test`, `npm run build` y `grep` en `dist/` (sin claves privadas).
+- **PC:**
+  - `npm run build && npm run preview`;
+  - DevTools → Application: manifiesto sin errores y service worker activo;
+  - Network → Offline: la app abre y muestra la ruta y las notas;
+  - hacer cambios sin conexión, recargar y volver a conectarse: llegan una sola vez.
+- **Android:** instalar desde Ajustes → «Instalar app» y repetir lo anterior en modo avión.
+- **iPhone:** Compartir → Agregar a inicio, entrar con el código del correo y probar en modo avión.
+- **Tras un deploy nuevo,** aparece «Hay una versión nueva».
 
 ---
 

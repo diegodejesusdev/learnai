@@ -1,7 +1,7 @@
 import { useEffect, useRef, type ReactNode } from 'react'
 import { Spinner } from '@/components/ui/Spinner'
 import { AssistantBubble, ChatEntry, UserBubble } from './ChatEntry'
-import { MarkdownMessage } from './MarkdownMessage'
+import { LazyMarkdown } from './LazyMarkdown'
 import type { NotesTarget } from './SaveToNotes'
 import type { TutorMessage } from './tutorApi'
 import type { PendingTurn } from './useTutorChat'
@@ -65,7 +65,7 @@ export function ChatThread({
               </p>
             ) : (
               <div className="rounded-2xl rounded-tl-md bg-surface px-3.5 py-2.5 ring-1 ring-border">
-                <MarkdownMessage text={pending.answer} />
+                <LazyMarkdown text={pending.answer} />
               </div>
             )}
           </AssistantBubble>

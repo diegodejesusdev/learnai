@@ -7,6 +7,7 @@ import { topicStatuses } from '@/features/ruta/progressModel'
 import type { RoadmapData } from '@/features/ruta/RoadmapGate'
 import { nextTopic } from '@/lib/progress'
 import { findPhaseIn, findTopicIn } from '@/lib/roadmap'
+import { useOnline } from '@/lib/offline'
 import { useKeyboardInset } from '@/lib/useKeyboardInset'
 import { ChatThread } from './ChatThread'
 import { ConversationBar } from './ConversationBar'
@@ -48,6 +49,7 @@ export function TutorWorkspace({ roadmap, progress }: RoadmapData) {
     onConversationCreated: (id) => update({ conversation: { id } }, true),
   })
   useKeyboardInset()
+  const online = useOnline()
 
   const subject =
     state.mode === 'project_review'
@@ -120,6 +122,12 @@ export function TutorWorkspace({ roadmap, progress }: RoadmapData) {
       {/* -mb-10: el relleno inferior de la página es más alto que la barra del móvil; así la
           caja queda pegada a la barra también al final de la conversación. */}
       <div className="chat-composer z-20 -mx-4 -mb-10 flex flex-col gap-2 border-t border-border bg-bg px-4 pt-3 pb-3 sm:-mx-6 sm:px-6 lg:-mx-8 lg:mb-0 lg:px-8">
+        {!online && (
+          <Alert>
+            Sin conexión: el tutor necesita internet. Tus conversaciones guardadas vuelven al
+            conectarte.
+          </Alert>
+        )}
         {chat.error && <Alert>{chat.error}</Alert>}
         <ModeComposer
           mode={state.mode}

@@ -30,6 +30,7 @@ export type Database = {
           paused_at: string | null
           paused_seconds: number
           project_phase_id: string | null
+          session_id: string
           started_at: string
           topic_id: string | null
           updated_at: string
@@ -43,6 +44,7 @@ export type Database = {
           paused_at?: string | null
           paused_seconds?: number
           project_phase_id?: string | null
+          session_id?: string
           started_at: string
           topic_id?: string | null
           updated_at?: string
@@ -55,6 +57,7 @@ export type Database = {
           paused_at?: string | null
           paused_seconds?: number
           project_phase_id?: string | null
+          session_id?: string
           started_at?: string
           topic_id?: string | null
           updated_at?: string
@@ -538,7 +541,12 @@ export type Database = {
           p_duration_minutes: number
           p_ended_at: string
           p_mark_done?: boolean
+          p_mode: Database['public']['Enums']['study_mode']
           p_notes?: string
+          p_project_phase_id?: string
+          p_session_id: string
+          p_started_at: string
+          p_topic_id?: string
         }
         Returns: string
       }
@@ -546,6 +554,7 @@ export type Database = {
         Args: {
           p_duration_minutes: number
           p_ended_at: string
+          p_id?: string
           p_mark_done?: boolean
           p_mode: Database['public']['Enums']['study_mode']
           p_notes?: string

@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { syncScope } from '@/lib/offline'
 import { toast } from '@/lib/toast'
 import { fetchUserSettings, saveUserSettings, type UserSettings } from './settingsApi'
 
@@ -13,6 +14,7 @@ export function useSaveUserSettings(errorMessage: string | null = null) {
   const queryClient = useQueryClient()
   return useMutation({
     mutationKey: settingsKey,
+    scope: syncScope,
     mutationFn: saveUserSettings,
     onMutate: async (patch: Partial<UserSettings>) => {
       await queryClient.cancelQueries({ queryKey: settingsKey })

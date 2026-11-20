@@ -1,3 +1,4 @@
+import { newId } from '@/lib/uuid'
 import type { ActiveTimer } from './timerModel'
 
 // Copia local del temporizador: aparece al instante al abrir la app y funciona sin conexión.
@@ -29,7 +30,14 @@ export function readStoredTimer(userId: string): StoredTimer | null {
     const raw = localStorage.getItem(STORAGE_KEY)
     const parsed: unknown = raw ? JSON.parse(raw) : null
     // Si es de otra cuenta, se ignora.
-    return isStoredTimer(parsed) && parsed.userId === userId ? parsed : null
+    if (!isStoredTimer(parsed) || parsed.userId !== userId) return null
+    // Copias guardadas antes de la fase 7 no traen el id de la sesión: se le asigna uno fijo.
+    if (parsed.timer && typeof parsed.timer.sessionId !== 'string') {
+      const entry = { ...parsed, timer: { ...parsed.timer, sessionId: newId() } }
+      writeStoredTimer(entry)
+      return entry
+    }
+    return parsed
   } catch {
     return null
   }

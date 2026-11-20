@@ -64,6 +64,8 @@ export function useLatestSession() {
 export function useUpdateSession(id: string) {
   const queryClient = useQueryClient()
   return useMutation({
+    // Editar y borrar necesitan conexión: sin ella fallan enseguida en vez de esperar.
+    networkMode: 'always',
     mutationFn: (update: SessionUpdate) => updateSession(id, update),
     onSettled: () => invalidateSessionQueries(queryClient),
   })
@@ -72,6 +74,7 @@ export function useUpdateSession(id: string) {
 export function useDeleteSession(id: string) {
   const queryClient = useQueryClient()
   return useMutation({
+    networkMode: 'always',
     mutationFn: () => deleteSession(id),
     onSuccess: () => queryClient.removeQueries({ queryKey: [...studySessionsKey, 'one', id] }),
     onSettled: () => invalidateSessionQueries(queryClient),

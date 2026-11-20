@@ -1,4 +1,4 @@
-import { Route, TriangleAlert } from 'lucide-react'
+import { Route, TriangleAlert, WifiOff } from 'lucide-react'
 import type { ReactNode } from 'react'
 import { Button } from '@/components/ui/Button'
 import { EmptyState } from '@/components/ui/EmptyState'
@@ -18,7 +18,19 @@ export function RoadmapGate({ children }: { children: (data: RoadmapData) => Rea
   const roadmap = useRoadmap()
   const progress = useProgress()
 
-  if (roadmap.isPending || progress.isPending) return <LoadingState label="Cargando la ruta…" />
+  if (roadmap.isPending || progress.isPending) {
+    // Sin conexión y sin copia guardada, la consulta queda en pausa: no se espera para siempre.
+    if (roadmap.fetchStatus === 'paused' || progress.fetchStatus === 'paused') {
+      return (
+        <EmptyState
+          icon={WifiOff}
+          title="Sin conexión"
+          description="Esta sección aún no está guardada en este dispositivo. Ábrela una vez con internet y después podrás verla sin conexión."
+        />
+      )
+    }
+    return <LoadingState label="Cargando la ruta…" />
+  }
   if (roadmap.isError || progress.isError) {
     return (
       <EmptyState

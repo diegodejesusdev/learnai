@@ -6,6 +6,8 @@ import { Section } from '@/components/ui/Section'
 import { SegmentedControl, type SegmentedOption } from '@/components/ui/SegmentedControl'
 import type { ThemePreference } from '@/lib/theme'
 import { AccountSection } from './AccountSection'
+import { ExportDataSection } from './ExportDataSection'
+import { InstallAppSection } from './InstallAppSection'
 import { StudySettingsSection } from './StudySettingsSection'
 import { useSaveUserSettings } from './useUserSettings'
 
@@ -39,6 +41,10 @@ export function SettingsPage() {
         </Section>
 
         <StudySettingsSection />
+
+        <InstallAppSection />
+
+        <ExportDataSection />
 
         <AccountSection />
 

@@ -47,14 +47,17 @@ describe('acceso', () => {
     expect(screen.getByRole('status')).toHaveTextContent('Cargando…')
   })
 
-  it('Ajustes muestra el correo de la sesión', () => {
+  it('Ajustes muestra el correo de la sesión', async () => {
     renderApp('/ajustes')
-    expect(screen.getByText('diego@prueba.local')).toBeInTheDocument()
+    expect(await screen.findByText('diego@prueba.local')).toBeInTheDocument()
   })
 
   it('Ajustes guarda el mínimo diario para la racha', async () => {
     renderApp('/ajustes')
-    const field = await screen.findByLabelText('Mínimo diario para la racha (min)')
+    // Mientras cargan los ajustes de la cuenta, el formulario se ve deshabilitado.
+    const label = 'Mínimo diario para la racha (min)'
+    await waitFor(() => expect(screen.getByLabelText(label)).toBeEnabled())
+    const field = screen.getByLabelText(label)
     expect(field).toHaveValue(15)
     await userEvent.clear(field)
     await userEvent.type(field, '30')
@@ -115,7 +118,7 @@ describe('navegación', () => {
 describe('tema', () => {
   it('se puede cambiar a oscuro desde Ajustes', async () => {
     renderApp('/ajustes')
-    await userEvent.click(screen.getByRole('radio', { name: 'Oscuro' }))
+    await userEvent.click(await screen.findByRole('radio', { name: 'Oscuro' }))
     expect(document.documentElement.dataset.theme).toBe('dark')
     await userEvent.click(screen.getByRole('radio', { name: 'Claro' }))
     expect(document.documentElement.dataset.theme).toBe('light')

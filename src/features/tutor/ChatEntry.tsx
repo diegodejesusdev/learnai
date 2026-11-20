@@ -2,7 +2,7 @@ import { Bot } from 'lucide-react'
 import { useRef, type ReactNode } from 'react'
 import { parseQuiz } from '@shared/quiz'
 import { Alert } from '@/components/ui/Alert'
-import { MarkdownMessage } from './MarkdownMessage'
+import { LazyMarkdown } from './LazyMarkdown'
 import { QuizCard } from './QuizCard'
 import { SaveToNotes, type NotesTarget } from './SaveToNotes'
 import type { QuizResult, TutorMessage } from './tutorApi'
@@ -65,7 +65,7 @@ export function ChatEntry({ message, quizTopicId, quizResult, notesTarget }: Cha
         ref={bubbleRef}
         className="rounded-2xl rounded-tl-md bg-surface px-3.5 py-2.5 ring-1 ring-border"
       >
-        <MarkdownMessage text={message.content} />
+        <LazyMarkdown text={message.content} />
       </div>
       {notesTarget && (
         <SaveToNotes text={message.content} messageRef={bubbleRef} {...notesTarget} />

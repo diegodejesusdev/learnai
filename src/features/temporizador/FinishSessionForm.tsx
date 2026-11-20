@@ -1,4 +1,5 @@
 import { Check, Trash2 } from 'lucide-react'
+import { onlineManager } from '@tanstack/react-query'
 import { useState } from 'react'
 import { Alert } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
@@ -73,13 +74,31 @@ export function FinishSessionForm({ timer, title, alreadyDone, onBack }: FinishS
       onSubmit={(event) => {
         event.preventDefault()
         if (durationError) return
+        const offline = !onlineManager.isOnline()
         finish.mutate(
-          { endedAt: draft.endedAt, durationMinutes: minutes, notes: notes.trim(), markDone },
           {
-            onSuccess: () =>
-              toast.success(`Sesión guardada: ${formatDuration(minutes)} en «${title}».`),
+            sessionId: timer.sessionId,
+            startedAt: timer.startedAt,
+            mode: timer.mode,
+            topicId: timer.topicId,
+            projectPhaseId: timer.projectPhaseId,
+            endedAt: draft.endedAt,
+            durationMinutes: minutes,
+            notes: notes.trim(),
+            markDone,
+          },
+          {
+            onSuccess: () => {
+              if (!offline)
+                toast.success(`Sesión guardada: ${formatDuration(minutes)} en «${title}».`)
+            },
           },
         )
+        if (offline) {
+          toast.success(
+            `Sin conexión: la sesión (${formatDuration(minutes)}) quedó en este dispositivo y se subirá al volver internet.`,
+          )
+        }
       }}
     >
       <Card className="flex flex-col gap-1">

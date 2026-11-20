@@ -1,3 +1,5 @@
+import { newId } from '@/lib/uuid'
+
 // Cálculo del temporizador a partir de lo guardado (inicio, pausas), nunca con un contador
 // en memoria: así el tiempo es correcto tras recargar, bloquear el móvil o cambiar de equipo.
 
@@ -5,6 +7,8 @@ export type TimerMode = 'pomodoro' | 'free'
 
 /** Lo mismo que la fila de active_timer (y la copia en localStorage). */
 export interface ActiveTimer {
+  /** Id que tendrá la sesión al terminar: evita guardarla dos veces (cola sin conexión). */
+  sessionId: string
   mode: TimerMode
   topicId: string | null
   projectPhaseId: string | null
@@ -30,9 +34,11 @@ export function createTimer(options: {
   workMin: number
   breakMin: number
   now: Date
+  sessionId?: string
 }): ActiveTimer {
   const iso = options.now.toISOString()
   return {
+    sessionId: options.sessionId ?? newId(),
     mode: options.mode,
     ...options.target,
     startedAt: iso,

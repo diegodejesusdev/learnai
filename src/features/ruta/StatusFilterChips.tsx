@@ -41,7 +41,7 @@ export function StatusFilterChips({ label, value, counts, onChange }: StatusFilt
               )}
             >
               {filterLabels[filter]}
-              <span className="text-xs tabular-nums opacity-70">{counts[filter]}</span>
+              <span className="text-xs font-normal tabular-nums">{counts[filter]}</span>
             </span>
           </label>
         ))}
