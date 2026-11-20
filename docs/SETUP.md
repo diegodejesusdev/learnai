@@ -135,6 +135,50 @@ Nunca agregues la secret/service role key en Vercel.
 
 ---
 
+## 5. Tutor IA (Edge Function `tutor`)
+
+Las claves de IA solo existen como secretos de Supabase: no van en `.env.local`, ni en Vercel, ni en el repo.
+
+### 5.1 Conseguir la clave
+- **Gemini:** [Google AI Studio → Get API key](https://aistudio.google.com/apikey). El plan gratuito puede usar lo que envías para mejorar sus productos: no pegues datos personales de clientes.
+- **Anthropic** (opcional): [platform.claude.com](https://platform.claude.com) → Settings → API keys.
+
+### 5.2 Probar en local
+1. Crea `supabase/functions/.env` (ya está en `.gitignore`) con lo de la sección «Tutor IA» de `.env.example`:
+   ```
+   TUTOR_PROVIDER=gemini
+   TUTOR_MODEL=gemini-4-hydrogen
+   GEMINI_API_KEY=<tu clave>
+   TUTOR_DAILY_LIMIT=50
+   ```
+   Para probar sin clave ni costo: `TUTOR_PROVIDER=demo`.
+2. Con Docker abierto y `npm run db:start`, en una terminal: `npx supabase functions serve tutor`. Lee ese `.env` solo; si lo cambias, detén la función con Ctrl+C y vuelve a correrla.
+3. En otra terminal: `npm run dev` y abre http://localhost:5173/tutor.
+
+### 5.3 Subir a la nube
+Primero la migración, luego los secretos y la función. Haz el push del código al final: si la app nueva llega antes que la base, el Tutor falla.
+```bash
+npx supabase db push --remote                                  # tabla quiz_results y funciones
+npx supabase secrets set --env-file supabase/functions/.env    # o uno a uno:
+npx supabase secrets set TUTOR_PROVIDER=gemini TUTOR_MODEL=gemini-4-hydrogen TUTOR_DAILY_LIMIT=50
+npx supabase secrets set GEMINI_API_KEY=<tu clave>
+npx supabase functions deploy tutor
+npx supabase secrets list                                      # muestra los nombres, nunca los valores
+```
+- `secrets set` va al proyecto enlazado (`awlzhskgbpuvmzlqhvhr`). Si usas `--env-file`, revisa antes que ese archivo no diga `TUTOR_PROVIDER=demo`.
+- Para cambiar de proveedor o de modelo no hay que volver a desplegar: `npx supabase secrets set TUTOR_PROVIDER=anthropic ANTHROPIC_API_KEY=<clave>`.
+
+### 5.4 Verificar
+- **Sin sesión responde 401.** Debe responder `HTTP/2 401`:
+  ```bash
+  curl -i -X POST https://awlzhskgbpuvmzlqhvhr.supabase.co/functions/v1/tutor \
+    -H "Content-Type: application/json" -d '{"mode":"daily_plan","message":"hola"}'
+  ```
+- **En la app:** abre Tutor → «Hoy» → «45 minutos». Debe responder en streaming.
+- **Registros:** [panel de Supabase → Edge Functions → tutor → Logs](https://supabase.com/dashboard/project/awlzhskgbpuvmzlqhvhr/functions). Solo aparecen códigos de error, nunca el contenido de las conversaciones.
+
+---
+
 ## 4. Verificar que otra cuenta no ve tus datos
 
 ### 4.1 Automático (local)

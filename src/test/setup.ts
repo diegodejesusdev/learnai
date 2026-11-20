@@ -2,8 +2,10 @@ import '@testing-library/jest-dom/vitest'
 import { cleanup } from '@testing-library/react'
 import { afterEach, vi } from 'vitest'
 
-// jsdom no implementa scrollTo (lo usa ScrollRestoration de React Router).
+// jsdom no implementa scrollTo (lo usa ScrollRestoration de React Router) ni scrollIntoView
+// (lo usa el chat del tutor).
 window.scrollTo = () => {}
+Element.prototype.scrollIntoView = () => {}
 
 // Ni ResizeObserver (lo usa ResponsiveContainer de Recharts).
 globalThis.ResizeObserver ??= class {

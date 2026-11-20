@@ -12,9 +12,9 @@ import { RoadmapPage } from '@/features/ruta/RoadmapPage'
 import { TopicPage } from '@/features/ruta/TopicPage'
 import { ManualSessionPage } from '@/features/temporizador/ManualSessionPage'
 import { StudyPage } from '@/features/temporizador/StudyPage'
-import { TutorPage } from '@/features/tutor/TutorPage'
 import { NotFoundPage } from './NotFoundPage'
 import { RouteErrorPage } from './RouteErrorPage'
+import { TutorRoute } from './TutorRoute'
 
 export const routes: RouteObject[] = [
   { path: '/login', element: <LoginPage />, errorElement: <RouteErrorPage /> },
@@ -35,7 +35,7 @@ export const routes: RouteObject[] = [
           { path: 'estudiar/manual', element: <ManualSessionPage /> },
           { path: 'historial', element: <HistoryPage /> },
           { path: 'historial/sesion/:sessionId', element: <SessionEditPage /> },
-          { path: 'tutor', element: <TutorPage /> },
+          { path: 'tutor', element: <TutorRoute /> },
           { path: 'ajustes', element: <SettingsPage /> },
           { path: 'ajustes/diseno', element: <DesignSystemPage /> },
           { path: '*', element: <NotFoundPage /> },

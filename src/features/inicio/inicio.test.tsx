@@ -70,5 +70,9 @@ describe('Inicio', () => {
     expect(link).toHaveAttribute('href', '/estudiar?tema=f0-t1')
     await waitFor(() => expect(screen.getAllByText('Qué es un proceso')).toHaveLength(1))
     expect(screen.queryByRole('link', { name: 'Estudiar este tema' })).not.toBeInTheDocument()
+    expect(screen.getByRole('link', { name: '¿Qué estudio hoy?' })).toHaveAttribute(
+      'href',
+      '/tutor?modo=hoy',
+    )
   })
 })

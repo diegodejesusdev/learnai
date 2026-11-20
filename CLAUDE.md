@@ -20,7 +20,7 @@ Especificación completa: `docs/SPEC.md`. Plan por fases: `docs/PLAN.md`. Config
 - Calidad: ESLint 10 (con typescript-eslint con tipos), Prettier (ordena las clases de Tailwind) y Vitest + Testing Library
 - vite-plugin-pwa
 - Supabase: Postgres con RLS, Auth (enlace mágico por correo con código de respaldo, y Google) y Edge Functions (Deno). Cliente `@supabase/supabase-js` con tipos generados.
-- Tutor: Edge Function `tutor` con proveedor según `AI_PROVIDER` (`gemini` por defecto, `anthropic` como alternativa)
+- Tutor: Edge Function `tutor` con proveedor según `TUTOR_PROVIDER` (`gemini` por defecto, `anthropic` como alternativa, `demo` para probar en local) y `TUTOR_MODEL`. Auth con `@supabase/server`; SDK oficiales `@google/genai` y `@anthropic-ai/sdk`. Markdown con `react-markdown` + `remark-gfm`
 - Fechas: `date-fns` + `@date-fns/tz`
 - Gráficas: Recharts 3, cargado con `lazy` solo en el Historial
 - Pruebas: Vitest (lógica pura) y pgTAP (`supabase test db`, para RLS)
@@ -60,6 +60,12 @@ LearnAI/
 │   └── test/setup.ts          # jest-dom + limpieza entre tests
 ├── supabase/
 │   ├── config.toml            # Config de Supabase local (URLs de redirección, plantillas, Google)
+│   ├── functions/
+│   │   ├── _shared/           # Código puro de la función y la app (alias @shared): tipos, contexto,
+│   │   │                      #   prompts, quiz, errores, NDJSON. Sin Deno ni navegador; tests con Vitest
+│   │   ├── tutor/             # Edge Function: index.ts, data.ts, respond.ts, proveedores; deno.json
+│   │   ├── deno-env.d.ts      # Tipos de Deno.env solo para tsc
+│   │   └── .env               # Secretos locales del tutor (no se sube; ver .env.example)
 │   ├── migrations/            # SQL versionado: esquema, RLS, triggers
 │   ├── tests/database/        # Pruebas pgTAP (npm run db:test)
 │   └── templates/             # Correo del enlace mágico (enlace + código)
@@ -83,6 +89,11 @@ LearnAI/
   - Los totales (por día, semana y fase) los calculan las funciones SQL `study_*_totals`, en hora de Bogotá. No se suman sesiones en el navegador; solo el CSV las descarga todas.
   - Las rachas y el mapa se calculan sobre esos totales con funciones puras (`lib/studyStats.ts`, `historial/heatmapModel.ts`).
   - Las claves de consulta que dependen de `study_sessions` están en `lib/sessionQueries.ts`. Tras guardar, editar o borrar una sesión, llama a `invalidateSessionQueries(queryClient)`.
+- **Edge Functions:**
+  - Las dependencias npm se fijan con versión exacta en el `deno.json` de la función y, con la misma versión, en `devDependencies`, para que `npm run typecheck` (`tsconfig.functions.json`) revise los tipos.
+  - Lo que se pueda probar sin red va en `_shared/` como función pura.
+  - Las importaciones entre archivos de funciones llevan extensión `.ts` (Deno la exige).
+  - Las consultas usan el cliente del usuario (`ctx.supabase`), nunca el admin.
 - **Gráficas:**
   - Recharts se importa con `lazy`, para que no entre en el arranque.
   - Los colores van con tokens (`fill="var(--accent)"`; los ejes, `var(--fg-muted)`).
@@ -99,9 +110,9 @@ LearnAI/
 - **Idioma**: todo texto visible para el usuario va en español (etiquetas, errores, estados vacíos, `aria-label`). Los identificadores de código van en inglés. Los valores de la base van en inglés, salvo el estado de progreso, que es el enum `progress_status`: `pendiente` / `en_curso` / `hecho` (decisión de Diego en la fase 2).
 - **Fechas**: en la base siempre `timestamptz` (UTC). Para mostrar o agrupar por día y semana se usa `America/Bogota`, y **solo** a través de `src/lib/dates.ts`. No se usa `new Date().getDate()` ni equivalentes para agrupar. La semana va de lunes a domingo. Una sesión cuenta en el día en que empezó.
 - **Nada de claves en el código**:
+  - Las claves de IA (`GEMINI_API_KEY`, `ANTHROPIC_API_KEY`) solo van en `supabase/functions/.env` (local) y en los secretos de Supabase (nube).
   - En el navegador solo van `VITE_SUPABASE_URL` y `VITE_SUPABASE_ANON_KEY` (clave anon o publishable), que son públicas y quedan protegidas por RLS.
   - `SUPABASE_SERVICE_ROLE_KEY` (o secret key) se usa solo en `npm run seed`, desde `.env.local` (local) o `.env.cloud` (nube). Nunca lleva prefijo `VITE_` ni va a Vercel.
-  - Las claves de IA viven solo en los secrets de la Edge Function.
   - `.env*` está en `.gitignore`, salvo `.env.example`.
 - **RLS siempre**: toda tabla con `user_id` tiene RLS activa con política `user_id = (select auth.uid())`. Las tablas de contenido son de solo lectura para `authenticated`.
 - **Base de datos**:
@@ -153,9 +164,9 @@ npm run seed:sesiones -- --correo <correo>   # 16 sesiones de prueba en local (-
 npx supabase migration new <nombre>
 npx supabase status                   # URL y claves locales
 npx supabase db push --remote         # Aplica migraciones a la nube (sin --remote apunta a local)
-npx supabase functions serve tutor    # (fase 6)
-npx supabase functions deploy tutor   # (fase 6)
-npx supabase secrets set NOMBRE=valor # (fase 6)
+npx supabase functions serve tutor    # Tutor en local (lee supabase/functions/.env)
+npx supabase functions deploy tutor   # Sube la función a la nube
+npx supabase secrets set NOMBRE=valor # Secretos del tutor en la nube (docs/SETUP.md §5)
 ```
 
 Diego corre una sola vez `npx supabase login` y `npx supabase link --project-ref <ref>`.

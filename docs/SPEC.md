@@ -230,44 +230,83 @@ Todos los días y semanas se calculan en hora de Bogotá. Una sesión cuenta en 
 
 ### 4.4 Tutor IA
 
-**Modos**
+**Modos** (selector arriba del chat: Explicar · Quiz · Proyecto · Hoy)
 
 | Modo | Ligado a | Qué hace |
 |---|---|---|
-| Explicar (`explain`) | Tema | Explica el tema con ejemplos de pequeños negocios colombianos y ajusta el nivel según las preguntas. |
-| Quiz (`quiz`) | Tema | Hace una pregunta a la vez (opción múltiple o abierta), corrige, explica y al final resume aciertos y puntos a repasar. |
-| Revisar proyecto (`project_review`) | Fase | El usuario pega la descripción, el código o el README. El tutor revisa contra el enunciado del proyecto y da retroalimentación concreta. No abre enlaces. |
-| Qué estudiar hoy (`daily_plan`) | Ninguno | Sugiere qué estudiar hoy según los temas en curso, la meta semanal, la racha y las sesiones recientes. |
+| Explicar (`explain`) | Tema | Explica el tema paso a paso con un ejemplo de un pequeño negocio colombiano y termina siempre con una pregunta para comprobar que entendiste. |
+| Quiz (`quiz`) | Tema | 5 preguntas de opción múltiple (4 opciones, una correcta). El modelo devuelve JSON con un esquema fijo; la app lo muestra como tarjetas, da el puntaje al final y lo guarda en `quiz_results`. |
+| Revisar proyecto (`project_review`) | Fase | Pegas tu solución o un enlace. Da retroalimentación concreta contra el enunciado del proyecto: qué cumple, qué falta, riesgos y mejoras. No abre enlaces: si solo hay un enlace, pide el README, el flujo o el código. |
+| ¿Qué estudio hoy? (`daily_plan`) | Ninguno | Propone un plan para la sesión según tu progreso y el tiempo que le digas (atajos de 30 min a 2 h). |
 
-**Contexto que recibe el modelo** (lo arma la Edge Function en cada llamada):
-- Meta de la ruta y lista compacta de fases y temas con su estado.
-- Detalles del tema o del proyecto actual y las notas del usuario sobre él.
-- Resumen de actividad: minutos de hoy y de la semana, meta, racha y últimas sesiones.
-- Las últimas ~20 entradas de la conversación.
+**Edge Function `tutor`** (`supabase/functions/tutor`)
+- **Auth:** `@supabase/server` (`withSupabase({ auth: 'user' })`) verifica el token del usuario. Sin sesión responde 401. Todas las consultas van con el cliente del usuario, así que el RLS aplica también aquí.
+- **Proveedor:** `TUTOR_PROVIDER=gemini` (por defecto) o `anthropic`, con `GEMINI_API_KEY` o `ANTHROPIC_API_KEY`, y `TUTOR_MODEL`.
+  - **Modelos por defecto,** revisados en la documentación de cada proveedor el 20 nov 2026: `gemini-4-hydrogen` (Google lo recomienda para proyectos nuevos y tiene plan gratuito) y `claude-opus-5-5`.
+  - **Adaptadores:** cada proveedor es un adaptador con la misma interfaz (`providerTypes.ts`).
+  - **Anthropic:** con Opus 5.5 se activa el respaldo del servidor (`fallbacks: 'default'`). Si el modelo declina, la API reintenta con el modelo que recomienda Anthropic.
+  - **Demo:** `TUTOR_PROVIDER=demo` responde textos fijos, sin clave y sin costo. Sirve para probar en local y repite parte del contexto recibido. Con `[error429]` o `[timeout]` en el mensaje simula esos errores.
+- **Streaming (NDJSON):** la respuesta llega como una línea JSON por evento:
+  - `start` con la conversación y el mensaje;
+  - `delta` con cada trozo de texto;
+  - `done` con el id del mensaje, el modelo y los mensajes que quedan hoy;
+  - o `error` con un código y un mensaje en español.
+- **Límite diario:** `TUTOR_DAILY_LIMIT` (50 por defecto) cuenta tus mensajes desde las 00:00 de Bogotá. Al llegar al límite responde 429: «Llegaste al límite de N mensajes al tutor por hoy. Se reinicia a la medianoche (hora de Colombia)». Cuando quedan 10 o menos, la app lo avisa.
+- **Errores del proveedor:** se traducen a mensajes en español:
+  - 429 o cuota agotada;
+  - tiempo de espera (120 s);
+  - clave inválida;
+  - proveedor saturado (5xx o 529);
+  - solicitud declinada;
+  - quiz con formato inválido;
+  - modelo inválido;
+  - falta de configuración;
+  - error de red.
+  - Si la respuesta falla, se borra la pregunta (y la conversación, si era nueva): no queda una pregunta sin respuesta y no cuenta para el límite. La app devuelve el texto a la caja para reintentar.
+- **Detener:** el botón corta la conexión. La función lo nota y guarda lo que el modelo alcanzó a escribir.
 
-**Conversaciones**
-- Se guardan en `tutor_conversations` y `tutor_messages`.
-- Lista por tema y por modo, botón «Nueva conversación» y opción de eliminar.
-- El título se genera a partir del primer mensaje.
+**Contexto del modelo.** Lo arma el servidor en cada mensaje (`_shared/tutorContext.ts`), nunca el navegador:
+- La fecha de hoy en Colombia, la ruta y su meta.
+- **Tema** (Explicar y Quiz): su fase (título y resumen), el título y los detalles del tema, su estado y tus notas. Las notas se recortan a 3000 caracteres y se marcan como datos, no como instrucciones.
+- **Proyecto** (Revisar proyecto): enunciado, temas de la fase, estado, repositorio, demo y notas.
+- Resumen corto del progreso:
+  - temas hechos y proyectos hechos;
+  - avance por fase;
+  - temas en curso;
+  - siguientes pendientes;
+  - en «Hoy», también los minutos de la semana frente a la meta.
+- Tus últimas 5 sesiones, en hora de Colombia.
+- **Historial:** las últimas 20 entradas de la conversación. En el Quiz no se reenvían los JSON: solo se pide no repetir las preguntas anteriores.
 
-**Interfaz**
-- Las respuestas llegan en streaming.
-- Se muestran en Markdown sin HTML.
-- Se puede detener la generación.
+**Instrucción de sistema** (`_shared/tutorPrompts.ts`):
+- En español.
+- Tutor paciente y directo para alguien que aprende automatización para negocios en Colombia.
+- Usa ejemplos de pequeños negocios colombianos, con montos en pesos.
+- Si no sabe algo o puede estar desactualizado (precios, planes, versiones, límites, normas), lo dice y sugiere verificarlo en la documentación oficial.
+- Responde en Markdown.
 
-**Proveedor**
-- Se elige con `AI_PROVIDER` (`gemini` por defecto, `anthropic` como alternativa) y el modelo con `GEMINI_MODEL` o `ANTHROPIC_MODEL`.
-- Cada proveedor es un adaptador con la misma interfaz, así que cambiar de proveedor no toca el front.
+**Quiz** (`_shared/quiz.ts`)
+- **Esquema:** `{ questions: [{ question, options[4], correctIndex 0–3, explanation }] }`.
+  - A Anthropic se le envía sin `minItems`/`maxItems`, que no los admite.
+  - A Gemini, con ellos.
+- **`parseQuiz`:**
+  - valida JSON, 5 preguntas, 4 opciones distintas, índice correcto y enunciado;
+  - acepta el JSON envuelto en un bloque de código;
+  - nunca lanza: devuelve el error en español.
+- **Repetir el quiz** reemplaza el resultado guardado.
 
-**Límite y costo**
-- Hay un máximo de mensajes por día (`TUTOR_DAILY_LIMIT`); al superarlo se muestra un mensaje claro.
-- Se guarda el modelo y los tokens de cada respuesta.
+**Interfaz** (`/tutor?modo=explicar|quiz|proyecto|hoy&tema=…&proyecto=…&conversacion=…`)
+- El estado va en la URL: los enlaces desde Ruta e Inicio abren lo correcto y recargar no pierde la conversación.
+- **Conversaciones:** se guardan por tema (o proyecto) y modo. Se abre la más reciente, hay un selector con las anteriores y un botón «Nueva».
+- **Respuestas:** se muestran en Markdown sin HTML, con `react-markdown` + `remark-gfm`. Los bloques de código muestran el lenguaje y un botón «Copiar».
+- **Guardar en notas:** en Explicar y Revisar proyecto, abre un editor con la selección (o la respuesta entera) para recortarla. Se agrega al final de las notas del tema o del proyecto con la función SQL `append_topic_notes` / `append_project_notes`, que no pisa cambios hechos en otro dispositivo.
+- **Teclado del móvil:**
+  - La caja de texto queda fija encima de la barra de navegación.
+  - Con el teclado abierto, la barra se oculta y la caja sube con él (`useKeyboardInset` + `interactive-widget=resizes-content`).
+  - En el móvil, Enter hace salto de línea; en el PC, Enter envía.
+- **Accesos:** «Preguntarle al tutor» en cada tema, «Revisar con el tutor» en cada proyecto y «¿Qué estudio hoy?» en Inicio.
 
-**Privacidad**
-- El plan gratuito de la API de Gemini puede usar lo enviado para mejorar sus productos.
-- Por eso no se pegan datos personales de clientes en el tutor (relacionado con la fase 7 de la ruta, Ley 1581).
-
-**Accesos al tutor:** «Preguntarle al tutor» en cada tema, «Revisar con el tutor» en cada proyecto y «¿Qué estudio hoy?» en Inicio.
+**Privacidad:** el plan gratuito de Gemini puede usar lo que se envía para mejorar sus productos. No se pegan datos personales de clientes en el tutor (relacionado con la fase 7 de la ruta, Ley 1581).
 
 ### 4.5 Inicio
 
@@ -382,6 +421,16 @@ user_settings(user_id pk, weekly_goal_minutes int default 600, pomodoro_work_min
   se crea con un trigger sobre auth.users al registrar el usuario
 ```
 
+**Resultados de quiz** (fase 6):
+
+```
+quiz_results(id uuid pk, user_id, message_id, topic_id fk → topics, score int, total int,
+             answers smallint[], created_at, updated_at)
+  unique (message_id): un resultado por quiz; repetirlo lo reemplaza
+  fk (message_id, user_id) → tutor_messages (id, user_id) on delete cascade
+  check score entre 0 y total, total entre 1 y 20, una respuesta por pregunta
+```
+
 **Funciones SQL** (todas `security invoker`, así que aplican el RLS de quien llama; solo las ejecuta `authenticated`):
 
 ```
@@ -390,6 +439,8 @@ finish_active_timer(...)   → uuid   guarda la sesión del temporizador activo 
 study_day_totals(p_from date?, p_to date?)  → (day, minutes, sessions)         por día de Bogotá
 study_week_totals(p_from date?)             → (week_start, minutes, sessions)  semanas de lunes a domingo
 study_phase_totals()                        → (phase_id, minutes, sessions)    temas + proyecto de cada fase
+append_topic_notes(p_topic_id, p_text)      agrega un fragmento al final de las notas del tema (crea la fila)
+append_project_notes(p_phase_id, p_text)    lo mismo con las notas del proyecto
 ```
 
 ### 5.3 Cambios frente a la propuesta original y por qué
@@ -419,7 +470,7 @@ study_phase_totals()                        → (phase_id, minutes, sessions)   
 - **Contenido** (`curriculum_meta`, `phases`, `topics`, `checklist_items`): RLS activa, con política de `select` para `authenticated` y sin políticas de escritura.
 - **Datos del usuario:** RLS activa y una política por tabla `for all to authenticated using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()))`.
 - **Permisos explícitos:** `anon` no tiene acceso a ninguna tabla. `authenticated` solo lee el contenido y opera sus tablas. `service_role` (el seed) escribe el contenido.
-- **Pruebas pgTAP** en `supabase/tests/database/` (`npm run db:test`, 64 comprobaciones en 3 archivos; `rls.test.sql` tiene 32):
+- **Pruebas pgTAP** en `supabase/tests/database/` (`npm run db:test`, 78 comprobaciones en 4 archivos; `rls.test.sql` tiene 32):
   - con dos usuarios, ninguno ve ni modifica las filas del otro;
   - nadie puede escribir en el contenido;
   - sin sesión no se lee nada;
@@ -429,10 +480,11 @@ study_phase_totals()                        → (phase_id, minutes, sessions)   
 
 - Los registros públicos se desactivan después de crear el único usuario. Eso cubre el correo y Google: una cuenta de Google nueva tampoco puede crear usuario.
 - **Edge Function `tutor`:**
-  - Verifica el JWT; sin token válido responde 401.
-  - Crea el cliente de Supabase con el token del usuario, así que RLS se aplica también en el servidor y no hace falta la service role.
-  - CORS limitado a los orígenes de `ALLOWED_ORIGINS`.
-  - Valida el cuerpo de la petición (modo, ids y longitud máxima del mensaje).
+  - Verifica el JWT con `@supabase/server`; sin token válido responde 401.
+  - Usa el cliente de Supabase con el token del usuario, así que RLS se aplica también en el servidor y no hace falta la service role.
+  - CORS con las cabeceras estándar de Supabase (`*`). Se acepta porque la función no usa cookies: sin un token de usuario válido no responde nada.
+  - Valida el cuerpo de la petición (modo, ids, tema o proyecto existente y largo máximo del mensaje: 20 000 caracteres).
+  - En los registros solo escribe códigos de error, nunca el contenido de las conversaciones.
 - **Secretos:**
   - En local, en `supabase/functions/.env`, que está en `.gitignore`.
   - En producción, con `supabase secrets set`.
@@ -446,11 +498,12 @@ study_phase_totals()                        → (phase_id, minutes, sessions)   
 | `VITE_SUPABASE_URL` | Front (`.env.local`, Vercel) | URL del proyecto Supabase. En local, la IP del PC si se prueba desde el móvil. |
 | `VITE_SUPABASE_ANON_KEY` | Front (`.env.local`, Vercel) | Clave pública (anon o publishable). Es segura en el navegador gracias a RLS. |
 | `SUPABASE_SERVICE_ROLE_KEY` | Solo el seed (`.env.local` / `.env.cloud`) | Clave service role o secret. Salta RLS: nunca con `VITE_` ni en Vercel. |
-| `AI_PROVIDER` | Edge Function | `gemini` (por defecto) o `anthropic`. |
-| `GEMINI_API_KEY`, `GEMINI_MODEL` | Edge Function | Clave y modelo de Gemini. |
-| `ANTHROPIC_API_KEY`, `ANTHROPIC_MODEL` | Edge Function | Clave y modelo de Anthropic. |
-| `TUTOR_DAILY_LIMIT` | Edge Function | Máximo de mensajes al tutor por día (Bogotá). |
-| `ALLOWED_ORIGINS` | Edge Function | Orígenes permitidos para CORS, separados por coma. |
+| `TUTOR_PROVIDER` | Edge Function | `gemini` (por defecto) o `anthropic`; `demo` para probar en local. |
+| `TUTOR_MODEL` | Edge Function | Modelo; vacío = `gemini-4-hydrogen` o `claude-opus-5-5`. |
+| `GEMINI_API_KEY`, `ANTHROPIC_API_KEY` | Edge Function | La clave del proveedor elegido. |
+| `TUTOR_DAILY_LIMIT` | Edge Function | Máximo de mensajes al tutor por día (Bogotá); 50 por defecto. |
+
+Las variables de la Edge Function van en `supabase/functions/.env` en local y con `npx supabase secrets set` en la nube. Nunca llevan `VITE_` ni van a Vercel.
 
 ## 8. Decisiones tomadas
 
@@ -459,6 +512,11 @@ study_phase_totals()                        → (phase_id, minutes, sessions)   
 - **Avisos del Pomodoro:** sin notificaciones push. El tiempo es correcto porque se calcula desde la hora de inicio. Con la app abierta suena o vibra, y se puede mantener la pantalla encendida.
 - **Tema:** claro/oscuro automático con interruptor manual.
 - **CLIs:** Supabase CLI como dependencia de desarrollo (`npx supabase`). Vercel sin CLI, conectado a GitHub desde su panel.
+- **Tutor (fase 6):**
+  - Variables `TUTOR_PROVIDER` / `TUTOR_MODEL` (las pidió Diego; reemplazan `AI_PROVIDER` y un modelo por proveedor).
+  - Límite de 50 mensajes al día.
+  - Quiz de 5 preguntas con JSON de esquema fijo y resultado en `quiz_results`.
+  - Sin `ALLOWED_ORIGINS`: la protección es el token del usuario.
 - **Historial (fase 5):**
   - Gráficas con Recharts, que reemplaza la idea inicial de SVG propio; lo pidió Diego.
   - Recharts se carga aparte para no pesar en el arranque.

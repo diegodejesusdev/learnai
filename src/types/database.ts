@@ -222,6 +222,58 @@ export type Database = {
           },
         ]
       }
+      quiz_results: {
+        Row: {
+          answers: number[]
+          created_at: string
+          id: string
+          message_id: string
+          score: number
+          topic_id: string
+          total: number
+          updated_at: string
+          user_id: string
+        }
+        ComputedFields: never
+        Insert: {
+          answers: number[]
+          created_at?: string
+          id?: string
+          message_id: string
+          score: number
+          topic_id: string
+          total: number
+          updated_at?: string
+          user_id?: string
+        }
+        Update: {
+          answers?: number[]
+          created_at?: string
+          id?: string
+          message_id?: string
+          score?: number
+          topic_id?: string
+          total?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'quiz_results_message_id_user_id_fkey'
+            columns: ['message_id', 'user_id']
+            isOneToOne: false
+            referencedRelation: 'tutor_messages'
+            referencedColumns: ['id', 'user_id']
+          },
+          {
+            foreignKeyName: 'quiz_results_topic_id_fkey'
+            columns: ['topic_id']
+            isOneToOne: false
+            referencedRelation: 'topics'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       study_sessions: {
         Row: {
           created_at: string
@@ -479,6 +531,8 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      append_project_notes: { Args: { p_phase_id: string; p_text: string }; Returns: undefined }
+      append_topic_notes: { Args: { p_text: string; p_topic_id: string }; Returns: undefined }
       finish_active_timer: {
         Args: {
           p_duration_minutes: number

@@ -175,7 +175,7 @@ A partir de la fase 2, también `npx supabase test db`.
 
 ---
 
-## Fase 5: Historial ✅ en local (20 nov 2026) · nube: falta `db push --remote` de la migración nueva
+## Fase 5: Historial ✅ (20 nov 2026, también en la nube)
 
 **Objetivo:** ver la constancia y el tiempo invertido.
 
@@ -222,40 +222,61 @@ A partir de la fase 2, también `npx supabase test db`.
 
 ---
 
-## Fase 6: Tutor IA
+## Fase 6: Tutor IA ✅ (20 nov 2026, también en la nube)
 
 **Objetivo:** un tutor útil que conoce la ruta y el progreso, sin exponer claves.
 
-**Requisitos previos**
-- Clave de la API de Gemini.
-- Opcional: clave de Anthropic para probar el proveedor alternativo.
-
-**Al iniciar, decidir:** el modelo concreto de cada proveedor (para `GEMINI_MODEL` y `ANTHROPIC_MODEL`) y el límite diario.
+**Decisiones de esta fase**
+- **Variables:** `TUTOR_PROVIDER` (`gemini` por defecto, `anthropic`), `TUTOR_MODEL`, `GEMINI_API_KEY` / `ANTHROPIC_API_KEY` y `TUTOR_DAILY_LIMIT` (50).
+- **Modelos por defecto** (documentación revisada el 20 nov 2026): `gemini-4-hydrogen` y `claude-opus-5-5`. Las alternativas más baratas están en `.env.example`.
+- **En producción:** `TUTOR_MODEL=gemini-3.6-flash` (secreto de Supabase). El 20 nov, `gemini-4-hydrogen` respondía 503 por alta demanda; `gemini-3.6-flash` respondió y devolvió el quiz con JSON válido. Se cambia con `npx supabase secrets set TUTOR_MODEL=…`, sin volver a desplegar.
+- **SDK y dependencias:**
+  - Auth con `@supabase/server` (lo que recomienda hoy la documentación de Supabase).
+  - SDK oficiales: `@google/genai` 3.0.0 y `@anthropic-ai/sdk` 1.6.0, fijados en `supabase/functions/tutor/deno.json` y con la misma versión en `devDependencies` para revisar los tipos.
+- **Código compartido:** lo puro (tipos, validación, contexto, prompts, quiz, errores, NDJSON) vive en `supabase/functions/_shared/`. La app lo importa con el alias `@shared`, y Vitest lo prueba.
+- **Errores:** si la respuesta falla, se borra la pregunta: no cuenta para el límite y la app devuelve el texto a la caja.
+- **Proveedor `demo`** para probar todo en local sin clave ni costo.
 
 **Entregables**
+- **Migración `20261120140732_tutor.sql`:**
+  - tabla `quiz_results` (RLS, un resultado por quiz);
+  - índice para el límite diario;
+  - funciones `append_topic_notes` y `append_project_notes`;
+  - 14 pruebas pgTAP.
 - **Edge Function `tutor`:**
-  - verificación del JWT;
-  - CORS;
+  - verificación del usuario (401 sin sesión);
   - validación del cuerpo;
-  - límite diario.
-- **Adaptadores de IA:** `gemini` y `anthropic` con la misma interfaz, elegidos con `AI_PROVIDER`, y streaming hacia el cliente.
-- **Constructor de contexto:** ruta, estados, tema o proyecto, notas, actividad y racha.
-- **Prompts de sistema** de los 4 modos, en español.
-- **Persistencia:** conversaciones y mensajes, con el modelo y los tokens de cada respuesta.
-- **UI de chat:**
-  - lista de conversaciones;
-  - nueva conversación;
-  - Markdown seguro;
-  - botón para detener;
-  - eliminar conversación.
-- **Accesos:** «Preguntarle al tutor» en cada tema, «Revisar con el tutor» en cada proyecto y «¿Qué estudio hoy?» en Inicio.
+  - límite diario con mensaje claro;
+  - contexto armado en el servidor;
+  - adaptadores Gemini, Anthropic y demo;
+  - streaming NDJSON;
+  - errores del proveedor en español;
+  - guardado de la conversación con el modelo y los tokens.
+- **Tutor en la app:**
+  - selector de modo arriba;
+  - tema o proyecto;
+  - historial por tema y modo, con «Nueva»;
+  - Markdown con «Copiar» en los bloques de código;
+  - quiz con tarjetas, puntaje y resultado guardado;
+  - «Guardar en notas»;
+  - atajos de tiempo en «Hoy»;
+  - botón Detener;
+  - caja de texto que funciona con el teclado del móvil.
+- **Accesos:** «¿Qué estudio hoy?» en Inicio; Ruta ya tenía «Preguntarle al tutor» y «Revisar con el tutor».
+- **Tests:**
+  - construcción del contexto, parser del quiz (con JSON inválido), validación del pedido, errores, límite diario, NDJSON y prompts (Vitest);
+  - URL del tutor;
+  - integración del chat, del quiz y de «Guardar en notas».
 
 **Cómo verificarla**
-- `npx supabase functions serve tutor`: probar los 4 modos y repetir con `AI_PROVIDER=anthropic`.
-- Una llamada sin token devuelve 401. Superado el límite diario, aparece un mensaje claro.
-- `npm run build` y luego `grep` en `dist/`: no aparecen las claves de IA.
-- **PC:** una conversación de quiz completa, que queda guardada.
-- **Móvil:** la misma conversación aparece y se puede continuar; el streaming se ve fluido.
+- `npm test`, `npm run db:test` (78 comprobaciones) y `npm run typecheck`, que también revisa la Edge Function.
+- **Local sin clave:**
+  - `TUTOR_PROVIDER=demo` en `supabase/functions/.env` y `npx supabase functions serve tutor`;
+  - recorrer los 4 modos;
+  - la respuesta de prueba repite parte del contexto recibido.
+- **Local con clave:** la misma prueba con `TUTOR_PROVIDER=gemini` y luego `anthropic`.
+- **Nube:** `docs/SETUP.md` §5: secretos, despliegue y prueba de 401.
+- `npm run build` y `grep` en `dist/`: no aparecen claves de IA.
 
 ---
 

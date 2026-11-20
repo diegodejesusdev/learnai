@@ -1,3 +1,5 @@
+import { CalendarClock } from 'lucide-react'
+import { ButtonLink } from '@/components/ui/ButtonLink'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { useLatestSession } from '@/features/historial/useSessions'
 import { NextTopicCard } from '@/features/ruta/NextTopicCard'
@@ -42,6 +44,10 @@ function HomeContent({ roadmap, progress }: RoadmapData) {
           hasHistory={Boolean(latest.data)}
         />
       )}
+      <ButtonLink to="/tutor?modo=hoy" variant="secondary" size="lg">
+        <CalendarClock className="size-5" />
+        ¿Qué estudio hoy?
+      </ButtonLink>
       <HomeStats />
       {showNext && <NextTopicCard roadmap={roadmap} progress={progress} />}
       <TotalProgressCard roadmap={roadmap} progress={progress} />

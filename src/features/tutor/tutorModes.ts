@@ -1,44 +1,33 @@
-import {
-  CalendarClock,
-  ClipboardCheck,
-  GraduationCap,
-  Lightbulb,
-  type LucideIcon,
-} from 'lucide-react'
+import type { TutorMode } from '@shared/tutorTypes'
 
 // Modos del tutor (docs/SPEC.md §4.4). Los valores coinciden con tutor_conversations.mode.
-export type TutorMode = 'explain' | 'quiz' | 'project_review' | 'daily_plan'
 
 export interface TutorModeInfo {
   value: TutorMode
+  /** Corto, para el selector de arriba (cabe a 360 px). */
   label: string
   description: string
-  icon: LucideIcon
 }
 
 export const tutorModes: readonly TutorModeInfo[] = [
   {
     value: 'explain',
     label: 'Explicar',
-    description: 'Un tema con ejemplos de negocios',
-    icon: Lightbulb,
+    description: 'Te explica el tema paso a paso y te pregunta para comprobar.',
   },
   {
     value: 'quiz',
     label: 'Quiz',
-    description: 'Preguntas para ponerte a prueba',
-    icon: GraduationCap,
+    description: '5 preguntas de opción múltiple con puntaje al final.',
   },
   {
     value: 'project_review',
-    label: 'Revisar proyecto',
-    description: 'Retroalimentación de tu proyecto',
-    icon: ClipboardCheck,
+    label: 'Proyecto',
+    description: 'Pega tu solución y te dice qué cumple y qué falta del proyecto.',
   },
   {
     value: 'daily_plan',
-    label: 'Qué estudiar hoy',
-    description: 'Sugerencia según tu progreso',
-    icon: CalendarClock,
+    label: 'Hoy',
+    description: '¿Qué estudio hoy? Un plan según tu progreso y tu tiempo.',
   },
 ]
