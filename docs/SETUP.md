@@ -65,13 +65,22 @@ npx supabase migration list --remote             # local y nube deben coincidir
 
 ### 2.4 URLs de redirección del login
 En **Authentication → URL Configuration**:
-- **Site URL:** tu URL de producción de Vercel, p. ej. `https://learnai-tan.vercel.app`.
+- **Site URL:** exactamente `https://learnai-tan.vercel.app`, el dominio de producción.
 - **Redirect URLs** (añade cada una):
   - `https://learnai-tan.vercel.app/**`
-  - `https://learnai-*-<tu-usuario-de-vercel>.vercel.app/**`, para las URLs de preview.
+  - `https://learnai-*-thechuchos-projects.vercel.app/**`, para las URLs de preview (opcional).
   - `http://localhost:5173/**`, solo si algún día apuntas la app local a la nube.
 
 La app pide volver a `<origen>/login`. Si ese origen no está en la lista, Supabase te manda al Site URL.
+
+> **Trampa:** no uses `https://learnai-thechuchos-projects.vercel.app` como Site URL. Vercel protege ese dominio con su propio login (Vercel Authentication). Después de entrar con Google o con el enlace caerías en una pantalla de Vercel, y la sesión quedaría en otro dominio.
+
+**Comprobar la configuración sin enviar correos.** Se usa un token inválido a propósito: Supabase redirige el error a la URL de retorno si está permitida y, si no, a la Site URL.
+```bash
+curl -s -o /dev/null -w '%{redirect_url}\n' \
+  "https://awlzhskgbpuvmzlqhvhr.supabase.co/auth/v1/verify?type=magiclink&token=x&redirect_to=https%3A%2F%2Flearnai-tan.vercel.app%2Flogin"
+```
+Debe responder `https://learnai-tan.vercel.app/login#error=…`. Si responde con otro dominio, revisa la Site URL y las Redirect URLs.
 
 ### 2.5 Plantilla del correo (enlace + código)
 En **Authentication → Emails → Templates**, edita **Magic link** y **Confirm signup**:
