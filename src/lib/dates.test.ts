@@ -1,6 +1,13 @@
 import { describe, expect, it } from 'vitest'
 import {
+  addDaysToKey,
+  daysBetweenKeys,
   endOfWeekInZone,
+  formatDayKey,
+  formatRelativeDay,
+  startOfWeekKey,
+  subtractMonthsFromKey,
+  weekdayOfKey,
   formatClock,
   startOfDayInZone,
   toDateInputValue,
@@ -92,5 +99,40 @@ describe('formatClock', () => {
     expect(formatClock(299)).toBe('04:59')
     expect(formatClock(3723)).toBe('1:02:03')
     expect(formatClock(-5)).toBe('00:00')
+  })
+})
+
+describe('claves de día', () => {
+  it('suma días cruzando meses y años', () => {
+    expect(addDaysToKey('2026-11-30', 1)).toBe('2026-12-01')
+    expect(addDaysToKey('2026-12-31', 1)).toBe('2027-01-01')
+    expect(addDaysToKey('2026-03-01', -1)).toBe('2026-02-28')
+  })
+
+  it('cuenta los días entre dos claves', () => {
+    expect(daysBetweenKeys('2026-11-18', '2026-11-20')).toBe(2)
+    expect(daysBetweenKeys('2026-11-20', '2026-11-18')).toBe(-2)
+    expect(daysBetweenKeys('2026-12-31', '2027-01-01')).toBe(1)
+  })
+
+  it('semana de lunes a domingo, también cuando cruza el cambio de mes', () => {
+    expect(weekdayOfKey('2026-11-16')).toBe(0) // lunes
+    expect(weekdayOfKey('2026-11-22')).toBe(6) // domingo
+    expect(startOfWeekKey('2026-11-22')).toBe('2026-11-16')
+    expect(startOfWeekKey('2026-12-02')).toBe('2026-11-30')
+  })
+
+  it('resta meses y ajusta los días que no existen', () => {
+    expect(subtractMonthsFromKey('2026-11-20', 6)).toBe('2026-05-20')
+    expect(subtractMonthsFromKey('2026-08-31', 6)).toBe('2026-02-28')
+    expect(subtractMonthsFromKey('2026-03-15', 6)).toBe('2025-09-15')
+  })
+
+  it('formatea y describe el día respecto a hoy', () => {
+    expect(formatDayKey('2026-11-18', 'd MMM')).toBe('18 nov')
+    expect(formatRelativeDay('2026-11-20', '2026-11-20')).toBe('hoy')
+    expect(formatRelativeDay('2026-11-19', '2026-11-20')).toBe('ayer')
+    expect(formatRelativeDay('2026-11-16', '2026-11-20')).toBe('hace 4 días')
+    expect(formatRelativeDay('2026-11-01', '2026-11-20')).toBe('1 nov')
   })
 })

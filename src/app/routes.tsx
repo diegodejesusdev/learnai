@@ -5,6 +5,7 @@ import { RequireAuth } from '@/features/acceso/RequireAuth'
 import { DesignSystemPage } from '@/features/ajustes/DesignSystemPage'
 import { SettingsPage } from '@/features/ajustes/SettingsPage'
 import { HistoryPage } from '@/features/historial/HistoryPage'
+import { SessionEditPage } from '@/features/historial/SessionEditPage'
 import { HomePage } from '@/features/inicio/HomePage'
 import { PhasePage } from '@/features/ruta/PhasePage'
 import { RoadmapPage } from '@/features/ruta/RoadmapPage'
@@ -33,6 +34,7 @@ export const routes: RouteObject[] = [
           { path: 'estudiar', element: <StudyPage /> },
           { path: 'estudiar/manual', element: <ManualSessionPage /> },
           { path: 'historial', element: <HistoryPage /> },
+          { path: 'historial/sesion/:sessionId', element: <SessionEditPage /> },
           { path: 'tutor', element: <TutorPage /> },
           { path: 'ajustes', element: <SettingsPage /> },
           { path: 'ajustes/diseno', element: <DesignSystemPage /> },

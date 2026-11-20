@@ -11,8 +11,8 @@ values ('test-f-t1', 'test-f', 0, 'Tema uno'), ('test-f-t2', 'test-f', 1, 'Tema 
 
 insert into auth.users (id, email, aud, role)
 values
-  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'diego@prueba.local', 'authenticated', 'authenticated'),
-  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'otra@prueba.local', 'authenticated', 'authenticated');
+  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'diego@pgtap.local', 'authenticated', 'authenticated'),
+  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'otra@pgtap.local', 'authenticated', 'authenticated');
 
 set local role authenticated;
 set local request.jwt.claims to '{"sub":"aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa","role":"authenticated"}';

@@ -155,22 +155,78 @@ Determinista y sin contadores en memoria. Lo guardado es:
 
 Todos los días y semanas se calculan en hora de Bogotá. Una sesión cuenta en el día de su `started_at`; si cruza la medianoche, no se parte.
 
-- **Mapa de calor:** una celda por día con color según los minutos. Muestra los últimos 12 meses en escritorio y 6 en móvil, con desplazamiento. Al tocar una celda se ven la fecha y los minutos.
-- **Rachas:**
-  - Un día cuenta si tiene ≥ 1 minuto.
-  - La racha actual incluye hoy si ya hay estudio. Si todavía no hay, cuenta hasta ayer, porque la racha no se rompe hasta que termina el día.
-  - También se muestra la racha máxima histórica.
-- **Horas por semana:** barras de las últimas 12 semanas (lunes a domingo) con una línea de meta semanal.
-- **Horas por fase:** barras horizontales. Las sesiones de proyecto suman a su fase.
-- **Meta semanal:** por defecto 600 min (las 10 h/semana de la ruta) y editable. Se muestra el avance de la semana actual.
-- **Lista de sesiones:**
-  - Orden: de la más reciente a la más antigua, paginada.
-  - Filtros: rango de fechas, fase y tema.
-  - Acciones: editar destino, fecha, hora, duración y notas; eliminar con confirmación.
-- **Exportar CSV:**
-  - Formato: UTF-8 con BOM, RFC 4180 (separador coma, comillas cuando haga falta), para que abra bien en Google Sheets, Excel y pandas.
-  - Columnas: `fecha`, `hora_inicio`, `hora_fin` (en hora de Bogotá), `duracion_min`, `modo`, `fase`, `tema_o_proyecto`, `notas`.
-- **Gráficos:** componentes SVG propios, sin librería pesada de gráficos.
+**Dónde se calcula**
+- **Totales, en la base:** las funciones SQL `study_day_totals`, `study_week_totals` y `study_phase_totals` devuelven una fila por día, semana o fase. El navegador nunca descarga todas las sesiones para sumar; solo lo hace para exportar el CSV.
+- **En el navegador, sobre esos totales:**
+  - las rachas (`lib/studyStats.ts`);
+  - la cuadrícula del mapa de calor (`historial/heatmapModel.ts`).
+  - Ambas son funciones puras con tests.
+
+**Mapa de calor**
+- Una celda por día con color según los minutos. Muestra los últimos 6 meses, en semanas completas de lunes a domingo.
+- En el móvil, cada cuadro mide 24 px y el mapa se desplaza de lado dentro de su tarjeta (abre mostrando lo más reciente). Desde 640 px, los cuadros miden 18 px y caben los 6 meses.
+- **Niveles de color:**
+  - Sin estudio.
+  - Por debajo del mínimo de la racha (tono muy claro).
+  - Del mínimo a 59 min.
+  - De 1 h a 1 h 59 min.
+  - 2 h o más.
+  - Con un mínimo alto, los niveles se corren y la leyenda omite los vacíos.
+- **Al tocar un día** se ven abajo:
+  - la fecha;
+  - los minutos;
+  - si cuenta para la racha;
+  - sus sesiones, que se pueden abrir para editarlas.
+- El día elegido va en la URL (`?dia=`).
+- Las flechas del teclado mueven entre días.
+
+**Rachas**
+- Un día cuenta si suma al menos `user_settings.streak_min_minutes` (15 min por defecto; se cambia en Ajustes).
+- La racha actual incluye hoy si ya llega al mínimo. Si todavía no llega, cuenta hasta ayer, porque la racha no se rompe hasta que termina el día.
+- Un día por debajo del mínimo rompe la racha igual que un día sin estudio.
+- El cambio de semana o de mes no la reinicia.
+- También se muestra la racha máxima histórica.
+
+**Gráficas (Recharts)**
+- **Minutos por semana:** columnas de las últimas 12 semanas (lunes a domingo) con una línea en la meta semanal.
+- **Minutos por fase:** barras horizontales de las 9 fases, con el tiempo al final de cada barra. Las sesiones de proyecto suman a su fase.
+- Cada gráfica tiene «Ver los datos», una tabla con los mismos valores, y un tooltip al tocar o pasar por las barras.
+- Recharts se descarga solo al abrir el Historial: va en un fragmento aparte, no en el arranque de la app.
+
+**Meta semanal**
+- Por defecto 600 min (las 10 h/semana de la ruta); se edita en Ajustes.
+- Se muestra el avance de la semana actual.
+
+**Lista de sesiones**
+- **Orden:** de la más reciente a la más antigua, de 20 en 20 con «Cargar más».
+- **Filtros:**
+  - rango de fechas (días de Bogotá, ambos incluidos);
+  - fase;
+  - tema o proyecto de esa fase.
+  - Van en la URL, así que se conservan al volver de editar.
+- **Editar** (`/historial/sesion/:id`):
+  - Se cambian el tema o proyecto, la fecha, la hora, los minutos netos y las notas.
+  - Si no cambias la fecha ni la hora, se conservan el inicio y el fin exactos.
+  - Se conserva la duración total con descansos, salvo que los minutos netos la superen.
+  - No puede terminar en el futuro.
+  - Editar no cambia el estado del tema.
+- **Eliminar:** pide confirmación en la misma pantalla. El foco va a «Cancelar».
+
+**Exportar CSV**
+- **Formato:**
+  - UTF-8 con BOM, para que Excel lea las tildes.
+  - RFC 4180: separador coma, comillas solo cuando hace falta y fin de línea CRLF.
+  - Abre en Google Sheets, Excel y pandas.
+- **Contenido:** todas las sesiones, de la más antigua a la más reciente, sin filtros. Se piden a la base en tandas de 1000.
+- **Columnas:**
+  - `fecha`, `hora_inicio` y `hora_fin`, en hora de Bogotá; la fecha es la del inicio.
+  - `duracion_min`.
+  - `modo`.
+  - `fase` (por ejemplo, «Fase 1 · Bases técnicas…»).
+  - `tipo` (`tema` o `proyecto`).
+  - `tema_o_proyecto`.
+  - `notas`.
+- **Archivo:** `learnai-sesiones-AAAA-MM-DD.csv`.
 
 ### 4.4 Tutor IA
 
@@ -215,17 +271,22 @@ Todos los días y semanas se calculan en hora de Bogotá. Una sesión cuenta en 
 
 ### 4.5 Inicio
 
-- **Minutos de hoy** (Bogotá), con datos reales desde la fase 4.
-- **Racha actual.**
-- **Meta semanal:** barra con los minutos de la semana sobre la meta.
-- **Siguiente tema** (desde la fase 3): la misma sugerencia que en Ruta, con «Estudiar este tema» y «Ver tema». En la fase 4 se decide si se prioriza el tema de la última sesión.
+- **«Seguir estudiando»**: la tarjeta principal. Abre, en este orden:
+  - la sesión en curso, si hay una;
+  - si no, el tema o proyecto de la última sesión, si aún no está «hecho»;
+  - si no, el siguiente tema sugerido.
+  - Sin ninguna sesión todavía, el botón dice «Empezar a estudiar».
+- **Minutos de hoy** (Bogotá), con lo que falta para que hoy cuente en la racha.
+- **Racha actual y máxima.**
+- **Meta semanal:** barra con los minutos de la semana (lunes a domingo) sobre la meta.
+- **Siguiente tema:** la misma sugerencia que en Ruta. Solo aparece si no es ya lo que propone «Seguir estudiando».
 - **Progreso de la ruta** (temas hechos / 100), que enlaza a Ruta.
-- **Botón «Seguir estudiando»:** si hay un temporizador activo, lo reanuda; si no, abre el temporizador con el último tema elegido.
-- **Acceso a «¿Qué estudio hoy?»** del tutor.
+- **Acceso a «¿Qué estudio hoy?»** del tutor (fase 6).
 
 ### 4.6 Ajustes
 
-- Meta semanal en horas o minutos.
+- Meta semanal en horas.
+- Mínimo diario para la racha, en minutos (de 1 a 240; por defecto 15).
 - Minutos de trabajo y descanso del Pomodoro.
 - Tema visual.
 - Cerrar sesión.
@@ -314,9 +375,21 @@ tutor_messages(id uuid pk, conversation_id, user_id,
   índice (conversation_id, created_at)
 
 user_settings(user_id pk, weekly_goal_minutes int default 600, pomodoro_work_min int default 25,
-              pomodoro_break_min int default 5, theme default 'system', updated_at)
+              pomodoro_break_min int default 5, streak_min_minutes int default 15,
+              theme default 'system', updated_at)
   theme ∈ {system, light, dark}
+  streak_min_minutes entre 1 y 240
   se crea con un trigger sobre auth.users al registrar el usuario
+```
+
+**Funciones SQL** (todas `security invoker`, así que aplican el RLS de quien llama; solo las ejecuta `authenticated`):
+
+```
+record_study_session(...)  → uuid   guarda una sesión y pasa el tema o proyecto a «en curso» o «hecho»
+finish_active_timer(...)   → uuid   guarda la sesión del temporizador activo y lo borra (una transacción)
+study_day_totals(p_from date?, p_to date?)  → (day, minutes, sessions)         por día de Bogotá
+study_week_totals(p_from date?)             → (week_start, minutes, sessions)  semanas de lunes a domingo
+study_phase_totals()                        → (phase_id, minutes, sessions)    temas + proyecto de cada fase
 ```
 
 ### 5.3 Cambios frente a la propuesta original y por qué
@@ -338,13 +411,15 @@ user_settings(user_id pk, weekly_goal_minutes int default 600, pomodoro_work_min
 | `model`, `tokens_in` y `tokens_out` en los mensajes. | Permite ver el costo real del tutor (tema f6-t13 de la ruta). |
 | `theme` en `user_settings` y meta por defecto de 600 min. | El tema sigue al usuario entre dispositivos, y 600 min son las 10 h/semana de la ruta. |
 | Sin columna «último tema». | Se deriva de la sesión más reciente, así que no hace falta mantener un dato duplicado. |
+| `streak_min_minutes` en `user_settings` (fase 5). | Un día cuenta para la racha desde 15 min (decisión de Diego), y se puede cambiar. |
+| Totales con funciones SQL y no con vistas (fase 5). | Devuelven tipos sin `null` en los tipos generados, aceptan rangos de fechas y agrupan en Bogotá en un solo lugar. |
 
 ### 5.4 Row Level Security
 
 - **Contenido** (`curriculum_meta`, `phases`, `topics`, `checklist_items`): RLS activa, con política de `select` para `authenticated` y sin políticas de escritura.
 - **Datos del usuario:** RLS activa y una política por tabla `for all to authenticated using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()))`.
 - **Permisos explícitos:** `anon` no tiene acceso a ninguna tabla. `authenticated` solo lee el contenido y opera sus tablas. `service_role` (el seed) escribe el contenido.
-- **Pruebas pgTAP** en `supabase/tests/database/` (`npm run db:test`, 32 comprobaciones):
+- **Pruebas pgTAP** en `supabase/tests/database/` (`npm run db:test`, 64 comprobaciones en 3 archivos; `rls.test.sql` tiene 32):
   - con dos usuarios, ninguno ve ni modifica las filas del otro;
   - nadie puede escribir en el contenido;
   - sin sesión no se lee nada;
@@ -384,6 +459,11 @@ user_settings(user_id pk, weekly_goal_minutes int default 600, pomodoro_work_min
 - **Avisos del Pomodoro:** sin notificaciones push. El tiempo es correcto porque se calcula desde la hora de inicio. Con la app abierta suena o vibra, y se puede mantener la pantalla encendida.
 - **Tema:** claro/oscuro automático con interruptor manual.
 - **CLIs:** Supabase CLI como dependencia de desarrollo (`npx supabase`). Vercel sin CLI, conectado a GitHub desde su panel.
+- **Historial (fase 5):**
+  - Gráficas con Recharts, que reemplaza la idea inicial de SVG propio; lo pidió Diego.
+  - Recharts se carga aparte para no pesar en el arranque.
+  - Un día cuenta para la racha desde 15 min, configurable (antes: desde 1 min).
+  - El mapa de calor muestra 6 meses en todos los tamaños.
 
 ## 9. Fuera de alcance (v1)
 

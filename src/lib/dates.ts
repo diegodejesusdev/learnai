@@ -101,3 +101,64 @@ export function formatClock(totalSeconds: number): string {
   const ss = String(s).padStart(2, '0')
   return h > 0 ? `${h}:${mm}:${ss}` : `${mm}:${ss}`
 }
+
+// ── Claves de día ('yyyy-MM-dd') ─────────────────────────────────────────────
+// Un día de calendario de Bogotá, ya calculado (toDayKey o la base). Sumar días o buscar el
+// lunes es aritmética de calendario: se hace en UTC y no depende de la zona del dispositivo.
+
+function keyToUtc(key: string): Date {
+  const [year, month, day] = key.split('-').map(Number) as [number, number, number]
+  return new Date(Date.UTC(year, month - 1, day))
+}
+
+function utcToKey(date: Date): string {
+  return date.toISOString().slice(0, 10)
+}
+
+/** '2026-11-30' + 1 → '2026-12-01'. */
+export function addDaysToKey(key: string, days: number): string {
+  const date = keyToUtc(key)
+  date.setUTCDate(date.getUTCDate() + days)
+  return utcToKey(date)
+}
+
+/** Días de `from` a `to` (positivo si `to` es posterior). */
+export function daysBetweenKeys(from: string, to: string): number {
+  return Math.round((keyToUtc(to).getTime() - keyToUtc(from).getTime()) / 86_400_000)
+}
+
+/** Día de la semana: 0 = lunes … 6 = domingo. */
+export function weekdayOfKey(key: string): number {
+  return (keyToUtc(key).getUTCDay() + 6) % 7
+}
+
+/** Lunes de la semana del día dado. */
+export function startOfWeekKey(key: string): string {
+  return addDaysToKey(key, -weekdayOfKey(key))
+}
+
+/** El mismo día `months` meses antes; si no existe (31 → 30 de abril), el último del mes. */
+export function subtractMonthsFromKey(key: string, months: number): string {
+  const [year, month, day] = key.split('-').map(Number) as [number, number, number]
+  const firstOfMonth = new Date(Date.UTC(year, month - 1 - months, 1))
+  const lastDay = new Date(
+    Date.UTC(firstOfMonth.getUTCFullYear(), firstOfMonth.getUTCMonth() + 1, 0),
+  ).getUTCDate()
+  firstOfMonth.setUTCDate(Math.min(day, lastDay))
+  return utcToKey(firstOfMonth)
+}
+
+/** Formatea un día con un patrón de date-fns, en español. */
+export function formatDayKey(key: string, pattern: string): string {
+  // Al mediodía de Bogotá, lejos de cualquier cambio de día.
+  return formatInZone(zonedInputToDate(key, '12:00') ?? keyToUtc(key), pattern)
+}
+
+/** 'hoy', 'ayer', 'hace 3 días' o, desde una semana, '18 nov'. */
+export function formatRelativeDay(key: string, today: string): string {
+  const days = daysBetweenKeys(key, today)
+  if (days === 0) return 'hoy'
+  if (days === 1) return 'ayer'
+  if (days > 1 && days < 7) return `hace ${days} días`
+  return formatDayKey(key, 'd MMM')
+}

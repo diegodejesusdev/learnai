@@ -1,4 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
+import { topicMinutesKey } from '@/lib/sessionQueries'
 import { toast } from '@/lib/toast'
 import type { ProgressStatus } from '@/types/progress'
 import {
@@ -25,7 +26,7 @@ export function useProgress() {
 
 export function useTopicMinutes(topicId: string) {
   return useQuery({
-    queryKey: ['topic-minutes', topicId],
+    queryKey: [...topicMinutesKey, topicId],
     queryFn: () => fetchTopicMinutes(topicId),
     staleTime: 0,
   })

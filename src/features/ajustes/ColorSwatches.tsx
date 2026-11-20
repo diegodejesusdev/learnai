@@ -11,6 +11,10 @@ const swatches = [
   { name: 'progress', className: 'bg-progress' },
   { name: 'done', className: 'bg-done' },
   { name: 'danger', className: 'bg-danger' },
+  { name: 'heat-1', className: 'bg-heat-1' },
+  { name: 'heat-2', className: 'bg-heat-2' },
+  { name: 'heat-3', className: 'bg-heat-3' },
+  { name: 'heat-4', className: 'bg-heat-4' },
 ] as const
 
 export function ColorSwatches() {

@@ -22,6 +22,7 @@ Especificación completa: `docs/SPEC.md`. Plan por fases: `docs/PLAN.md`. Config
 - Supabase: Postgres con RLS, Auth (enlace mágico por correo con código de respaldo, y Google) y Edge Functions (Deno). Cliente `@supabase/supabase-js` con tipos generados.
 - Tutor: Edge Function `tutor` con proveedor según `AI_PROVIDER` (`gemini` por defecto, `anthropic` como alternativa)
 - Fechas: `date-fns` + `@date-fns/tz`
+- Gráficas: Recharts 3, cargado con `lazy` solo en el Historial
 - Pruebas: Vitest (lógica pura) y pgTAP (`supabase test db`, para RLS)
 - Despliegue: Vercel, conectado al repo de GitHub desde su panel
 - Entornos: Supabase local en Docker para desarrollar y proyecto Supabase en la nube para producción
@@ -53,7 +54,6 @@ LearnAI/
 │   ├── data/
 │   │   ├── curriculum.json    # Copia de /curriculum.json (un test verifica que sean idénticas)
 │   │   ├── curriculum.ts      # Acceso tipado: phases, allTopics, findPhase, findTopic
-│   │   └── demo.ts            # Datos de ejemplo de la fase 1 (se borran al conectar Supabase)
 │   ├── lib/                   # supabase.ts, env.ts, dates.ts, progress.ts, roadmap.ts, theme.ts…
 │   ├── types/                 # database.ts (generado, no editar), curriculum.ts, progress.ts
 │   ├── styles/index.css       # Tailwind + tokens de color claro/oscuro
@@ -79,7 +79,16 @@ LearnAI/
 - **Datos que cambian en otro dispositivo** (progreso, sesiones): `staleTime: 0`, para que se refresquen al volver a la app.
 - **Operaciones de varios pasos en la base** (p. ej. guardar una sesión, borrar el temporizador y actualizar el tema): una función SQL `security invoker` en una migración, con sus pruebas pgTAP, que se llama con `supabase.rpc(...)`. Ver `finish_active_timer`.
 - **Temporizador:** el tiempo se calcula siempre desde la hora de inicio guardada (`timerModel.ts`). Nunca se cuentan segundos en memoria; `useNow` solo sirve para repintar.
-- **Tests de integración de UI:** usa `renderApp(ruta)` de `src/test/renderApp.tsx` y simula los `*Api.ts` con `vi.mock`. `src/test/setup.ts` ya simula `timerApi` y `settingsApi` (sin temporizador y con los ajustes por defecto); cámbialos por test con `vi.mocked(...)`.
+- **Sesiones y totales:**
+  - Los totales (por día, semana y fase) los calculan las funciones SQL `study_*_totals`, en hora de Bogotá. No se suman sesiones en el navegador; solo el CSV las descarga todas.
+  - Las rachas y el mapa se calculan sobre esos totales con funciones puras (`lib/studyStats.ts`, `historial/heatmapModel.ts`).
+  - Las claves de consulta que dependen de `study_sessions` están en `lib/sessionQueries.ts`. Tras guardar, editar o borrar una sesión, llama a `invalidateSessionQueries(queryClient)`.
+- **Gráficas:**
+  - Recharts se importa con `lazy`, para que no entre en el arranque.
+  - Los colores van con tokens (`fill="var(--accent)"`; los ejes, `var(--fg-muted)`).
+  - Cada gráfica lleva una tabla «Ver los datos» (`ChartDataTable`).
+  - El mapa de calor usa los tokens `heat-0` … `heat-4`.
+- **Tests de integración de UI:** usa `renderApp(ruta)` de `src/test/renderApp.tsx` y simula los `*Api.ts` con `vi.mock`. `src/test/setup.ts` ya simula `timerApi`, `settingsApi`, `historyApi` y `sessionsApi` (sin temporizador, con los ajustes por defecto y sin sesiones); cámbialos por test con `vi.mocked(...)`. `vi.clearAllMocks()` no deshace `mockResolvedValue`: vuelve a los valores por defecto en `beforeEach`.
 - Imports con el alias `@/` → `src/` (por ejemplo `@/components/ui/Button`).
 
 ## Convenciones
@@ -139,6 +148,7 @@ npm run db:test       # Pruebas pgTAP de RLS y restricciones
 npm run db:types      # Regenera src/types/database.ts desde la base local
 npm run seed          # Carga curriculum.json en Supabase local (.env.local)
 npm run seed:cloud    # Carga curriculum.json en la nube (.env.cloud)
+npm run seed:sesiones -- --correo <correo>   # 16 sesiones de prueba en local (--borrar las quita)
 
 npx supabase migration new <nombre>
 npx supabase status                   # URL y claves locales

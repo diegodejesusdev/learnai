@@ -15,8 +15,8 @@ values ('test-c1', 99, 'Ítem de prueba');
 
 insert into auth.users (id, email, aud, role)
 values
-  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'diego@prueba.local', 'authenticated', 'authenticated'),
-  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'otra@prueba.local', 'authenticated', 'authenticated');
+  ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaaa', 'diego@pgtap.local', 'authenticated', 'authenticated'),
+  ('bbbbbbbb-bbbb-bbbb-bbbb-bbbbbbbbbbbb', 'otra@pgtap.local', 'authenticated', 'authenticated');
 
 -- ── Trigger de registro ──────────────────────────────────────────────────────
 select results_eq(

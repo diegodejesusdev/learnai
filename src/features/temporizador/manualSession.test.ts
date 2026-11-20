@@ -51,3 +51,38 @@ describe('sesión manual', () => {
     })
   })
 })
+
+describe('editar una sesión', () => {
+  it('conserva la duración total con descansos si es mayor que los minutos netos', () => {
+    // Pomodoro de 40 min en total (35 netos + 5 de descanso), movido a las 9:00.
+    const result = parseManualSession(
+      { date: '2026-11-19', time: '09:00', durationMinutes: '35' },
+      NOW,
+      40 * 60_000,
+    )
+    expect(result).toMatchObject({
+      ok: true,
+      startedAt: '2026-11-19T14:00:00.000Z',
+      endedAt: '2026-11-19T14:40:00.000Z',
+    })
+  })
+
+  it('si los minutos netos crecen, el fin se corre', () => {
+    const result = parseManualSession(
+      { date: '2026-11-19', time: '09:00', durationMinutes: '50' },
+      NOW,
+      40 * 60_000,
+    )
+    expect(result).toMatchObject({ ok: true, endedAt: '2026-11-19T14:50:00.000Z' })
+  })
+
+  it('tampoco puede terminar en el futuro', () => {
+    // Empieza a las 2:30 p. m. y duraba 40 min en total: terminaría a las 3:10 p. m.
+    const result = parseManualSession(
+      { date: '2026-11-19', time: '14:30', durationMinutes: '20' },
+      NOW,
+      40 * 60_000,
+    )
+    expect(result).toMatchObject({ ok: false, field: 'date' })
+  })
+})

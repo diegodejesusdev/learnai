@@ -33,6 +33,13 @@
 
   --danger: #b91c1c;
   --danger-fg: #ffffff;
+
+  /* Mapa de calor: un solo tono, de claro (poco) a oscuro (mucho). */
+  --heat-0: #eceef2;
+  --heat-1: #99f6e4;
+  --heat-2: #2dd4bf;
+  --heat-3: #0d9488;
+  --heat-4: #115e59;
 }
 
 [data-theme='dark'] {
@@ -61,6 +68,13 @@
 
   --danger: #f87171;
   --danger-fg: #1f0707;
+
+  /* En oscuro la escala se invierte: poco = oscuro, mucho = brillante. */
+  --heat-0: #232831;
+  --heat-1: #115e59;
+  --heat-2: #0d9488;
+  --heat-3: #2dd4bf;
+  --heat-4: #99f6e4;
 }
 
 @theme inline {
@@ -87,6 +101,12 @@
 
   --color-danger: var(--danger);
   --color-danger-fg: var(--danger-fg);
+
+  --color-heat-0: var(--heat-0);
+  --color-heat-1: var(--heat-1);
+  --color-heat-2: var(--heat-2);
+  --color-heat-3: var(--heat-3);
+  --color-heat-4: var(--heat-4);
 
   --font-sans: 'Inter Variable', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
 }

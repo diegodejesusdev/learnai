@@ -1,8 +1,9 @@
-import { screen, within } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { phases } from '@/data/curriculum'
 import { fetchAuthProviders } from '@/features/acceso/authApi'
+import { saveUserSettings } from '@/features/ajustes/settingsApi'
 import { fetchProgress } from '@/features/ruta/progressApi'
 import { emptySnapshot } from '@/features/ruta/progressModel'
 import { fetchRoadmap } from '@/features/ruta/roadmapApi'
@@ -49,6 +50,22 @@ describe('acceso', () => {
   it('Ajustes muestra el correo de la sesión', () => {
     renderApp('/ajustes')
     expect(screen.getByText('diego@prueba.local')).toBeInTheDocument()
+  })
+
+  it('Ajustes guarda el mínimo diario para la racha', async () => {
+    renderApp('/ajustes')
+    const field = await screen.findByLabelText('Mínimo diario para la racha (min)')
+    expect(field).toHaveValue(15)
+    await userEvent.clear(field)
+    await userEvent.type(field, '30')
+    // Se guarda con autoguardado (800 ms después de escribir).
+    await waitFor(
+      () =>
+        expect(vi.mocked(saveUserSettings).mock.lastCall?.[0]).toMatchObject({
+          streak_min_minutes: 30,
+        }),
+      { timeout: 2000 },
+    )
   })
 })
 

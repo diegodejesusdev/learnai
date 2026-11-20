@@ -5,6 +5,13 @@ import { afterEach, vi } from 'vitest'
 // jsdom no implementa scrollTo (lo usa ScrollRestoration de React Router).
 window.scrollTo = () => {}
 
+// Ni ResizeObserver (lo usa ResponsiveContainer de Recharts).
+globalThis.ResizeObserver ??= class {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+}
+
 // La AppShell consulta el temporizador activo y los ajustes en todas las pantallas.
 // Por defecto: sin temporizador y con los ajustes por defecto, sin tocar la red.
 // Cada test puede cambiarlo con vi.mocked(fetchActiveTimer).mockResolvedValue(...).
@@ -19,7 +26,6 @@ vi.mock('@/features/temporizador/timerApi', async (importOriginal) => {
     deleteActiveTimer: vi.fn(() => Promise.resolve()),
     finishActiveTimer: vi.fn(() => Promise.resolve('sesion-1')),
     recordManualSession: vi.fn(() => Promise.resolve('sesion-2')),
-    fetchMinutesSince: vi.fn(() => Promise.resolve(0)),
   }
 })
 vi.mock('@/features/ajustes/settingsApi', async (importOriginal) => {
@@ -28,6 +34,25 @@ vi.mock('@/features/ajustes/settingsApi', async (importOriginal) => {
     ...original,
     fetchUserSettings: vi.fn(() => Promise.resolve(original.defaultSettings)),
     saveUserSettings: vi.fn(() => Promise.resolve()),
+  }
+})
+
+// Inicio y el Historial piden totales y sesiones: por defecto, sin ninguna sesión.
+vi.mock('@/features/historial/historyApi', () => ({
+  fetchDayTotals: vi.fn(() => Promise.resolve([])),
+  fetchWeekTotals: vi.fn(() => Promise.resolve([])),
+  fetchPhaseTotals: vi.fn(() => Promise.resolve([])),
+}))
+vi.mock('@/features/historial/sessionsApi', async (importOriginal) => {
+  const original = await importOriginal<typeof import('@/features/historial/sessionsApi')>()
+  return {
+    ...original,
+    fetchSessionPage: vi.fn(() => Promise.resolve([])),
+    fetchSession: vi.fn(() => Promise.resolve(null)),
+    fetchLatestSession: vi.fn(() => Promise.resolve(null)),
+    fetchAllSessions: vi.fn(() => Promise.resolve([])),
+    updateSession: vi.fn(() => Promise.resolve()),
+    deleteSession: vi.fn(() => Promise.resolve()),
   }
 })
 

@@ -140,7 +140,7 @@ A partir de la fase 2, también `npx supabase test db`.
 
 ---
 
-## Fase 4: Temporizador ✅ en local (20 nov 2026) · nube: falta `db push --remote` de la migración nueva
+## Fase 4: Temporizador ✅ (20 nov 2026, también en la nube)
 
 **Objetivo:** sesiones de estudio fiables que sobreviven a recargas y bloqueos.
 
@@ -175,27 +175,50 @@ A partir de la fase 2, también `npx supabase test db`.
 
 ---
 
-## Fase 5: Historial
+## Fase 5: Historial ✅ en local (20 nov 2026) · nube: falta `db push --remote` de la migración nueva
 
 **Objetivo:** ver la constancia y el tiempo invertido.
 
+**Decisiones de esta fase**
+- **Totales en la base:**
+  - Funciones SQL `study_day_totals`, `study_week_totals` y `study_phase_totals` (migración `20261120131127_history_stats.sql`), que agrupan por día y semana de Bogotá.
+  - Las rachas y la cuadrícula del mapa se calculan en TypeScript sobre esos totales, con funciones puras.
+- **Racha:** un día cuenta desde `user_settings.streak_min_minutes`, que vale 15 por defecto y se cambia en Ajustes.
+- **Gráficas:** Recharts 3.10, cargado aparte (`lazy`). Se usa la 3.10 y no la 3.11 porque la 3.11 salió hace pocos días.
+- **Mapa de calor:** 6 meses en todos los tamaños. En el móvil se desplaza de lado.
+- **Editar una sesión** no cambia el estado del tema; borrarla tampoco.
+
 **Entregables**
-- Funciones puras con tests: minutos por día, rachas actual y máxima, minutos por semana y por fase, y CSV.
-- Mapa de calor (12 meses en escritorio, 6 en móvil), con detalle al tocar una celda.
-- Rachas, barras de las últimas 12 semanas con línea de meta y barras por fase.
-- Meta semanal editable.
-- Lista de sesiones paginada con filtros, edición y eliminación.
-- Exportación a CSV.
-- Inicio completo: racha y avance de la meta semanal.
+- **Lógica pura con tests:**
+  - `lib/studyStats.ts`: rachas, semanas y textos;
+  - `historial/heatmapModel.ts`;
+  - `historial/sessionFilters.ts`;
+  - `historial/sessionEdit.ts`;
+  - `historial/sessionCsv.ts` + `lib/csv.ts`;
+  - `inicio/continueStudying.ts`;
+  - claves de día en `lib/dates.ts`.
+- **Historial:**
+  - rachas y meta de la semana;
+  - mapa de calor con detalle del día;
+  - minutos por semana y por fase, con tabla de datos;
+  - lista paginada con filtros en la URL;
+  - editar y eliminar con confirmación en `/historial/sesion/:id`;
+  - exportar a CSV.
+- **Inicio:** «Seguir estudiando», minutos de hoy, racha, meta semanal, siguiente tema (sin repetirlo) y progreso.
+- **Ajustes:** mínimo diario para la racha.
+- **Datos de prueba:** `npm run seed:sesiones -- --correo <correo>` crea 16 sesiones en Supabase local (nunca en la nube) e imprime lo que se debe ver.
+- **Pruebas pgTAP** de los totales: Bogotá frente a UTC, medianoche, cambio de semana, fases, RLS y anon.
 
 **Cómo verificarla**
-- **Tests:**
-  - sesiones cerca de la medianoche de Bogotá;
-  - racha que incluye hoy y racha que solo llega hasta ayer;
-  - semana que cruza un cambio de mes;
-  - CSV con comas, comillas, saltos de línea y tildes en las notas.
-- **PC:** registrar sesiones manuales en varios días y comprobar el mapa de calor, las rachas y las barras. Editar una sesión y ver que los gráficos cambian. Exportar el CSV y abrirlo en Google Sheets y con `pandas.read_csv`.
-- **Móvil:** el mapa de calor se desplaza sin romper el diseño, la lista se puede editar con el dedo y el CSV se descarga.
+- `npm test` y `npm run db:test`, que ahora tiene 64 comprobaciones.
+- **PC:**
+  - `npm run seed:sesiones -- --correo <tu correo>` y comparar Inicio y el Historial con lo que imprime el script.
+  - Editar la sesión de 10 min a 20 min: la racha pasa de 3 a 9 días.
+  - Exportar el CSV y abrirlo en Google Sheets y con `pandas.read_csv(..., encoding="utf-8-sig")`.
+- **Móvil:**
+  - el mapa de calor se desplaza sin que la página se mueva de lado;
+  - la lista se edita con el dedo;
+  - el CSV se descarga.
 
 ---
 

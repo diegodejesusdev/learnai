@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { ErrorState } from '@/components/ui/ErrorState'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { ProgressBar } from '@/components/ui/ProgressBar'
 import { Section } from '@/components/ui/Section'
@@ -84,7 +85,7 @@ export function DesignSystemPage() {
           </Card>
         </Section>
 
-        <Section title="Formularios y vacíos">
+        <Section title="Formularios, vacíos y errores">
           <Card className="flex flex-col gap-4">
             <TextField
               label="Enlace al repositorio"
@@ -102,6 +103,10 @@ export function DesignSystemPage() {
               icon={BookOpen}
               title="Aún no hay nada aquí"
               description="Así se ve un estado vacío."
+            />
+            <ErrorState
+              title="No pudimos cargar esto"
+              onRetry={() => toast.success('Reintentando…')}
             />
           </Card>
         </Section>

@@ -1,12 +1,11 @@
 import { useMutation, useQuery, useQueryClient, type QueryClient } from '@tanstack/react-query'
 import { useAuth } from '@/features/acceso/AuthContext'
 import { progressKey } from '@/features/ruta/useProgress'
-import { startOfDayInZone } from '@/lib/dates'
+import { invalidateSessionQueries } from '@/lib/sessionQueries'
 import { toast } from '@/lib/toast'
 import {
   deleteActiveTimer,
   fetchActiveTimer,
-  fetchMinutesSince,
   finishActiveTimer,
   insertActiveTimer,
   TimerConflictError,
@@ -19,7 +18,6 @@ import type { ActiveTimer } from './timerModel'
 import { readStoredTimer, reconcileTimer, writeStoredTimer } from './timerStorage'
 
 export const activeTimerKey = ['active-timer'] as const
-export const todayMinutesKey = ['today-minutes'] as const
 
 function useUserId(): string {
   const auth = useAuth()
@@ -133,8 +131,7 @@ export function useFinishSession() {
     onSuccess: () => {
       clearTimer(queryClient, userId)
       void queryClient.invalidateQueries({ queryKey: progressKey })
-      void queryClient.invalidateQueries({ queryKey: ['topic-minutes'] })
-      void queryClient.invalidateQueries({ queryKey: todayMinutesKey })
+      invalidateSessionQueries(queryClient)
     },
     onError: (error) => {
       if (error instanceof TimerGoneError) {
@@ -142,14 +139,5 @@ export function useFinishSession() {
         toast.error('Esta sesión ya se guardó o descartó en otro dispositivo.')
       }
     },
-  })
-}
-
-/** Minutos estudiados hoy (desde las 00:00 de Bogotá). */
-export function useTodayMinutes() {
-  return useQuery({
-    queryKey: todayMinutesKey,
-    queryFn: () => fetchMinutesSince(startOfDayInZone(new Date()).toISOString()),
-    staleTime: 0,
   })
 }

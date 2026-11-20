@@ -23,10 +23,12 @@ function StudySettingsForm({ settings }: { settings: UserSettings }) {
     goalHours: String(Math.round(settings.weekly_goal_minutes / 60)),
     work: String(settings.pomodoro_work_min),
     rest: String(settings.pomodoro_break_min),
+    streakMin: String(settings.streak_min_minutes),
   })
   const goal = intInRange(form.goalHours, 1, 100)
   const work = intInRange(form.work, 1, 180)
   const rest = intInRange(form.rest, 1, 60)
+  const streakMin = intInRange(form.streakMin, 1, 240)
 
   function update(field: keyof typeof form, value: string) {
     const next = { ...form, [field]: value }
@@ -34,17 +36,21 @@ function StudySettingsForm({ settings }: { settings: UserSettings }) {
     const nextGoal = intInRange(next.goalHours, 1, 100)
     const nextWork = intInRange(next.work, 1, 180)
     const nextRest = intInRange(next.rest, 1, 60)
-    if (nextGoal === null || nextWork === null || nextRest === null) return
+    const nextStreakMin = intInRange(next.streakMin, 1, 240)
+    if (nextGoal === null || nextWork === null || nextRest === null || nextStreakMin === null) {
+      return
+    }
     autosave.schedule({
       weekly_goal_minutes: nextGoal * 60,
       pomodoro_work_min: nextWork,
       pomodoro_break_min: nextRest,
+      streak_min_minutes: nextStreakMin,
     })
   }
 
   return (
     <Card className="flex flex-col gap-4">
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <TextField
           label="Meta semanal (horas)"
           type="number"
@@ -54,6 +60,17 @@ function StudySettingsForm({ settings }: { settings: UserSettings }) {
           value={form.goalHours}
           onChange={(event) => update('goalHours', event.target.value)}
           error={goal === null ? 'Entre 1 y 100 horas.' : null}
+        />
+        <TextField
+          label="Mínimo diario para la racha (min)"
+          type="number"
+          inputMode="numeric"
+          min={1}
+          max={240}
+          value={form.streakMin}
+          onChange={(event) => update('streakMin', event.target.value)}
+          hint="Un día cuenta en la racha si estudias al menos esto."
+          error={streakMin === null ? 'Entre 1 y 240 minutos.' : null}
         />
         <TextField
           label="Pomodoro: trabajo (min)"

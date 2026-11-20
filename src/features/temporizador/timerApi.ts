@@ -128,13 +128,3 @@ export async function recordManualSession(input: ManualSessionInput): Promise<st
   if (error) throw error
   return data
 }
-
-/** Minutos de estudio desde un instante (p. ej. el inicio del día en Bogotá). */
-export async function fetchMinutesSince(since: string): Promise<number> {
-  const { data, error } = await supabase
-    .from('study_sessions')
-    .select('duration_minutes')
-    .gte('started_at', since)
-  if (error) throw error
-  return data.reduce((sum, session) => sum + session.duration_minutes, 0)
-}

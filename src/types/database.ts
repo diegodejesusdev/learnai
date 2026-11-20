@@ -447,6 +447,7 @@ export type Database = {
         Row: {
           pomodoro_break_min: number
           pomodoro_work_min: number
+          streak_min_minutes: number
           theme: Database['public']['Enums']['theme_preference']
           updated_at: string
           user_id: string
@@ -456,6 +457,7 @@ export type Database = {
         Insert: {
           pomodoro_break_min?: number
           pomodoro_work_min?: number
+          streak_min_minutes?: number
           theme?: Database['public']['Enums']['theme_preference']
           updated_at?: string
           user_id?: string
@@ -464,6 +466,7 @@ export type Database = {
         Update: {
           pomodoro_break_min?: number
           pomodoro_work_min?: number
+          streak_min_minutes?: number
           theme?: Database['public']['Enums']['theme_preference']
           updated_at?: string
           user_id?: string
@@ -497,6 +500,30 @@ export type Database = {
           p_topic_id?: string
         }
         Returns: string
+      }
+      study_day_totals: {
+        Args: { p_from?: string; p_to?: string }
+        Returns: {
+          day: string
+          minutes: number
+          sessions: number
+        }[]
+      }
+      study_phase_totals: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          minutes: number
+          phase_id: string
+          sessions: number
+        }[]
+      }
+      study_week_totals: {
+        Args: { p_from?: string }
+        Returns: {
+          minutes: number
+          sessions: number
+          week_start: string
+        }[]
       }
     }
     Enums: {

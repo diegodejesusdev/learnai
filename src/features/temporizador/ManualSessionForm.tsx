@@ -13,12 +13,12 @@ import type { RoadmapData } from '@/features/ruta/RoadmapGate'
 import { progressKey } from '@/features/ruta/useProgress'
 import { formatDuration, toDateInputValue, toTimeInputValue } from '@/lib/dates'
 import { nextTopic } from '@/lib/progress'
+import { invalidateSessionQueries } from '@/lib/sessionQueries'
 import { toast } from '@/lib/toast'
 import { parseManualSession } from './manualSession'
 import { studyTargets } from './studyTargets'
 import { TargetPicker } from './TargetPicker'
 import { recordManualSession } from './timerApi'
-import { todayMinutesKey } from './useActiveTimer'
 
 const DEFAULT_MINUTES = 30
 
@@ -57,8 +57,7 @@ export function ManualSessionForm({ roadmap, progress }: RoadmapData) {
     mutationFn: recordManualSession,
     onSuccess: (_id, input) => {
       void queryClient.invalidateQueries({ queryKey: progressKey })
-      void queryClient.invalidateQueries({ queryKey: ['topic-minutes'] })
-      void queryClient.invalidateQueries({ queryKey: todayMinutesKey })
+      invalidateSessionQueries(queryClient)
       toast.success(
         `Sesión registrada: ${formatDuration(input.durationMinutes)} en «${selected?.title ?? ''}».`,
       )

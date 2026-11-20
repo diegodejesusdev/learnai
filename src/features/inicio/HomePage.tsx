@@ -1,46 +1,60 @@
-import { Clock, Flame } from 'lucide-react'
-import { DemoNotice } from '@/components/ui/DemoNotice'
 import { PageHeader } from '@/components/ui/PageHeader'
-import { StatCard } from '@/components/ui/StatCard'
-import { demoStats } from '@/data/demo'
+import { useLatestSession } from '@/features/historial/useSessions'
 import { NextTopicCard } from '@/features/ruta/NextTopicCard'
-import { RoadmapGate } from '@/features/ruta/RoadmapGate'
-import { useTodayMinutes } from '@/features/temporizador/useActiveTimer'
-import { formatDuration, formatLongDate } from '@/lib/dates'
+import { projectStatuses, topicStatuses } from '@/features/ruta/progressModel'
+import { RoadmapGate, type RoadmapData } from '@/features/ruta/RoadmapGate'
+import { useActiveTimer } from '@/features/temporizador/useActiveTimer'
+import { formatLongDate } from '@/lib/dates'
+import { nextTopic } from '@/lib/progress'
+import { ContinueCard } from './ContinueCard'
+import { continueSuggestion } from './continueStudying'
+import { HomeStats } from './HomeStats'
 import { TotalProgressCard } from './TotalProgressCard'
-import { WeeklyGoalCard } from './WeeklyGoalCard'
+
+function HomeContent({ roadmap, progress }: RoadmapData) {
+  const timer = useActiveTimer()
+  const latest = useLatestSession()
+  const statuses = topicStatuses(progress)
+
+  // Se espera a la última sesión para no mostrar una sugerencia y cambiarla enseguida.
+  const ready = latest.data !== undefined || latest.isError
+  const suggestion = ready
+    ? continueSuggestion({
+        timer: timer.data ?? null,
+        latest: latest.data ?? null,
+        phases: roadmap.phases,
+        topicStatuses: statuses,
+        projectStatuses: projectStatuses(progress),
+      })
+    : null
+  // El siguiente tema de la ruta, si no es ya lo que propone «Seguir estudiando».
+  // Con todo hecho y nada que retomar, NextTopicCard muestra la felicitación.
+  const next = nextTopic(roadmap.phases, statuses)
+  const showNext = ready && (next ? suggestion?.target.topicId !== next.topic.id : !suggestion)
+
+  return (
+    <>
+      {suggestion && (
+        <ContinueCard
+          suggestion={suggestion}
+          phases={roadmap.phases}
+          topicStatuses={statuses}
+          hasHistory={Boolean(latest.data)}
+        />
+      )}
+      <HomeStats />
+      {showNext && <NextTopicCard roadmap={roadmap} progress={progress} />}
+      <TotalProgressCard roadmap={roadmap} progress={progress} />
+    </>
+  )
+}
 
 export function HomePage() {
-  const today = useTodayMinutes()
   return (
     <>
       <PageHeader title="Inicio" description={formatLongDate(new Date())} />
       <div className="flex flex-col gap-4">
-        <RoadmapGate>
-          {(roadmapData) => (
-            <>
-              <NextTopicCard {...roadmapData} />
-              <TotalProgressCard {...roadmapData} />
-            </>
-          )}
-        </RoadmapGate>
-        <DemoNotice>La racha y la meta semanal son de ejemplo hasta la fase 5.</DemoNotice>
-        <div className="grid grid-cols-2 gap-4">
-          <StatCard
-            icon={Clock}
-            label="Hoy"
-            value={
-              today.isError ? '—' : today.data === undefined ? '…' : formatDuration(today.data)
-            }
-          />
-          <StatCard
-            icon={Flame}
-            label="Racha"
-            value={`${demoStats.currentStreak} días`}
-            hint={`Máxima: ${demoStats.maxStreak} días`}
-          />
-        </div>
-        <WeeklyGoalCard minutes={demoStats.weekMinutes} goalMinutes={demoStats.weeklyGoalMinutes} />
+        <RoadmapGate>{(data) => <HomeContent {...data} />}</RoadmapGate>
       </div>
     </>
   )
