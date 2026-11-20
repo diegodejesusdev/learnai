@@ -133,7 +133,7 @@ npm run seed:cloud    # Carga curriculum.json en la nube (.env.cloud)
 
 npx supabase migration new <nombre>
 npx supabase status                   # URL y claves locales
-npx supabase db push                  # Aplica migraciones a la nube (solo tras probar en local)
+npx supabase db push --remote         # Aplica migraciones a la nube (sin --remote apunta a local)
 npx supabase functions serve tutor    # (fase 6)
 npx supabase functions deploy tutor   # (fase 6)
 npx supabase secrets set NOMBRE=valor # (fase 6)

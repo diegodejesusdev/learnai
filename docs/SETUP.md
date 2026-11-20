@@ -40,19 +40,23 @@ npm run dev        # http://localhost:5173
 
 ### 2.2 Aplicar las migraciones
 ```bash
-npx supabase login                         # una vez; abre el navegador (escríbelo como: ! npx supabase login)
-npx supabase link --project-ref <ref>      # pide la contraseña de la base
-npx supabase db push --dry-run             # muestra qué migraciones aplicaría, sin tocar nada
-npx supabase db push                       # las aplica
+npx supabase login                               # una vez, en la app Terminal (abre el navegador)
+npx supabase link --project-ref <ref>            # una vez, en Terminal (pide la contraseña de la base)
+npx supabase db push --remote --dry-run          # muestra qué migraciones aplicaría, sin tocar nada
+npx supabase db push --remote                    # las aplica (pide confirmación)
+npx supabase migration list --remote             # local y nube deben coincidir
 ```
-- Cada vez que haya una migración nueva: pruébala en local (`npm run db:reset && npm run db:test`) y luego corre `npx supabase db push`.
+- **Importante:** sin `--remote`, esta versión de la CLI apunta a la base **local**.
+- Antes de cambiar producción, la CLI pide confirmación. Si quien lo corre es Claude, la CLI exige que tú lo hayas aprobado, y entonces se pasa `--yes`.
+- Cada vez que haya una migración nueva: pruébala en local (`npm run db:reset && npm run db:test`) y luego corre `npx supabase db push --remote`.
+- Proyecto actual: ref `awlzhskgbpuvmzlqhvhr` (`https://awlzhskgbpuvmzlqhvhr.supabase.co`). Migraciones aplicadas el 19 nov 2026.
 - Para confirmar: en el panel, ve a **Table Editor** y deberías ver `phases`, `topics`, `topic_progress`… con el candado de RLS activo.
 
 ### 2.3 Cargar la ruta (seed)
 1. En **Project Settings → API Keys** copia:
    - **Publishable key** (`sb_publishable_…`), o en la pestaña *Legacy* la `anon`: es la pública;
    - **Secret key** (`sb_secret_…`), o en *Legacy* la `service_role`: es la privada.
-2. Crea `.env.cloud` en la raíz del proyecto, que ya está ignorado por git:
+2. Crea `.env.cloud` en la raíz del proyecto, que ya está ignorado por git. Ya existe: lo generó Claude con la CLI, sin mostrar la clave. Para regenerarlo, `npx supabase projects api-keys --project-ref <ref> --reveal` muestra las claves completas; sin `--reveal` salen enmascaradas con `·` y el seed falla con «Invalid API key».
    ```
    SUPABASE_URL=https://<ref>.supabase.co
    SUPABASE_SERVICE_ROLE_KEY=<secret key>
@@ -61,9 +65,9 @@ npx supabase db push                       # las aplica
 
 ### 2.4 URLs de redirección del login
 En **Authentication → URL Configuration**:
-- **Site URL:** tu URL de producción de Vercel, p. ej. `https://learnai-xxxx.vercel.app`.
+- **Site URL:** tu URL de producción de Vercel, p. ej. `https://learnai-tan.vercel.app`.
 - **Redirect URLs** (añade cada una):
-  - `https://learnai-xxxx.vercel.app/**`
+  - `https://learnai-tan.vercel.app/**`
   - `https://learnai-*-<tu-usuario-de-vercel>.vercel.app/**`, para las URLs de preview.
   - `http://localhost:5173/**`, solo si algún día apuntas la app local a la nube.
 
@@ -85,8 +89,8 @@ Sin esto el correo llega en inglés y **sin código**: el enlace funciona, pero 
    - **Branding:** nombre `LearnAI` y tu correo de soporte.
    - **Audience:** *External*. Agrega tu correo de Gmail como **Test user**. En modo *Testing* solo los test users pueden entrar, y eso es justo lo que queremos.
 3. En **Clients → Create client → Web application**:
-   - **Authorized JavaScript origins:** `https://learnai-xxxx.vercel.app` y `http://localhost:5173`.
-   - **Authorized redirect URIs:** `https://<ref>.supabase.co/auth/v1/callback`. Para Google en local, agrega también `http://127.0.0.1:54321/auth/v1/callback`.
+   - **Authorized JavaScript origins:** `https://learnai-tan.vercel.app` y `http://localhost:5173`.
+   - **Authorized redirect URIs:** `https://awlzhskgbpuvmzlqhvhr.supabase.co/auth/v1/callback`. Para Google en local, agrega también `http://127.0.0.1:54321/auth/v1/callback`.
 4. Copia el **Client ID** y el **Client secret**.
 
 **En Supabase:** ve a **Authentication → Sign In / Providers → Google**, actívalo, pega el Client ID y el Client secret, y guarda. El *Callback URL* que muestra ahí es el que va en el paso 3.
