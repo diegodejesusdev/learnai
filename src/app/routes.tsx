@@ -9,6 +9,7 @@ import { HomePage } from '@/features/inicio/HomePage'
 import { PhasePage } from '@/features/ruta/PhasePage'
 import { RoadmapPage } from '@/features/ruta/RoadmapPage'
 import { TopicPage } from '@/features/ruta/TopicPage'
+import { ManualSessionPage } from '@/features/temporizador/ManualSessionPage'
 import { StudyPage } from '@/features/temporizador/StudyPage'
 import { TutorPage } from '@/features/tutor/TutorPage'
 import { NotFoundPage } from './NotFoundPage'
@@ -30,6 +31,7 @@ export const routes: RouteObject[] = [
           { path: 'ruta/:phaseId', element: <PhasePage /> },
           { path: 'ruta/tema/:topicId', element: <TopicPage /> },
           { path: 'estudiar', element: <StudyPage /> },
+          { path: 'estudiar/manual', element: <ManualSessionPage /> },
           { path: 'historial', element: <HistoryPage /> },
           { path: 'tutor', element: <TutorPage /> },
           { path: 'ajustes', element: <SettingsPage /> },

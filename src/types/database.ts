@@ -476,7 +476,28 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      finish_active_timer: {
+        Args: {
+          p_duration_minutes: number
+          p_ended_at: string
+          p_mark_done?: boolean
+          p_notes?: string
+        }
+        Returns: string
+      }
+      record_study_session: {
+        Args: {
+          p_duration_minutes: number
+          p_ended_at: string
+          p_mark_done?: boolean
+          p_mode: Database['public']['Enums']['study_mode']
+          p_notes?: string
+          p_project_phase_id?: string
+          p_started_at: string
+          p_topic_id?: string
+        }
+        Returns: string
+      }
     }
     Enums: {
       message_role: 'user' | 'assistant'

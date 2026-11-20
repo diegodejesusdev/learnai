@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest'
 import {
   endOfWeekInZone,
+  formatClock,
+  startOfDayInZone,
+  toDateInputValue,
+  toTimeInputValue,
+  zonedInputToDate,
   formatDuration,
   formatLongDate,
   formatTime,
@@ -55,5 +60,37 @@ describe('formatos en español', () => {
     expect(formatDuration(45)).toBe('45 min')
     expect(formatDuration(120)).toBe('2 h')
     expect(formatDuration(320)).toBe('5 h 20 min')
+  })
+})
+
+describe('formularios en hora de Bogotá', () => {
+  it('fecha y hora escritas en Bogotá → instante UTC (Bogotá es UTC-5)', () => {
+    expect(zonedInputToDate('2026-11-17', '23:30')?.toISOString()).toBe('2026-11-18T04:30:00.000Z')
+    expect(zonedInputToDate('2026-11-18', '00:00')?.toISOString()).toBe('2026-11-18T05:00:00.000Z')
+  })
+
+  it('rechaza fechas u horas inválidas', () => {
+    expect(zonedInputToDate('2026-02-31', '10:00')).toBeNull()
+    expect(zonedInputToDate('2026-11-18', '24:00')).toBeNull()
+    expect(zonedInputToDate('18/11/2026', '10:00')).toBeNull()
+  })
+
+  it('valores por defecto de los inputs en Bogotá aunque en UTC ya sea otro día', () => {
+    const instant = '2026-11-18T04:30:00Z' // 17 nov, 11:30 p. m. en Bogotá
+    expect(toDateInputValue(instant)).toBe('2026-11-17')
+    expect(toTimeInputValue(instant)).toBe('23:30')
+  })
+
+  it('inicio del día en Bogotá', () => {
+    expect(startOfDayInZone('2026-11-18T04:30:00Z').toISOString()).toBe('2026-11-17T05:00:00.000Z')
+  })
+})
+
+describe('formatClock', () => {
+  it('minutos y segundos, y horas cuando hace falta', () => {
+    expect(formatClock(0)).toBe('00:00')
+    expect(formatClock(299)).toBe('04:59')
+    expect(formatClock(3723)).toBe('1:02:03')
+    expect(formatClock(-5)).toBe('00:00')
   })
 })

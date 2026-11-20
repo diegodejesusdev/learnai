@@ -77,7 +77,9 @@ LearnAI/
   - `onSettled` invalida.
   - Los textos con autoguardado usan `useDebouncedSave` + `SaveIndicator` y no revierten lo escrito.
 - **Datos que cambian en otro dispositivo** (progreso, sesiones): `staleTime: 0`, para que se refresquen al volver a la app.
-- **Tests de integración de UI:** usa `renderApp(ruta)` de `src/test/renderApp.tsx` y simula los `*Api.ts` con `vi.mock`.
+- **Operaciones de varios pasos en la base** (p. ej. guardar una sesión, borrar el temporizador y actualizar el tema): una función SQL `security invoker` en una migración, con sus pruebas pgTAP, que se llama con `supabase.rpc(...)`. Ver `finish_active_timer`.
+- **Temporizador:** el tiempo se calcula siempre desde la hora de inicio guardada (`timerModel.ts`). Nunca se cuentan segundos en memoria; `useNow` solo sirve para repintar.
+- **Tests de integración de UI:** usa `renderApp(ruta)` de `src/test/renderApp.tsx` y simula los `*Api.ts` con `vi.mock`. `src/test/setup.ts` ya simula `timerApi` y `settingsApi` (sin temporizador y con los ajustes por defecto); cámbialos por test con `vi.mocked(...)`.
 - Imports con el alias `@/` → `src/` (por ejemplo `@/components/ui/Button`).
 
 ## Convenciones

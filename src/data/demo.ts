@@ -1,8 +1,7 @@
-// Datos de ejemplo: minutos, racha y sesiones. Se eliminan en las fases 4 y 5.
+// Datos de ejemplo: racha, meta semanal y sesiones del Historial. Se eliminan en la fase 5.
 import type { StudyMode } from '@/types/progress'
 
 export const demoStats = {
-  todayMinutes: 45,
   currentStreak: 4,
   maxStreak: 9,
   weekMinutes: 320,

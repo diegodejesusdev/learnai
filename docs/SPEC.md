@@ -83,49 +83,73 @@ LearnAI es una app web personal para estudiar la ruta «Automatización para neg
 ### 4.2 Temporizador (sección «Estudiar»)
 
 **Destino de la sesión:** cada sesión va ligada a **un tema o al proyecto de una fase** (exactamente uno de los dos).
+- **Buscador por nombre:** ignora tildes y mayúsculas, y exige todas las palabras. Encuentra temas y proyectos.
+- **Destino por defecto:** el que viene en la URL (`?tema=` / `?proyecto=`, p. ej. desde la página de tema); si no hay, el siguiente tema sugerido (§4.1).
 
 **Modos**
-- **Pomodoro:** bloques de trabajo y descanso configurables (por defecto 25/5). Los ciclos se repiten hasta que el usuario termina.
-- **Libre:** cronómetro ascendente.
-- **Pausa y reanudar** en ambos modos.
+- **Pomodoro:** bloques de trabajo y descanso con los minutos de `user_settings` (por defecto 25/5).
+  - Los ciclos se repiten hasta terminar.
+  - Se muestra el ciclo actual y los ciclos completados (bloques de trabajo terminados).
+  - El temporizador guarda los minutos con los que empezó: cambiarlos en Ajustes solo afecta a sesiones nuevas.
+- **Libre:** cronómetro hacia arriba.
+- **Pausa y reanudar** en ambos modos. El tiempo en pausa no cuenta.
 
-**Cálculo del tiempo**
+**Cálculo del tiempo** (`features/temporizador/timerModel.ts`)
 
-El tiempo se calcula de forma determinista, sin contar segundos en memoria. El estado guardado es:
-`started_at`, `paused_at` (o nulo), `paused_seconds` acumulados, `mode`, `work_min`, `break_min`.
+Determinista y sin contadores en memoria. Lo guardado es:
+`started_at`, `paused_at` (inicio de la pausa actual o nulo), `paused_seconds` (pausas ya terminadas), `mode`, `work_min`, `break_min`.
 
-Con eso:
 - `activo = (ahora o paused_at) − started_at − paused_seconds`
 - En Pomodoro, con `ciclo = trabajo + descanso`:
-  - `n = floor(activo / ciclo)`
-  - `r = activo mod ciclo`
-  - se está en trabajo si `r < trabajo`
-  - `minutos netos = n·trabajo + min(r, trabajo)`
-- En modo libre: `minutos netos = activo`.
-
-Así el tiempo es correcto después de recargar, bloquear el móvil, cerrar el navegador o cambiar de pestaña.
+  - `n = floor(activo / ciclo)` y `r = activo mod ciclo`;
+  - se está en trabajo si `r < trabajo`;
+  - `tiempo de estudio = n·trabajo + min(r, trabajo)`, porque los descansos no cuentan.
+- En modo libre, `tiempo de estudio = activo`.
+- La pantalla se repinta cada segundo, pero el valor siempre sale de esa fórmula. Por eso es correcto tras recargar, bloquear el móvil, cerrar la pestaña o cambiar de dispositivo.
 
 **Persistencia del temporizador activo**
-- Se guarda en `localStorage` para que se recupere al instante y sin conexión.
-- También se guarda en la tabla `active_timer`, para verlo y controlarlo desde otro dispositivo.
-- Al abrir la app se reconcilia con la versión más reciente, según `updated_at`.
+- **Dónde se guarda:** en la tabla `active_timer` (una fila por usuario) y en una copia en `localStorage`.
+  - No se usa una fila de `study_sessions` con `ended_at` vacío: así `study_sessions` conserva sus restricciones y el historial no mezcla sesiones a medias.
+  - Las pausas se guardan como total acumulado más el inicio de la pausa actual, lo que equivale a tener los tramos de pausa para calcular el tiempo.
+- **Al abrir la app:** se muestra la copia local al instante y luego se confirma con Supabase (`reconcileTimer`).
+  - Gana Supabase, salvo que la copia local tenga cambios sin subir más nuevos (p. ej. una pausa hecha sin conexión); en ese caso se suben.
+- **Entre dispositivos:** el otro dispositivo ve los cambios al volver a la app y cada 30 s mientras haya una sesión.
+- **Iniciar** usa insert: si ya hay una sesión en otro dispositivo, avisa en lugar de pisarla.
+- **Pausar o reanudar** usa update: si la sesión ya se terminó en otro dispositivo, no la resucita, la limpia y avisa.
+- **Orden:** las acciones van en fila (`scope` de TanStack Query), así que llegan a Supabase en el orden en que se hicieron.
 
-**Avisos (sin push)**
-- Con la app abierta, al cambiar de bloque suena un sonido y vibra donde exista la Vibration API.
-- En escritorio, si el usuario dio permiso, también aparece una notificación del sistema.
-- Opción «Mantener pantalla encendida» con la Screen Wake Lock API.
-- Con el móvil bloqueado no hay alarma. Al volver, el tiempo se muestra correcto.
+**Avisos al terminar cada bloque Pomodoro** (sin push)
+- Suena un sonido suave de dos notas (Web Audio, sin archivos). Se habilita con el toque en «Iniciar» o «Reanudar», como exige iOS.
+- Vibra donde exista la Vibration API (Android; iOS no la tiene).
+- Muestra una notificación del navegador si el usuario dio permiso con «Avisarme también con una notificación». En Android hará falta el service worker de la fase 7.
+- Muestra un aviso dentro de la app.
+- Funciona en cualquier página de la app.
+- Solo avisa si el cambio de bloque acaba de pasar (≤ 5 s). Al volver tras un bloqueo largo no suena tarde.
+- Con el móvil bloqueado no hay alarma; al volver, el tiempo es correcto.
+
+**Pantalla encendida:** mientras el temporizador corre (no en pausa) se pide la Screen Wake Lock API, y se vuelve a pedir al regresar a la app. Si el navegador no la tiene, no pasa nada.
+
+**Banner:** con una sesión activa, todas las páginas excepto Estudiar muestran arriba un banner pequeño con el tema, el bloque (o «En pausa») y el reloj. Al tocarlo se abre Estudiar.
 
 **Al terminar**
-- Se abre un formulario con la duración neta (editable), la hora de inicio y fin, y notas.
-- Al guardar se crea la fila en `study_sessions` y se borra `active_timer`.
-- Las sesiones de menos de 1 minuto se descartan, previa confirmación.
-- Si el temporizador lleva más de 12 h corriendo, se pregunta «¿Olvidaste detenerlo?» y se pide ajustar la hora de fin.
-- Al guardar la primera sesión de un tema pendiente, el tema pasa a «En curso».
+- «Terminar» pausa la sesión (el tiempo deja de correr mientras escribes) y abre el formulario. Este muestra la duración neta (editable entre 1 y los minutos transcurridos, máx. 720), las notas «¿Qué aprendiste?» y la opción «Marcar «tema» como hecho».
+- **Guardar** llama a la función SQL `finish_active_timer`, que en una transacción:
+  - crea la fila en `study_sessions` con el inicio, el tema y el modo del temporizador;
+  - borra `active_timer`;
+  - actualiza el progreso (hecho si se marcó; si el tema estaba pendiente, «en curso»).
+  - Si la sesión ya se guardó en otro dispositivo, falla (P0002) y no duplica.
+- Una sesión de menos de 1 minuto no se guarda: se ofrece descartarla, o volver.
+- Descartar una sesión más larga pide confirmación.
+- Si quedó corriendo más de 12 h, la duración se limita a 720 min y se puede corregir.
 
-**Sesión manual:** formulario con destino, fecha, hora de inicio, duración y notas. Queda guardada con `mode = manual`.
+**Sesión manual** (`/estudiar/manual`)
+- Campos: tema o proyecto (con el mismo buscador), fecha, hora de inicio (hora de Colombia, sin importar la zona del dispositivo), duración (1–720), notas y «marcar como hecho».
+- No puede terminar en el futuro.
+- Se guarda con la función SQL `record_study_session` (`mode = manual`).
 
-**Ajustes:** minutos de trabajo y de descanso del Pomodoro.
+**Día de una sesión:** el de su `started_at` en hora de Bogotá; una sesión que cruza la medianoche no se parte.
+
+**Ajustes:** meta semanal (horas), minutos de trabajo y de descanso del Pomodoro, con autoguardado en `user_settings`. El tema visual también se guarda allí y se aplica en los demás dispositivos.
 
 ### 4.3 Historial
 
@@ -191,7 +215,7 @@ Todos los días y semanas se calculan en hora de Bogotá. Una sesión cuenta en 
 
 ### 4.5 Inicio
 
-- **Minutos de hoy** (Bogotá).
+- **Minutos de hoy** (Bogotá), con datos reales desde la fase 4.
 - **Racha actual.**
 - **Meta semanal:** barra con los minutos de la semana sobre la meta.
 - **Siguiente tema** (desde la fase 3): la misma sugerencia que en Ruta, con «Estudiar este tema» y «Ver tema». En la fase 4 se decide si se prioriza el tema de la última sesión.

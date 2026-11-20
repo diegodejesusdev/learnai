@@ -140,29 +140,38 @@ A partir de la fase 2, también `npx supabase test db`.
 
 ---
 
-## Fase 4: Temporizador
+## Fase 4: Temporizador ✅ en local (20 nov 2026) · nube: falta `db push --remote` de la migración nueva
 
 **Objetivo:** sesiones de estudio fiables que sobreviven a recargas y bloqueos.
 
+**Decisiones de esta fase**
+- **Sesión activa:** en `active_timer` + `localStorage`, no en una fila de `study_sessions` con `ended_at` vacío (ver SPEC §4.2).
+- **Guardar sesiones:** con funciones SQL transaccionales (`finish_active_timer`, `record_study_session`) en la migración `20261120031944_study_session_functions.sql`.
+
 **Entregables**
-- Función pura del estado del temporizador (Pomodoro y libre, con pausas) con tests.
-- Selector de destino: tema o proyecto de fase.
-- Modos Pomodoro (25/5 configurable) y libre, con pausar y reanudar.
-- Persistencia en `localStorage` + `active_timer` y reconciliación al abrir.
-- Avisos con la app abierta (sonido, vibración, notificación en escritorio) y opción de mantener la pantalla encendida (Wake Lock).
-- Formulario de fin de sesión: duración editable, notas, regla de 12 h, descarte de menos de 1 min y paso automático del tema a «En curso».
-- Registro de sesión manual.
-- Ajustes del Pomodoro en `user_settings`, junto con la meta semanal y el tema visual (este último, movido desde la fase 3).
-- Inicio: minutos de hoy y «Seguir estudiando».
+- **Lógica pura con tests:**
+  - `timerModel.ts`: tiempo activo con pausas, bloques y ciclos Pomodoro, tiempo de estudio y borrador de la sesión;
+  - `timerStorage.ts`: copia local y reconciliación;
+  - `studyTargets.ts`: buscador;
+  - `manualSession.ts`;
+  - `timerView.ts`;
+  - fechas y horas de Bogotá en `lib/dates.ts`.
+- **Estudiar:** buscador de tema con valor por defecto, Pomodoro y Libre, pausar, reanudar y terminar.
+  - Formulario de fin: duración, notas, «marcar como hecho» y descarte si dura menos de 1 min.
+  - Sesión manual en `/estudiar/manual`.
+- **Avisos y pantalla:**
+  - Al cambiar de bloque: sonido, vibración, notificación (con permiso) y aviso en la app (`ActiveTimerEffects`).
+  - Wake Lock mientras corre.
+  - Banner de sesión activa en todas las páginas.
+- **Ajustes:** meta semanal y minutos del Pomodoro con autoguardado en `user_settings`; el tema se guarda en la cuenta (`ThemeSync`).
+- **Inicio:** minutos de hoy reales.
+- **Pruebas pgTAP** de las funciones: transacción, sin duplicados, RLS y anon.
 
 **Cómo verificarla**
-- Los tests del cálculo pasan: cambio de bloque exacto, varias pausas, varios ciclos.
-- **PC:** iniciar un Pomodoro de prueba (por ejemplo 2/1 min), recargar a mitad de bloque y comprobar que el tiempo sigue bien. Pausar, esperar y reanudar. Terminar y guardar.
-- **Móvil:**
-  - iniciar, bloquear el móvil 5 min, desbloquear y comprobar que el tiempo es correcto;
-  - cerrar la pestaña, abrirla y comprobar que sigue;
-  - iniciar en el PC y ver la sesión en curso en el móvil.
-- La sesión guardada aparece en Supabase con la duración neta correcta.
+- `npm test` (lógica, incluida la prueba en las zonas UTC, Tokio y Los Ángeles) y `npm run db:test` (48 comprobaciones).
+- **Recargar:** iniciar, esperar unos segundos, recargar y cerrar y abrir la pestaña. El reloj sigue desde donde iba.
+- **PC → móvil:** iniciar en el PC, abrir la app en el móvil y ver el banner y el mismo reloj. Pausar en uno y verlo en pausa en el otro al volver a la app.
+- **Terminar:** las notas y «hecho» quedan guardados; la sesión aparece en «Hoy» en Inicio y en los minutos del tema.
 
 ---
 

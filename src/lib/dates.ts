@@ -1,5 +1,5 @@
-import { tz } from '@date-fns/tz'
-import { endOfWeek, format, startOfWeek } from 'date-fns'
+import { TZDate, tz } from '@date-fns/tz'
+import { endOfWeek, format, startOfDay, startOfWeek } from 'date-fns'
 import { es } from 'date-fns/locale'
 
 // Único lugar donde se decide la zona horaria de la app (ver CLAUDE.md).
@@ -57,4 +57,47 @@ export function formatDuration(totalMinutes: number): string {
   if (hours === 0) return `${rest} min`
   if (rest === 0) return `${hours} h`
   return `${hours} h ${rest} min`
+}
+
+/** 00:00 (Bogotá) del día del instante dado. */
+export function startOfDayInZone(input: DateInput): Date {
+  return new Date(startOfDay(toDate(input), { in: inAppZone }).getTime())
+}
+
+/** Valor para <input type="date"> en hora de Bogotá: 'yyyy-MM-dd'. */
+export function toDateInputValue(input: DateInput): string {
+  return toDayKey(input)
+}
+
+/** Valor para <input type="time"> en hora de Bogotá: 'HH:mm'. */
+export function toTimeInputValue(input: DateInput): string {
+  return format(toDate(input), 'HH:mm', { in: inAppZone })
+}
+
+/**
+ * Fecha 'yyyy-MM-dd' y hora 'HH:mm' escritas en hora de Bogotá → instante real.
+ * No depende de la zona horaria del dispositivo. null si el formato no es válido.
+ */
+export function zonedInputToDate(date: string, time: string): Date | null {
+  const dateMatch = /^(\d{4})-(\d{2})-(\d{2})$/.exec(date)
+  const timeMatch = /^(\d{2}):(\d{2})$/.exec(time)
+  if (!dateMatch || !timeMatch) return null
+  const [year, month, day] = dateMatch.slice(1).map(Number) as [number, number, number]
+  const [hours, minutes] = timeMatch.slice(1).map(Number) as [number, number]
+  if (month < 1 || month > 12 || day < 1 || day > 31 || hours > 23 || minutes > 59) return null
+  const zoned = new TZDate(year, month - 1, day, hours, minutes, APP_TIME_ZONE)
+  // 31 de febrero y similares: JavaScript los «corre» al mes siguiente; se rechazan.
+  if (zoned.getDate() !== day) return null
+  return new Date(zoned.getTime())
+}
+
+/** Segundos como reloj: '04:59' o, desde una hora, '1:02:03'. */
+export function formatClock(totalSeconds: number): string {
+  const seconds = Math.max(0, Math.floor(totalSeconds))
+  const h = Math.floor(seconds / 3600)
+  const m = Math.floor((seconds % 3600) / 60)
+  const s = seconds % 60
+  const mm = String(m).padStart(2, '0')
+  const ss = String(s).padStart(2, '0')
+  return h > 0 ? `${h}:${mm}:${ss}` : `${mm}:${ss}`
 }
