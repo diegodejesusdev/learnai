@@ -30,26 +30,27 @@ export function UpdatePrompt() {
 
   if (!needRefresh) return null
   return (
-    <div className="pointer-events-none fixed inset-x-0 bottom-[calc(4.75rem+env(safe-area-inset-bottom))] z-50 flex justify-center px-4 lg:bottom-6 lg:pl-64">
+    <div className="pointer-events-none fixed inset-x-0 bottom-[calc(4.75rem+env(safe-area-inset-bottom))] z-50 flex justify-center px-4 lg:bottom-6 lg:pl-60">
       <div
         role="alertdialog"
         aria-labelledby="update-title"
-        className="pointer-events-auto flex w-full max-w-sm flex-col gap-3 rounded-2xl border border-border bg-surface-raised p-4 shadow-lg"
+        data-surface="dark"
+        className="pointer-events-auto flex w-full max-w-md flex-col gap-4 rounded-xs bg-chrome p-4 text-chrome-fg ring-1 ring-border"
       >
         <div className="flex items-start gap-2">
-          <p id="update-title" className="flex-1 text-sm font-medium">
+          <p id="update-title" className="flex-1 font-semibold">
             Hay una versión nueva de LearnAI.
           </p>
           <button
             type="button"
             aria-label="Cerrar aviso"
             onClick={() => setNeedRefresh(false)}
-            className="-m-1 flex size-9 shrink-0 items-center justify-center rounded-lg text-fg-muted hover:bg-surface-muted hover:text-fg"
+            className="-m-3 flex size-11 shrink-0 items-center justify-center rounded-xs text-chrome-muted hover:text-chrome-fg"
           >
             <X className="size-4" />
           </button>
         </div>
-        <Button onClick={() => void updateServiceWorker(true)}>
+        <Button variant="inverse" onClick={() => void updateServiceWorker(true)}>
           <RefreshCw className="size-4" />
           Actualizar
         </Button>

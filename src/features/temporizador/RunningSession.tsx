@@ -1,9 +1,8 @@
 import { Flag, Pause, Play, Sun } from 'lucide-react'
-import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
-import { Card } from '@/components/ui/Card'
-import { ProgressBar } from '@/components/ui/ProgressBar'
+import { Hero } from '@/components/ui/Hero'
 import { unlockAudio } from '@/lib/alerts'
+import { cn } from '@/lib/cn'
 import { formatDuration } from '@/lib/dates'
 import { useNow } from '@/lib/useNow'
 import { isWakeLockSupported } from '@/lib/useWakeLock'
@@ -34,30 +33,51 @@ export function RunningSession({ timer, title, context, onFinish }: RunningSessi
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <Card className="flex flex-col items-center gap-3 py-8 text-center">
-        <p className="text-sm text-fg-muted">{context}</p>
-        <h2 className="text-lg font-semibold text-balance">{title}</h2>
-        <div className="flex flex-wrap justify-center gap-2">
-          <Badge tone={view.phaseLabel === 'Descanso' ? 'done' : 'accent'}>{view.phaseLabel}</Badge>
-          {view.paused && <Badge tone="progress">En pausa</Badge>}
+    <div className="flex flex-col gap-6">
+      {/* El fondo dice de lejos si corre (vinotinto) o está en pausa (negro). */}
+      <Hero
+        tone={view.paused ? 'chrome' : 'hero'}
+        className="-mt-4 flex min-h-[25rem] flex-col justify-between gap-8 lg:mt-0 lg:min-h-[32rem]"
+      >
+        <div className="flex flex-col gap-1.5">
+          <p className="text-sm font-medium text-hero-muted">{context}</p>
+          <h2 className="text-title text-balance">{title}</h2>
         </div>
-        <p
-          className="text-7xl font-semibold tracking-tight tabular-nums sm:text-8xl"
-          role="timer"
-          aria-label={`${view.phaseLabel}: ${view.clock}${view.paused ? ', en pausa' : ''}`}
-        >
-          {view.clock}
-        </p>
-        {view.blockProgress !== null && (
-          <ProgressBar
-            value={view.blockProgress}
-            label="Avance del bloque"
-            size="sm"
-            className="w-full max-w-xs"
-          />
-        )}
-        <p className="text-sm text-fg-muted">
+        <div className="flex flex-col gap-5">
+          <div className="flex flex-wrap gap-x-4 text-lg font-bold">
+            <span>{view.phaseLabel}</span>
+            {view.paused && <span className="text-hero-muted">En pausa</span>}
+          </div>
+          <p
+            className={cn(
+              'leading-[0.8] font-extrabold tracking-[-0.045em] tabular-nums',
+              // Con horas («1:05:32») son más cifras: más pequeño para que quepa a 360 px.
+              view.clock.length > 5
+                ? 'text-[clamp(4rem,20vw,9rem)] lg:text-[clamp(6rem,11vw,10rem)]'
+                : 'text-[clamp(5.5rem,28vw,13rem)] lg:text-[clamp(8rem,15vw,13rem)]',
+            )}
+            role="timer"
+            aria-label={`${view.phaseLabel}: ${view.clock}${view.paused ? ', en pausa' : ''}`}
+          >
+            {view.clock}
+          </p>
+          {view.blockProgress !== null && (
+            <div
+              role="progressbar"
+              aria-label="Avance del bloque"
+              aria-valuemin={0}
+              aria-valuemax={100}
+              aria-valuenow={Math.round(view.blockProgress * 100)}
+              className="h-2.5 overflow-hidden bg-hero-fg/25"
+            >
+              <div
+                className="h-full origin-left bg-hero-fg transition-transform duration-500"
+                style={{ transform: `scaleX(${view.blockProgress})` }}
+              />
+            </div>
+          )}
+        </div>
+        <p className="text-sm text-hero-muted">
           {view.pomodoro && (
             <>
               Ciclo {view.pomodoro.cycle} · {view.pomodoro.completedCycles}{' '}
@@ -69,20 +89,24 @@ export function RunningSession({ timer, title, context, onFinish }: RunningSessi
             Estudiado: {formatDuration(view.focusSeconds / 60)}
           </span>
         </p>
-      </Card>
-      <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-        <Button size="lg" onClick={togglePause} disabled={change.isPending}>
-          {view.paused ? <Play className="size-5" /> : <Pause className="size-5" />}
+      </Hero>
+      <div className="grid grid-cols-2 gap-3">
+        <Button size="xl" onClick={togglePause} disabled={change.isPending}>
+          {view.paused ? (
+            <Play className="size-6 fill-current" />
+          ) : (
+            <Pause className="size-6 fill-current" />
+          )}
           {view.paused ? 'Reanudar' : 'Pausar'}
         </Button>
-        <Button size="lg" variant="secondary" onClick={onFinish}>
-          <Flag className="size-5" />
+        <Button size="xl" variant="secondary" onClick={onFinish}>
+          <Flag className="size-6" />
           Terminar
         </Button>
       </div>
       {isWakeLockSupported() && !view.paused && (
         <p className="flex items-center gap-2 text-sm text-fg-muted">
-          <Sun className="size-4 text-accent" />
+          <Sun className="size-4 shrink-0" />
           La pantalla se mantiene encendida mientras corre el temporizador.
         </p>
       )}

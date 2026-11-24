@@ -51,7 +51,7 @@ function QuizComposer({
         value={focus}
         onChange={(event) => setFocus(event.target.value)}
         placeholder={trackProfile(track).ui.quizFocus}
-        className={cn(fieldControlClasses, 'min-h-11 min-w-0 flex-1')}
+        className={cn(fieldControlClasses, 'min-h-12 min-w-0 flex-1')}
       />
       {sending ? (
         <Button type="button" variant="secondary" onClick={onStop}>
@@ -59,7 +59,7 @@ function QuizComposer({
           Detener
         </Button>
       ) : (
-        <Button type="submit">
+        <Button type="submit" className="min-h-12">
           <Sparkles className="size-4" />
           Nuevo quiz
         </Button>

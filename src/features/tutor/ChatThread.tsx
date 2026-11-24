@@ -44,7 +44,7 @@ export function ChatThread({
   if (messages.length === 0 && !pending) return <>{empty}</>
 
   return (
-    <div className="flex flex-col gap-4" aria-live="polite" aria-busy={pending !== null}>
+    <div className="flex flex-col gap-8" aria-live="polite" aria-busy={pending !== null}>
       {messages.map((message) => (
         <ChatEntry
           key={message.id}
@@ -60,18 +60,17 @@ export function ChatThread({
           <AssistantBubble>
             {pending.answer === '' || quizTopicId ? (
               <p className="flex items-center gap-2 py-2 text-sm text-fg-muted">
-                <Spinner className="text-accent" />
+                <Spinner className="text-meter" />
                 {quizTopicId ? 'Preparando 5 preguntas…' : 'Pensando…'}
               </p>
             ) : (
-              <div className="rounded-2xl rounded-tl-md bg-surface px-3.5 py-2.5 ring-1 ring-border">
-                <LazyMarkdown text={pending.answer} />
-              </div>
+              <LazyMarkdown text={pending.answer} />
             )}
           </AssistantBubble>
         </>
       )}
-      <div ref={endRef} />
+      {/* El margen deja el final de la respuesta por encima de la caja de texto. */}
+      <div ref={endRef} className="scroll-mb-20 lg:scroll-mb-28" />
     </div>
   )
 }

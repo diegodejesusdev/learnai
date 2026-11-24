@@ -46,11 +46,11 @@ export function subscribeToSystemTheme(onChange: () => void): () => void {
   return () => media.removeEventListener('change', onChange)
 }
 
-/** Aplica el tema en <html> y ajusta el color de la barra del navegador al fondo actual. */
+/** Aplica el tema en <html> y pone la barra del navegador del color del marco de la app. */
 export function applyTheme(theme: ResolvedTheme): void {
   const root = document.documentElement
   root.dataset.theme = theme
-  const background = getComputedStyle(root).getPropertyValue('--bg').trim()
+  const chrome = getComputedStyle(root).getPropertyValue('--chrome').trim()
   const meta = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')
-  if (meta && background) meta.content = background
+  if (meta && chrome) meta.content = chrome
 }

@@ -1,4 +1,3 @@
-import { Bot } from 'lucide-react'
 import { useRef, type ReactNode } from 'react'
 import { parseQuiz } from '@shared/quiz'
 import { Alert } from '@/components/ui/Alert'
@@ -10,7 +9,7 @@ import type { QuizResult, TutorMessage } from './tutorApi'
 export function UserBubble({ children }: { children: ReactNode }) {
   return (
     <div className="flex justify-end">
-      <p className="max-w-[85%] rounded-2xl rounded-br-md bg-accent px-3.5 py-2.5 text-sm whitespace-pre-wrap text-accent-fg">
+      <p className="max-w-[85%] bg-action px-4 py-3 wrap-anywhere whitespace-pre-wrap text-action-fg">
         {children}
       </p>
     </div>
@@ -19,11 +18,9 @@ export function UserBubble({ children }: { children: ReactNode }) {
 
 export function AssistantBubble({ children }: { children: ReactNode }) {
   return (
-    <div className="flex gap-2">
-      <span className="mt-1 flex size-7 shrink-0 items-center justify-center rounded-full bg-accent-soft text-accent-soft-fg">
-        <Bot className="size-4" />
-      </span>
-      <div className="flex min-w-0 flex-1 flex-col gap-1">{children}</div>
+    <div className="flex min-w-0 flex-col gap-2 border-t-2 border-meter pt-4">
+      <p className="text-sm font-bold text-accent">Tutor</p>
+      {children}
     </div>
   )
 }
@@ -61,10 +58,7 @@ export function ChatEntry({ message, quizTopicId, quizResult, notesTarget }: Cha
 
   return (
     <AssistantBubble>
-      <div
-        ref={bubbleRef}
-        className="rounded-2xl rounded-tl-md bg-surface px-3.5 py-2.5 ring-1 ring-border"
-      >
+      <div ref={bubbleRef}>
         <LazyMarkdown text={message.content} />
       </div>
       {notesTarget && (

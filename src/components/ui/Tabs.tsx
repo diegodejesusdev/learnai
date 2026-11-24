@@ -38,7 +38,7 @@ export function Tabs<T extends string>({ label, options, value, onChange, panelI
       role="tablist"
       aria-label={label}
       onKeyDown={onKeyDown}
-      className="flex gap-1 border-b border-border"
+      className="flex flex-wrap gap-x-8 border-b-2 border-border"
     >
       {options.map((option) => {
         const selected = option.value === value
@@ -52,8 +52,8 @@ export function Tabs<T extends string>({ label, options, value, onChange, panelI
             tabIndex={selected ? 0 : -1}
             onClick={() => onChange(option.value)}
             className={cn(
-              '-mb-px min-h-11 border-b-2 px-4 text-sm font-medium transition-colors',
-              selected ? 'border-accent text-fg' : 'border-transparent text-fg-muted hover:text-fg',
+              '-mb-0.5 min-h-14 border-b-4 text-lg font-bold tracking-tight transition-colors',
+              selected ? 'border-meter text-fg' : 'border-transparent text-fg-muted hover:text-fg',
             )}
           >
             {option.label}

@@ -1,15 +1,16 @@
 import { PartyPopper, Play } from 'lucide-react'
 import { ButtonLink } from '@/components/ui/ButtonLink'
-import { Card } from '@/components/ui/Card'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { Hero } from '@/components/ui/Hero'
 import { StatusBadge } from '@/components/ui/StatusBadge'
+import { statusLabels } from '@/lib/labels'
 import { nextTopic, statusOf } from '@/lib/progress'
 import { phaseLabel, trackPhaseLabel } from '@/lib/roadmap'
 import { topicStatuses } from './progressModel'
 import type { TrackData } from './RoadmapGate'
 
 interface NextTopicCardProps extends TrackData {
-  /** Fuera de la página de la ruta: dice de qué ruta es. */
+  /** Fuera de la página de la ruta: dice de qué ruta es y va en una fila, sin el bloque grande. */
   showTrack?: boolean
 }
 
@@ -32,28 +33,50 @@ export function NextTopicCard({ track, progress, showTrack = false }: NextTopicC
   }
 
   const { topic, phase } = next
-  return (
-    <Card className="flex flex-col gap-4">
-      <div className="flex flex-col gap-1">
-        <p className="text-sm text-fg-muted">
-          Siguiente tema · {showTrack ? trackPhaseLabel(track, phase) : phaseLabel(phase)}:{' '}
-          {phase.title}
-        </p>
-        <div className="flex flex-wrap items-center gap-2">
-          <h2 className="text-xl font-semibold tracking-tight">{topic.title}</h2>
-          <StatusBadge status={statusOf(statuses, topic.id)} />
+  const status = statusOf(statuses, topic.id)
+
+  if (showTrack) {
+    return (
+      <section className="flex flex-col gap-4 border-t-2 border-fg py-6 sm:flex-row sm:items-center sm:justify-between sm:gap-8">
+        <div className="flex min-w-0 flex-col gap-1">
+          <p className="text-sm text-fg-muted">
+            Siguiente tema · {trackPhaseLabel(track, phase)}: {phase.title}
+          </p>
+          <h2 className="text-title">{topic.title}</h2>
+          <StatusBadge status={status} />
         </div>
-        <p className="text-sm text-fg-muted">{topic.details}</p>
+        <div className="flex shrink-0 flex-wrap gap-2">
+          <ButtonLink to={`/estudiar?tema=${topic.id}`}>
+            <Play className="size-4 fill-current" />
+            Estudiar este tema
+          </ButtonLink>
+          <ButtonLink to={`/ruta/tema/${topic.id}`} variant="secondary">
+            Ver tema
+          </ButtonLink>
+        </div>
+      </section>
+    )
+  }
+
+  return (
+    <Hero className="flex flex-col gap-8">
+      <div className="flex flex-col gap-3">
+        <p className="text-sm font-medium text-hero-muted">
+          Siguiente tema · {phaseLabel(phase)}: {phase.title}
+        </p>
+        <h2 className="text-lead text-balance wrap-break-word hyphens-auto">{topic.title}</h2>
+        <p className="max-w-xl text-pretty text-hero-muted">{topic.details}</p>
+        <p className="text-sm font-semibold">{statusLabels[status]}</p>
       </div>
-      <div className="flex flex-col gap-2 sm:flex-row">
-        <ButtonLink to={`/estudiar?tema=${topic.id}`} size="lg" className="sm:flex-1">
-          <Play className="size-5" />
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <ButtonLink to={`/estudiar?tema=${topic.id}`} variant="inverse" size="lg">
+          <Play className="size-5 fill-current" />
           Estudiar este tema
         </ButtonLink>
-        <ButtonLink to={`/ruta/tema/${topic.id}`} variant="secondary" size="lg">
+        <ButtonLink to={`/ruta/tema/${topic.id}`} variant="outline" size="lg">
           Ver tema
         </ButtonLink>
       </div>
-    </Card>
+    </Hero>
   )
 }

@@ -1,5 +1,4 @@
 import { Button } from '@/components/ui/Button'
-import { Card } from '@/components/ui/Card'
 import { Spinner } from '@/components/ui/Spinner'
 import { formatDayKey, formatDuration } from '@/lib/dates'
 import type { DayTotal } from '@/lib/studyStats'
@@ -27,12 +26,12 @@ export function DayDetail({ day, today, total, minMinutes, tracks }: DayDetailPr
   const sessions = useDaySessions(day, minutes > 0)
 
   return (
-    <Card className="flex flex-col gap-3">
+    <div className="flex flex-col gap-3 border-t border-border pt-5">
       <div aria-live="polite" className="flex flex-col gap-0.5">
         <div className="flex flex-wrap items-baseline justify-between gap-x-3">
-          <h3 className="font-semibold">{dayTitle(day, today)}</h3>
+          <h3 className="text-lg font-bold tracking-tight">{dayTitle(day, today)}</h3>
           {minutes > 0 && (
-            <span className="text-sm font-medium tabular-nums">{formatDuration(minutes)}</span>
+            <span className="text-lg font-bold tabular-nums">{formatDuration(minutes)}</span>
           )}
         </div>
         <p className="text-sm text-fg-muted">
@@ -52,7 +51,10 @@ export function DayDetail({ day, today, total, minMinutes, tracks }: DayDetailPr
             </Button>
           </div>
         ) : sessions.data ? (
-          <ul aria-label="Sesiones del día" className="-mx-2 divide-y divide-border">
+          <ul
+            aria-label="Sesiones del día"
+            className="divide-y divide-border border-y border-border"
+          >
             {sessions.data.map((session) => (
               <li key={session.id}>
                 <SessionRow session={session} tracks={tracks} showDate={false} />
@@ -60,8 +62,8 @@ export function DayDetail({ day, today, total, minMinutes, tracks }: DayDetailPr
             ))}
           </ul>
         ) : (
-          <Spinner className="text-accent" />
+          <Spinner className="text-meter" />
         ))}
-    </Card>
+    </div>
   )
 }

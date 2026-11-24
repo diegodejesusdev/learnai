@@ -28,9 +28,14 @@ export function EmptyChat({ mode, subject, track, onSend }: EmptyChatProps) {
         title={`Pregúntale al tutor sobre «${subject}»`}
         description="Conoce tus notas, el estado del tema y tus últimas sesiones."
         action={
-          <div className="flex flex-col gap-2">
+          <div className="flex flex-col items-start gap-2">
             {starters.map((starter) => (
-              <Button key={starter} variant="secondary" onClick={() => void onSend(starter)}>
+              <Button
+                key={starter}
+                variant="secondary"
+                className="py-2.5 text-left"
+                onClick={() => void onSend(starter)}
+              >
                 {starter}
               </Button>
             ))}

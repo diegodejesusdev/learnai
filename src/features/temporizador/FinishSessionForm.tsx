@@ -3,7 +3,6 @@ import { onlineManager } from '@tanstack/react-query'
 import { useState } from 'react'
 import { Alert } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
-import { Card } from '@/components/ui/Card'
 import { Spinner } from '@/components/ui/Spinner'
 import { TextAreaField } from '@/components/ui/TextAreaField'
 import { TextField } from '@/components/ui/TextField'
@@ -39,11 +38,11 @@ export function FinishSessionForm({ timer, title, alreadyDone, onBack }: FinishS
 
   if (confirmDiscard) {
     return (
-      <Card className="flex flex-col gap-4">
-        <h2 className="text-lg font-semibold">
+      <div className="flex max-w-2xl flex-col gap-5 border-t-2 border-fg pt-5">
+        <h2 className="text-lead">
           {draft.tooShort ? 'La sesión duró menos de 1 minuto' : '¿Descartar esta sesión?'}
         </h2>
-        <p className="text-sm text-fg-muted">
+        <p className="text-fg-muted">
           {draft.tooShort
             ? 'Las sesiones de menos de un minuto no se guardan. ¿La descartas?'
             : `Se perderán ${formatDuration(draft.focusSeconds / 60)} de estudio en «${title}».`}
@@ -64,13 +63,13 @@ export function FinishSessionForm({ timer, title, alreadyDone, onBack }: FinishS
             {draft.tooShort ? 'Volver al temporizador' : 'No, volver'}
           </Button>
         </div>
-      </Card>
+      </div>
     )
   }
 
   return (
     <form
-      className="flex flex-col gap-4"
+      className="flex max-w-2xl flex-col gap-6"
       onSubmit={(event) => {
         event.preventDefault()
         if (durationError) return
@@ -101,13 +100,13 @@ export function FinishSessionForm({ timer, title, alreadyDone, onBack }: FinishS
         }
       }}
     >
-      <Card className="flex flex-col gap-1">
-        <h2 className="text-lg font-semibold">Terminar sesión</h2>
-        <p className="text-sm text-fg-muted">
+      <div className="flex flex-col gap-2 border-t-2 border-fg pt-5">
+        <h2 className="text-lead">Terminar sesión</h2>
+        <p className="text-fg-muted">
           {title} · de {formatTime(timer.startedAt)} a {formatTime(draft.endedAt)}
         </p>
-      </Card>
-      <Card className="flex flex-col gap-4">
+      </div>
+      <div className="flex flex-col gap-5">
         <TextField
           label="Duración (minutos de estudio)"
           type="number"
@@ -138,12 +137,12 @@ export function FinishSessionForm({ timer, title, alreadyDone, onBack }: FinishS
               type="checkbox"
               checked={markDone}
               onChange={(event) => setMarkDone(event.target.checked)}
-              className="size-5 accent-[var(--accent)]"
+              className="size-6 shrink-0 accent-[var(--meter)]"
             />
-            <span className="text-sm">Marcar «{title}» como hecho</span>
+            <span>Marcar «{title}» como hecho</span>
           </label>
         )}
-      </Card>
+      </div>
       {finish.isError && (
         <Alert>No se pudo guardar la sesión. Revisa tu conexión e inténtalo de nuevo.</Alert>
       )}
@@ -167,7 +166,7 @@ export function FinishSessionForm({ timer, title, alreadyDone, onBack }: FinishS
       <Button
         type="button"
         variant="ghost"
-        className="self-start text-danger"
+        className="-ml-4 self-start text-danger"
         onClick={() => setConfirmDiscard(true)}
       >
         <Trash2 className="size-4" />

@@ -16,7 +16,7 @@ export function LoadingState({ label = 'Cargando…', fullScreen = false }: Load
         fullScreen ? 'min-h-dvh' : 'py-12',
       )}
     >
-      <Spinner className="text-accent" />
+      <Spinner className="text-meter" />
       {label}
     </div>
   )

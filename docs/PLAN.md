@@ -343,7 +343,7 @@ A partir de la fase 2, también `npx supabase test db`.
 
 ---
 
-## Fase 8: Varias rutas de estudio ✅ en local (23 nov 2026) · nube: base y tutor aplicados (24 nov 2026); faltan la app y el seed
+## Fase 8: Varias rutas de estudio ✅ publicada en la nube (24 nov 2026)
 
 **Objetivo:** estudiar varias rutas en la misma app sin perder nada del progreso. Diseño: `docs/superpowers/specs/2026-11-23-varias-rutas-design.md`.
 
@@ -368,6 +368,22 @@ A partir de la fase 2, también `npx supabase test db`.
 - `npm test`, `npm run db:test` (104 comprobaciones) y `npm run db:test:migracion`.
 - **Orden en producción:** respaldo → `db push --remote` → `functions deploy tutor` → push → `npm run seed:cloud`. Si el seed va antes que la app, la versión anterior mezcla las fases de las dos rutas.
 - **PC y móvil:** Ajustes → «Exportar mis datos» antes y después; los números del resumen deben coincidir. Ruta muestra automatización igual que antes, y la segunda ruta con 13 fases y 110 temas.
+
+---
+
+## Fase 9: Rediseño visual ✅ publicado en la nube (24 nov 2026)
+
+**Objetivo:** un diseño minimalista, con poco color y muy legible, pero con carácter. Solo frontend. Diseño: `docs/superpowers/specs/2026-11-24-rediseno-design.md`.
+
+**Decisiones de esta fase**
+- **Color:** negro, gris y un vinotinto con un solo significado (lo de ahora y tu avance). El error pasa a anaranjado para no confundirse.
+- **Estructura:** un bloque `Hero` por pantalla y listas con líneas en vez de tarjetas. En el PC, dos columnas.
+- **Letra:** Inter con tamaño óptico; títulos de 36 a 64 px. Lo más pequeño, 13 px.
+- **Sin dependencias nuevas** ni cambios en datos, consultas, direcciones o textos con información.
+
+**Cómo verificarla**
+- `npm test` (incluye `scripts/contrast.test.ts`: contraste de los dos temas).
+- **PC y móvil:** recorrer las cinco secciones, Ajustes y el acceso, en claro y oscuro.
 
 ---
 

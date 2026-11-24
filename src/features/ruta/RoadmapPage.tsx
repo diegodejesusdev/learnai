@@ -18,9 +18,9 @@ function RoadmapView({ roadmap, progress, activeTrack }: RoadmapData) {
     tracks.length > 1 ? { id: PANEL_ID, role: 'tabpanel', 'aria-label': track.title } : {}
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex flex-col gap-8">
       <TrackSelector tracks={tracks} value={track.id} onChange={showTrack} panelId={PANEL_ID} />
-      <div {...panel} className="flex flex-col gap-8">
+      <div {...panel} className="flex flex-col gap-12">
         {track.phases.length === 0 ? (
           <EmptyState
             icon={Route}
@@ -29,8 +29,8 @@ function RoadmapView({ roadmap, progress, activeTrack }: RoadmapData) {
           />
         ) : (
           <>
-            <div className="flex flex-col gap-4">
-              <p className="text-pretty text-fg-muted">{track.goal}</p>
+            <div className="flex flex-col gap-8">
+              <p className="max-w-2xl text-pretty text-fg-muted lg:text-lg">{track.goal}</p>
               <OverviewCard track={track} progress={progress} />
               <NextTopicCard track={track} progress={progress} />
             </div>

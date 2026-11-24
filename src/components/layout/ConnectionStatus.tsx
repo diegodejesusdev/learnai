@@ -50,13 +50,13 @@ export function ConnectionStatus({ className }: { className?: string }) {
               : undefined
           }
           className={cn(
-            'inline-flex min-h-8 items-center gap-1.5 rounded-full px-3 text-xs font-medium',
-            state === 'offline' && 'bg-progress-soft text-progress',
-            state === 'syncing' && 'bg-accent-soft text-accent-soft-fg',
-            state === 'synced' && 'bg-done-soft text-done',
+            'inline-flex min-h-8 items-center gap-1.5 rounded-xs border px-2.5 text-xs font-semibold',
+            state === 'offline'
+              ? 'border-chrome-fg bg-chrome-fg text-chrome'
+              : 'border-chrome-muted text-chrome-fg',
           )}
         >
-          <Icon className={cn('size-3.5 shrink-0', state === 'syncing' && 'animate-spin')} />
+          <Icon className={cn('size-4 shrink-0', state === 'syncing' && 'animate-spin')} />
           {label}
         </span>
       )}

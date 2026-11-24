@@ -1,4 +1,3 @@
-import { Card } from '@/components/ui/Card'
 import { ProgressBar } from '@/components/ui/ProgressBar'
 import { doneCount, totalProgress } from '@/lib/progress'
 import { checklistDoneCount, projectStatuses, topicStatuses } from './progressModel'
@@ -11,28 +10,34 @@ export function OverviewCard({ track, progress }: TrackData) {
     track.phases.map((phase) => phase.id),
     projectStatuses(progress),
   )
+  const label = `Progreso total · ${topics.done} de ${topics.total} temas`
 
   return (
-    <Card className="flex flex-col gap-3">
-      <ProgressBar
-        value={topics.ratio}
-        label={`Progreso total · ${topics.done} de ${topics.total} temas`}
-        showLabel
-      />
-      <p className="flex flex-wrap gap-x-4 gap-y-1 text-sm text-fg-muted">
-        <span>
-          Proyectos:{' '}
-          <strong className="font-medium text-fg tabular-nums">
-            {projects.done}/{projects.total}
-          </strong>
-        </span>
-        <span>
-          Checklist final:{' '}
-          <strong className="font-medium text-fg tabular-nums">
-            {checklistDoneCount(progress, track.checklist)}/{track.checklist.length}
-          </strong>
-        </span>
-      </p>
-    </Card>
+    <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:gap-10">
+        <p aria-hidden className="text-giant text-meter">
+          {Math.round(topics.ratio * 100)}
+          <span className="text-[0.4em] tracking-tight"> %</span>
+        </p>
+        <div className="flex flex-col gap-1 sm:pb-1">
+          <p className="text-lg font-bold tracking-tight">{label}</p>
+          <p className="flex flex-wrap gap-x-6 gap-y-1 text-fg-muted">
+            <span>
+              Proyectos:{' '}
+              <strong className="font-bold text-fg tabular-nums">
+                {projects.done}/{projects.total}
+              </strong>
+            </span>
+            <span>
+              Checklist final:{' '}
+              <strong className="font-bold text-fg tabular-nums">
+                {checklistDoneCount(progress, track.checklist)}/{track.checklist.length}
+              </strong>
+            </span>
+          </p>
+        </div>
+      </div>
+      <ProgressBar value={topics.ratio} label={label} />
+    </div>
   )
 }

@@ -1,6 +1,6 @@
-import { ChevronRight, Monitor, Moon, Palette, Sun } from 'lucide-react'
+import { ArrowRight, Monitor, Moon, Sun } from 'lucide-react'
+import { Link } from 'react-router'
 import { useTheme } from '@/app/ThemeContext'
-import { CardLink } from '@/components/ui/CardLink'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { Section } from '@/components/ui/Section'
 import { SegmentedControl, type SegmentedOption } from '@/components/ui/SegmentedControl'
@@ -24,8 +24,9 @@ export function SettingsPage() {
   return (
     <>
       <PageHeader title="Ajustes" />
-      <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-12">
         <Section
+          split
           title="Apariencia"
           description="«Sistema» sigue el modo claro u oscuro de tu dispositivo. Se guarda en tu cuenta."
         >
@@ -48,12 +49,14 @@ export function SettingsPage() {
 
         <AccountSection />
 
-        <Section title="Desarrollo">
-          <CardLink to="/ajustes/diseno" className="flex items-center gap-3">
-            <Palette className="size-5 text-accent" />
-            <span className="flex-1 font-medium">Sistema de diseño</span>
-            <ChevronRight className="size-5 text-fg-muted" />
-          </CardLink>
+        <Section split title="Desarrollo">
+          <Link
+            to="/ajustes/diseno"
+            className="group flex min-h-14 items-center justify-between gap-4 border-y border-border font-semibold transition-colors hover:text-accent"
+          >
+            Sistema de diseño
+            <ArrowRight className="size-5 transition-transform group-hover:translate-x-1" />
+          </Link>
         </Section>
       </div>
     </>

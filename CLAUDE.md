@@ -20,7 +20,7 @@ Especificación completa: `docs/SPEC.md`. Plan por fases: `docs/PLAN.md`. Config
 - React 19 + Vite 8 + TypeScript 6.0 estricto. No se usa TS 7 porque typescript-eslint todavía no lo soporta.
 - Tailwind CSS v4 (plugin `@tailwindcss/vite`, tokens en CSS con `@theme`)
 - React Router 8 (modo data: `createBrowserRouter`), TanStack Query
-- Iconos: `lucide-react`. Fuente: Inter (`@fontsource-variable/inter`, autoalojada)
+- Iconos: `lucide-react`. Fuente: Inter con tamaño óptico (`@fontsource-variable/inter/opsz.css`, autoalojada)
 - Calidad: ESLint 10 (con typescript-eslint con tipos), Prettier (ordena las clases de Tailwind) y Vitest + Testing Library
 - vite-plugin-pwa
 - Supabase: Postgres con RLS, Auth (enlace mágico por correo con código de respaldo, y Google) y Edge Functions (Deno). Cliente `@supabase/supabase-js` con tipos generados.
@@ -45,8 +45,8 @@ LearnAI/
 │   ├── app/                   # routes.tsx, Providers (caché persistida), ThemeProvider, 404, error,
 │   │                          #   UpdatePrompt (versión nueva), offlineMutations.ts (cola sin conexión)
 │   ├── components/
-│   │   ├── ui/                # Sistema de diseño: Button, Card, Badge, StatusBadge, ProgressBar,
-│   │   │                      #   SegmentedControl, TextField, SelectField, PageHeader, Section…
+│   │   ├── ui/                # Sistema de diseño: Button, Hero, Stat, StatusIcon, StatusBadge, ProgressBar,
+│   │   │                      #   SegmentedControl, Tabs, TextField, SelectField, PageHeader, Section…
 │   │   └── layout/            # AppShell, BottomNav (móvil), Sidebar (≥1024 px), navItems
 │   ├── features/              # Una carpeta por sección (nombres en español)
 │   │   ├── inicio/
@@ -113,7 +113,7 @@ LearnAI/
   - Las consultas usan el cliente del usuario (`ctx.supabase`), nunca el admin.
 - **Gráficas:**
   - Recharts se importa con `lazy`, para que no entre en el arranque.
-  - Los colores van con tokens (`fill="var(--accent)"`; los ejes, `var(--fg-muted)`).
+  - Los colores van con tokens (`fill="var(--meter)"`; los ejes, `var(--fg-muted)`).
   - Cada gráfica lleva una tabla «Ver los datos» (`ChartDataTable`).
   - El mapa de calor usa los tokens `heat-0` … `heat-4`.
 - **Tests de integración de UI:** usa `renderApp(ruta)` de `src/test/renderApp.tsx` y simula los `*Api.ts` con `vi.mock`. `src/test/setup.ts` ya simula `timerApi`, `settingsApi`, `historyApi` y `sessionsApi` (sin temporizador, con los ajustes por defecto y sin sesiones); cámbialos por test con `vi.mocked(...)`. `vi.clearAllMocks()` no deshace `mockResolvedValue`: vuelve a los valores por defecto en `beforeEach`.
@@ -144,8 +144,15 @@ LearnAI/
 - **Mobile-first**: se diseña primero a 360 px de ancho. Áreas táctiles de al menos 44 px, safe areas (`env(safe-area-inset-*)`) y nada de scroll horizontal.
 - **Tema**: claro/oscuro según el sistema, con interruptor manual en Ajustes.
   - Los colores son tokens semánticos definidos en `src/styles/index.css`: `bg-bg`, `bg-surface`, `text-fg`, `text-fg-muted`, `bg-accent`, `bg-done-soft`…
+  - Regla de color: negro (`action`, `chrome`) = lo que se toca y el marco; vinotinto (`hero`, `meter`, `accent`) = lo de ahora y tu avance; gris = lo demás; `danger` (anaranjado) solo para errores y borrar, con ícono y texto. `meter` es para barras y gráficas; `accent`, para texto.
+  - `control` es el borde de lo que se toca (3:1); `border` solo separa. `scripts/contrast.test.ts` falla si un par de colores baja del contraste mínimo.
+  - Dentro de un bloque oscuro (`data-surface="dark"`: marco y `Hero`), `fg`, `fg-muted`, `done` y `danger` pasan a claro solos.
   - No se usan colores sueltos de Tailwind (`bg-teal-600`) ni variantes `dark:` en los componentes.
   - Un color nuevo se agrega como token en los dos temas.
+- **Diseño** (`docs/superpowers/specs/2026-11-24-rediseno-design.md`):
+  - Un solo `Hero` por pantalla, con la acción principal en blanco. Lo demás va en listas con líneas (`divide-y`), no en tarjetas.
+  - Títulos con `text-display`, `text-lead`, `text-title`, `text-figure` y `text-giant`. Lo más pequeño es `text-xs` (13 px). Esquinas rectas (`rounded-xs` en controles) y sin sombras.
+  - `cn` solo une clases: no mezcles dos del mismo tipo (dos tamaños de letra, dos paddings). Si falta un tamaño, agrégalo a `styles.ts`.
 - **Componentes de UI**: se reutilizan los de `src/components/ui` antes de crear uno nuevo. Todo componente nuevo del sistema se agrega también a `/ajustes/diseno`.
 - **Contenido de las rutas**:
   - Se edita el JSON en `src/data/routes/` y se corre `npm run seed` (y `npm run seed:cloud` para producción). La app lo lee de Supabase.

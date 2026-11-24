@@ -1,4 +1,3 @@
-import { Card } from '@/components/ui/Card'
 import { ErrorState } from '@/components/ui/ErrorState'
 import { LoadingState } from '@/components/ui/LoadingState'
 import { Section } from '@/components/ui/Section'
@@ -26,8 +25,8 @@ export function PhaseSection({ tracks }: { tracks: readonly Track[] }) {
   } else {
     const byPhase = new Map(totals.data.map((total) => [total.phaseId, total]))
     content = (filtered ? [filtered] : tracks).map((track) => (
-      <Card key={track.id} className="flex flex-col gap-2">
-        {tracks.length > 1 && <h3 className="font-semibold">{track.title}</h3>}
+      <div key={track.id} className="flex flex-col gap-3">
+        {tracks.length > 1 && <h3 className="text-lg font-bold tracking-tight">{track.title}</h3>}
         <MinutesBars
           caption={`Minutos por fase · ${track.title}`}
           column="Fase"
@@ -40,7 +39,7 @@ export function PhaseSection({ tracks }: { tracks: readonly Track[] }) {
             sessions: byPhase.get(phase.id)?.sessions ?? 0,
           }))}
         />
-      </Card>
+      </div>
     ))
   }
 

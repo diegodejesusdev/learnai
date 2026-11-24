@@ -1,14 +1,11 @@
 import type { ReactNode } from 'react'
 import { cn } from '@/lib/cn'
 
-export type BadgeTone = 'neutral' | 'accent' | 'pending' | 'progress' | 'done'
+export type BadgeTone = 'neutral' | 'accent'
 
 const tones: Record<BadgeTone, string> = {
-  neutral: 'bg-surface-muted text-fg-muted',
-  accent: 'bg-accent-soft text-accent-soft-fg',
-  pending: 'bg-pending-soft text-pending',
-  progress: 'bg-progress-soft text-progress',
-  done: 'bg-done-soft text-done',
+  neutral: 'border-control text-fg-muted',
+  accent: 'border-hero bg-hero text-hero-fg',
 }
 
 interface BadgeProps {
@@ -22,7 +19,7 @@ export function Badge({ tone = 'neutral', icon, children, className }: BadgeProp
   return (
     <span
       className={cn(
-        'inline-flex shrink-0 items-center gap-1 rounded-full px-2.5 py-0.5 text-xs font-medium whitespace-nowrap',
+        'inline-flex shrink-0 items-center gap-1 rounded-xs border px-2 py-px text-xs font-semibold whitespace-nowrap',
         tones[tone],
         className,
       )}

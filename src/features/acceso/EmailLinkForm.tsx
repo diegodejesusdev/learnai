@@ -22,7 +22,7 @@ export function EmailLinkForm({ enabled, onSent }: EmailLinkFormProps) {
 
   return (
     <form
-      className="flex flex-col gap-3"
+      className="flex flex-col gap-4"
       onSubmit={(event) => {
         event.preventDefault()
         mutation.mutate(email.trim())

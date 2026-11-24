@@ -1,8 +1,6 @@
 import { MessageSquarePlus } from 'lucide-react'
-import { useId } from 'react'
 import { Button } from '@/components/ui/Button'
-import { fieldControlClasses } from '@/components/ui/styles'
-import { cn } from '@/lib/cn'
+import { SelectField } from '@/components/ui/SelectField'
 import { formatShortDate } from '@/lib/dates'
 import type { TutorConversation } from './tutorApi'
 
@@ -23,19 +21,14 @@ export function ConversationBar({
   onSelect,
   onNew,
 }: ConversationBarProps) {
-  const id = useId()
   return (
     <div className="flex items-end gap-2">
-      <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-        <label htmlFor={id} className="text-sm font-medium">
-          Conversación
-        </label>
-        <select
-          id={id}
+      <div className="min-w-0 flex-1">
+        <SelectField
+          label="Conversación"
           value={selectedId ?? ''}
           disabled={disabled || conversations.length === 0}
           onChange={(event) => onSelect(event.target.value)}
-          className={cn(fieldControlClasses, 'min-h-11 truncate')}
         >
           {selectedId === null && <option value="">Nueva conversación</option>}
           {conversations.map((conversation) => (
@@ -43,9 +36,14 @@ export function ConversationBar({
               {formatShortDate(conversation.updatedAt)} · {conversation.title}
             </option>
           ))}
-        </select>
+        </SelectField>
       </div>
-      <Button variant="secondary" disabled={disabled || selectedId === null} onClick={onNew}>
+      <Button
+        variant="secondary"
+        className="min-h-12"
+        disabled={disabled || selectedId === null}
+        onClick={onNew}
+      >
         <MessageSquarePlus className="size-4" />
         Nueva
       </Button>

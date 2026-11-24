@@ -1,7 +1,7 @@
 // Escalas y estilos compartidos por las gráficas del Historial (Recharts).
 
 /** Texto de los ejes: tokens del tema, nunca el color de los datos. */
-export const axisTick = { fill: 'var(--fg-muted)', fontSize: 11 }
+export const axisTick = { fill: 'var(--fg-muted)', fontSize: 13 }
 
 /** Marcas del eje de minutos en horas enteras y redondas (0, 2, 4… h) que cubren `maxMinutes`. */
 export function hourTicks(maxMinutes: number): number[] {
@@ -11,5 +11,5 @@ export function hourTicks(maxMinutes: number): number[] {
   return Array.from({ length: top / step + 1 }, (_, index) => index * step * 60)
 }
 
-/** Alto de cada barra de minutos por fase o por ruta. */
-export const MINUTES_ROW_HEIGHT = 36
+/** Alto de cada barra de minutos por fase. */
+export const MINUTES_ROW_HEIGHT = 30

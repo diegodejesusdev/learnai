@@ -20,16 +20,21 @@ export function ActiveTimerBanner() {
   const title = targetTitle(tracks, timer) ?? 'Sesión de estudio'
 
   return (
-    <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top))] z-10 border-b border-border bg-accent-soft lg:top-0">
+    <div
+      data-surface="dark"
+      className="sticky top-[calc(3.5rem+env(safe-area-inset-top))] z-10 bg-hero text-hero-fg lg:top-0"
+    >
       <Link
         to="/estudiar"
         aria-label={`Sesión en curso: ${title}. ${view.phaseLabel} ${view.clock}${view.paused ? ', en pausa' : ''}. Abrir el temporizador.`}
-        className="mx-auto flex min-h-11 max-w-3xl items-center gap-3 px-4 py-2 text-accent-soft-fg sm:px-6 lg:px-8"
+        className="flex min-h-12 items-center gap-3 px-4 py-2 focus-visible:-outline-offset-4 sm:px-6 lg:px-12"
       >
         <Icon className="size-5 shrink-0" />
-        <span className="min-w-0 flex-1 truncate text-sm font-medium">{title}</span>
-        <span className="shrink-0 text-xs">{view.paused ? 'En pausa' : view.phaseLabel}</span>
-        <span className="shrink-0 font-semibold tabular-nums">{view.clock}</span>
+        <span className="min-w-0 flex-1 truncate text-sm font-semibold">{title}</span>
+        <span className="shrink-0 text-sm text-hero-muted">
+          {view.paused ? 'En pausa' : view.phaseLabel}
+        </span>
+        <span className="shrink-0 text-lg font-extrabold tabular-nums">{view.clock}</span>
         <ChevronRight className="size-4 shrink-0" />
       </Link>
     </div>

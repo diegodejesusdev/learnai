@@ -12,7 +12,7 @@ export function RouteErrorPage() {
       : undefined
 
   return (
-    <main className="mx-auto flex min-h-dvh max-w-md items-center px-4">
+    <main className="mx-auto flex min-h-dvh max-w-xl items-center px-4">
       <title>Error · LearnAI</title>
       <div className="w-full">
         <EmptyState
@@ -22,7 +22,10 @@ export function RouteErrorPage() {
             detail ? `Detalle: ${detail}` : 'Recarga la página para intentarlo de nuevo.'
           }
           action={
-            <a href="/" className="font-medium text-accent underline-offset-2 hover:underline">
+            <a
+              href="/"
+              className="inline-flex min-h-11 items-center font-semibold underline underline-offset-4 hover:text-accent"
+            >
               Volver al inicio
             </a>
           }

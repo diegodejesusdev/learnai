@@ -1,32 +1,17 @@
-import {
-  CircleCheck,
-  CircleDashed,
-  CircleDot,
-  ExternalLink,
-  FolderGit2,
-  MessageCircle,
-} from 'lucide-react'
+import { ExternalLink, MessageCircle } from 'lucide-react'
 import { useState } from 'react'
 import { ButtonLink } from '@/components/ui/ButtonLink'
-import { Card } from '@/components/ui/Card'
 import { SaveIndicator } from '@/components/ui/SaveIndicator'
-import { SegmentedControl, type SegmentedOption } from '@/components/ui/SegmentedControl'
+import { SegmentedControl } from '@/components/ui/SegmentedControl'
 import { TextAreaField } from '@/components/ui/TextAreaField'
 import { TextField } from '@/components/ui/TextField'
-import { statusLabels } from '@/lib/labels'
 import { saveStatus } from '@/lib/saveStatus'
 import { useDebouncedSave } from '@/lib/useDebouncedSave'
 import type { Phase } from '@/types/curriculum'
-import type { ProgressStatus } from '@/types/progress'
 import type { ProjectPatch, ProjectProgress } from './progressApi'
 import { normalizeUrl, urlError } from './projectForm'
+import { statusOptions } from './statusOptions'
 import { useSaveProject } from './useProgress'
-
-const statusOptions: readonly SegmentedOption<ProgressStatus>[] = [
-  { value: 'pendiente', label: statusLabels.pendiente, icon: CircleDashed },
-  { value: 'en_curso', label: statusLabels.en_curso, icon: CircleDot },
-  { value: 'hecho', label: statusLabels.hecho, icon: CircleCheck },
-]
 
 interface ProjectEditorProps {
   phase: Phase
@@ -63,13 +48,10 @@ export function ProjectEditor({ phase, project }: ProjectEditorProps) {
   }
 
   return (
-    <Card className="flex flex-col gap-4">
+    <div className="flex flex-col gap-5">
       <div className="flex flex-col gap-1">
-        <h3 className="flex items-center gap-2 font-semibold">
-          <FolderGit2 className="size-5 shrink-0 text-accent" />
-          {phase.project.title}
-        </h3>
-        <p className="text-sm text-fg-muted">{phase.project.description}</p>
+        <h3 className="text-lg font-bold tracking-tight">{phase.project.title}</h3>
+        <p className="text-fg-muted">{phase.project.description}</p>
       </div>
       <SegmentedControl
         label="Estado del proyecto"
@@ -107,13 +89,13 @@ export function ProjectEditor({ phase, project }: ProjectEditorProps) {
           status={saveStatus({ isWaiting: autosave.isWaiting, ...saveText })}
           onRetry={() => saveText.variables && saveText.mutate(saveText.variables)}
         />
-        <div className="flex flex-wrap gap-2">
+        <div className="flex flex-wrap gap-x-5">
           {project.repo_url && (
             <a
               href={project.repo_url}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex min-h-11 items-center gap-1 rounded-xl px-2 text-sm font-medium text-accent hover:underline"
+              className="inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold underline decoration-control underline-offset-4 hover:decoration-fg"
             >
               Repositorio <ExternalLink className="size-3.5" />
             </a>
@@ -123,7 +105,7 @@ export function ProjectEditor({ phase, project }: ProjectEditorProps) {
               href={project.demo_url}
               target="_blank"
               rel="noreferrer"
-              className="inline-flex min-h-11 items-center gap-1 rounded-xl px-2 text-sm font-medium text-accent hover:underline"
+              className="inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold underline decoration-control underline-offset-4 hover:decoration-fg"
             >
               Demo <ExternalLink className="size-3.5" />
             </a>
@@ -134,6 +116,6 @@ export function ProjectEditor({ phase, project }: ProjectEditorProps) {
         <MessageCircle className="size-4" />
         Revisar con el tutor
       </ButtonLink>
-    </Card>
+    </div>
   )
 }

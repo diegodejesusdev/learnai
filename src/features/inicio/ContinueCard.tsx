@@ -1,8 +1,8 @@
 import { Play } from 'lucide-react'
 import { ButtonLink } from '@/components/ui/ButtonLink'
-import { Card } from '@/components/ui/Card'
-import { StatusBadge } from '@/components/ui/StatusBadge'
+import { Hero } from '@/components/ui/Hero'
 import { formatRelativeDay, toDayKey } from '@/lib/dates'
+import { statusLabels } from '@/lib/labels'
 import { statusOf } from '@/lib/progress'
 import { findPhaseIn, findTopicIn, trackOfTarget, trackPhaseLabel, type Track } from '@/lib/roadmap'
 import type { StatusMap } from '@/types/progress'
@@ -44,24 +44,28 @@ export function ContinueCard({ suggestion, tracks, topicStatuses, hasHistory }: 
     suggestion.kind === 'next' && !hasHistory ? 'Empezar a estudiar' : 'Seguir estudiando'
 
   return (
-    <Card className="flex flex-col gap-4">
-      <div className="flex flex-col gap-1">
-        <p className="text-sm text-fg-muted">{contextOf(suggestion, where)}</p>
-        <div className="flex flex-wrap items-center gap-2">
-          <h2 className="text-xl font-semibold tracking-tight">{title}</h2>
-          {topic && <StatusBadge status={statusOf(topicStatuses, topic.topic.id)} />}
-        </div>
-        {topic && <p className="text-sm text-fg-muted">{topic.topic.details}</p>}
+    <Hero className="flex flex-col justify-between gap-8">
+      <div className="flex flex-col gap-3">
+        <p className="text-sm font-medium text-hero-muted">{contextOf(suggestion, where)}</p>
+        <h2 className="text-lead text-balance wrap-break-word hyphens-auto">{title}</h2>
+        {topic && (
+          <>
+            <p className="max-w-xl text-pretty text-hero-muted">{topic.topic.details}</p>
+            <p className="text-sm font-semibold">
+              {statusLabels[statusOf(topicStatuses, topic.topic.id)]}
+            </p>
+          </>
+        )}
       </div>
-      <div className="flex flex-col gap-2 sm:flex-row">
-        <ButtonLink to={suggestion.to} size="lg" className="sm:flex-1">
-          <Play className="size-5" />
+      <div className="flex flex-col gap-3 sm:flex-row">
+        <ButtonLink to={suggestion.to} variant="inverse" size="lg">
+          <Play className="size-5 fill-current" />
           {action}
         </ButtonLink>
-        <ButtonLink to={detailsUrl} variant="secondary" size="lg">
+        <ButtonLink to={detailsUrl} variant="outline" size="lg">
           {topic ? 'Ver tema' : 'Ver proyecto'}
         </ButtonLink>
       </div>
-    </Card>
+    </Hero>
   )
 }

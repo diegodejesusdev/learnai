@@ -2,7 +2,7 @@ import { RotateCcw, Trophy } from 'lucide-react'
 import { useState } from 'react'
 import { quizScore, type Quiz } from '@shared/quiz'
 import { Button } from '@/components/ui/Button'
-import { Card } from '@/components/ui/Card'
+import { Hero } from '@/components/ui/Hero'
 import { SaveIndicator } from '@/components/ui/SaveIndicator'
 import { saveStatus } from '@/lib/saveStatus'
 import { initialAnswers, quizFeedback } from './quizFeedback'
@@ -41,7 +41,7 @@ export function QuizCard({ quiz, messageId, topicId, savedResult }: QuizCardProp
   }
 
   return (
-    <div className="flex flex-col gap-3">
+    <div className="flex flex-col gap-10">
       {quiz.questions.map((question, index) => (
         <QuizQuestionCard
           key={index}
@@ -53,26 +53,23 @@ export function QuizCard({ quiz, messageId, topicId, savedResult }: QuizCardProp
         />
       ))}
       {finished && (
-        <Card className="flex flex-col gap-3 border-accent/40 bg-accent-soft">
-          <p className="flex items-center gap-2 text-lg font-semibold text-accent-soft-fg">
-            <Trophy className="size-5" />
+        <Hero className="flex flex-col gap-4 lg:p-8">
+          <p className="flex items-center gap-3 text-display">
+            <Trophy className="size-10" />
             {score} de {total}
           </p>
-          <p className="text-sm">{quizFeedback(score, total)}</p>
+          <p className="text-hero-muted">{quizFeedback(score, total)}</p>
           <div className="flex flex-wrap items-center justify-between gap-2">
             <SaveIndicator
               status={save.isIdle ? 'saved' : saveStatus({ isWaiting: false, ...save })}
               onRetry={() => save.variables && save.mutate(save.variables)}
             />
-            <Button
-              variant="secondary"
-              onClick={() => setAnswers(initialAnswers(undefined, total))}
-            >
+            <Button variant="outline" onClick={() => setAnswers(initialAnswers(undefined, total))}>
               <RotateCcw className="size-4" />
               Repetir este quiz
             </Button>
           </div>
-        </Card>
+        </Hero>
       )}
     </div>
   )

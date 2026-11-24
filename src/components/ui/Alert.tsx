@@ -13,8 +13,8 @@ export function Alert({ tone = 'error', children }: AlertProps) {
     <p
       role={tone === 'error' ? 'alert' : 'status'}
       className={cn(
-        'flex items-start gap-2 rounded-xl px-3 py-2 text-sm',
-        tone === 'error' ? 'bg-danger/10 text-danger' : 'bg-done-soft text-done',
+        'flex items-start gap-2 rounded-xs border px-3 py-2.5 text-sm font-medium',
+        tone === 'error' ? 'border-danger text-danger' : 'border-fg text-fg',
       )}
     >
       <Icon className="mt-0.5 size-4 shrink-0" />

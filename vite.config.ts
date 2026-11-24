@@ -25,8 +25,8 @@ export default defineConfig({
         scope: '/',
         display: 'standalone',
         orientation: 'any',
-        background_color: '#f7f8fa',
-        theme_color: '#0f766e',
+        background_color: '#faf9f9',
+        theme_color: '#171214',
         categories: ['education', 'productivity'],
         // Íconos generados con npm run pwa:icons (pwa-assets.config.ts).
         icons: [

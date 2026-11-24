@@ -23,7 +23,7 @@ export function DeleteSessionPanel({ session, onDeleted }: DeleteSessionPanelPro
     return (
       <Button
         variant="ghost"
-        className="self-start text-danger"
+        className="-ml-4 self-start text-danger"
         onClick={() => setConfirming(true)}
       >
         <Trash2 className="size-4" />
@@ -50,10 +50,10 @@ export function DeleteSessionPanel({ session, onDeleted }: DeleteSessionPanelPro
     <Card
       role="group"
       aria-labelledby="delete-session-title"
-      className="flex flex-col gap-3 border-danger/40"
+      className="flex flex-col gap-4 border-danger"
     >
       <div className="flex flex-col gap-1">
-        <p id="delete-session-title" className="font-semibold">
+        <p id="delete-session-title" className="text-title">
           ¿Eliminar esta sesión?
         </p>
         <p className="text-sm text-fg-muted">

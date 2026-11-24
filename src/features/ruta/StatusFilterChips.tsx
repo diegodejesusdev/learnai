@@ -22,9 +22,9 @@ export function StatusFilterChips({ label, value, counts, onChange }: StatusFilt
   return (
     <fieldset>
       <legend className="sr-only">{label}</legend>
-      <div className="flex flex-wrap gap-2">
+      <div className="flex max-w-xl divide-x divide-control rounded-xs border border-control bg-surface">
         {STATUS_FILTERS.map((filter) => (
-          <label key={filter}>
+          <label key={filter} className="min-w-0 flex-auto">
             <input
               type="radio"
               name={name}
@@ -35,13 +35,15 @@ export function StatusFilterChips({ label, value, counts, onChange }: StatusFilt
             />
             <span
               className={cn(
-                'flex min-h-11 cursor-pointer items-center gap-1.5 rounded-full border border-border bg-surface px-3.5 text-sm font-medium text-fg-muted transition-colors hover:text-fg',
-                'peer-checked:border-accent peer-checked:bg-accent-soft peer-checked:text-accent-soft-fg',
-                'peer-focus-visible:outline-2 peer-focus-visible:outline-accent',
+                'flex min-h-16 cursor-pointer flex-col-reverse justify-center px-2.5 text-xs font-semibold whitespace-nowrap text-fg-muted transition-colors hover:bg-surface-muted hover:text-fg sm:px-4 sm:text-sm',
+                'peer-checked:bg-action peer-checked:text-action-fg peer-checked:hover:bg-action',
+                'peer-focus-visible:outline-2 peer-focus-visible:-outline-offset-5 peer-focus-visible:outline-current',
               )}
             >
               {filterLabels[filter]}
-              <span className="text-xs font-normal tabular-nums">{counts[filter]}</span>
+              <span className="text-xl font-extrabold tracking-tight tabular-nums">
+                {counts[filter]}
+              </span>
             </span>
           </label>
         ))}

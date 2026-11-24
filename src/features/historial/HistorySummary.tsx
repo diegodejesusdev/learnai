@@ -1,7 +1,6 @@
-import { Flame, Trophy } from 'lucide-react'
 import { ErrorState } from '@/components/ui/ErrorState'
 import { LoadingState } from '@/components/ui/LoadingState'
-import { StatCard } from '@/components/ui/StatCard'
+import { Stat } from '@/components/ui/Stat'
 import { formatDuration } from '@/lib/dates'
 import { formatDays, streakHint } from '@/lib/studyStats'
 import { useStudySummary } from './useStudyStats'
@@ -17,22 +16,22 @@ export function HistorySummary() {
 
   const { streaks, todayMinutes, streakMinMinutes, weekMinutes, weeklyGoalMinutes } = summary.data
   return (
-    <div className="flex flex-col gap-4">
-      <div className="grid grid-cols-2 gap-4">
-        <StatCard
-          icon={Flame}
-          label="Racha actual"
-          value={formatDays(streaks.current)}
-          hint={streakHint(streaks, todayMinutes, streakMinMinutes)}
-        />
-        <StatCard
-          icon={Trophy}
-          label="Racha máxima"
-          value={formatDays(streaks.max)}
-          hint={`Días con ${formatDuration(streakMinMinutes)} o más.`}
-        />
-      </div>
-      <WeeklyGoalCard minutes={weekMinutes} goalMinutes={weeklyGoalMinutes} />
+    <div className="grid grid-cols-2 gap-x-4 gap-y-8 lg:grid-cols-3 lg:gap-x-8">
+      <Stat
+        label="Racha actual"
+        value={formatDays(streaks.current)}
+        hint={streakHint(streaks, todayMinutes, streakMinMinutes)}
+      />
+      <Stat
+        label="Racha máxima"
+        value={formatDays(streaks.max)}
+        hint={`Días con ${formatDuration(streakMinMinutes)} o más.`}
+      />
+      <WeeklyGoalCard
+        minutes={weekMinutes}
+        goalMinutes={weeklyGoalMinutes}
+        className="col-span-2 lg:col-span-1"
+      />
     </div>
   )
 }

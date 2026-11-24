@@ -14,7 +14,7 @@ export function StudyPage() {
     <>
       <PageHeader
         title="Estudiar"
-        description="Elige un tema o un proyecto y empieza una sesión."
+        description={timer.data ? undefined : 'Elige un tema o un proyecto y empieza una sesión.'}
       />
       {loading ? (
         <LoadingState />

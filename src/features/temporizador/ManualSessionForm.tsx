@@ -4,7 +4,6 @@ import { useState } from 'react'
 import { useNavigate, useSearchParams } from 'react-router'
 import { Alert } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
-import { Card } from '@/components/ui/Card'
 import { Spinner } from '@/components/ui/Spinner'
 import { TextAreaField } from '@/components/ui/TextAreaField'
 import { TextField } from '@/components/ui/TextField'
@@ -76,7 +75,7 @@ export function ManualSessionForm({ roadmap, progress, activeTrack }: RoadmapDat
 
   return (
     <form
-      className="flex flex-col gap-5"
+      className="flex max-w-2xl flex-col gap-8"
       onSubmit={(event) => {
         event.preventDefault()
         setSubmitted(true)
@@ -101,7 +100,7 @@ export function ManualSessionForm({ roadmap, progress, activeTrack }: RoadmapDat
       }}
     >
       <TargetPicker targets={targets} selected={selected} onSelect={setSelectedKey} />
-      <Card className="flex flex-col gap-4">
+      <div className="flex flex-col gap-5">
         <div className="grid grid-cols-2 gap-3">
           <TextField
             label="Fecha"
@@ -118,7 +117,7 @@ export function ManualSessionForm({ roadmap, progress, activeTrack }: RoadmapDat
             required
           />
         </div>
-        <p className="-mt-2 text-xs text-fg-muted">Hora de Colombia.</p>
+        <p className="-mt-3 text-sm text-fg-muted">Hora de Colombia.</p>
         {submitted && !parsed.ok && parsed.field === 'date' && <Alert>{parsed.error}</Alert>}
         <TextField
           label="Duración (minutos)"
@@ -141,11 +140,11 @@ export function ManualSessionForm({ roadmap, progress, activeTrack }: RoadmapDat
             type="checkbox"
             checked={markDone}
             onChange={(event) => setMarkDone(event.target.checked)}
-            className="size-5 accent-[var(--accent)]"
+            className="size-6 shrink-0 accent-[var(--meter)]"
           />
-          <span className="text-sm">Marcar «{selected?.title ?? ''}» como hecho</span>
+          <span>Marcar «{selected?.title ?? ''}» como hecho</span>
         </label>
-      </Card>
+      </div>
       {save.isError && (
         <Alert>No se pudo registrar la sesión. Revisa tu conexión e inténtalo de nuevo.</Alert>
       )}

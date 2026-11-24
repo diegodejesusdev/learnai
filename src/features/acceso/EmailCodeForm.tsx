@@ -21,13 +21,13 @@ export function EmailCodeForm({ email, onBack }: EmailCodeFormProps) {
 
   return (
     <div className="flex flex-col gap-4">
-      <p className="text-sm text-fg-muted">
-        Te enviamos un correo a <strong className="font-medium text-fg">{email}</strong>. Toca el
-        enlace para entrar, o escribe aquí el código que trae (útil en la app instalada en el
-        móvil).
+      <p className="text-fg-muted">
+        Te enviamos un correo a <strong className="font-bold break-all text-fg">{email}</strong>.
+        Toca el enlace para entrar, o escribe aquí el código que trae (útil en la app instalada en
+        el móvil).
       </p>
       <form
-        className="flex flex-col gap-3"
+        className="flex flex-col gap-4"
         onSubmit={(event) => {
           event.preventDefault()
           verify.mutate()
@@ -44,7 +44,7 @@ export function EmailCodeForm({ email, onBack }: EmailCodeFormProps) {
           required
           value={code}
           onChange={(event) => setCode(event.target.value.replace(/\D/g, ''))}
-          className="text-center text-xl tracking-[0.4em] tabular-nums"
+          className="min-h-16 text-center text-3xl font-extrabold tracking-[0.3em] tabular-nums"
         />
         <Button type="submit" size="lg" disabled={verify.isPending || code.length < 6}>
           {verify.isPending && <Spinner />}
@@ -53,11 +53,16 @@ export function EmailCodeForm({ email, onBack }: EmailCodeFormProps) {
       </form>
       {error && <Alert>{authErrorMessage(error)}</Alert>}
       {resend.isSuccess && !error && <Alert tone="success">Te enviamos otro correo.</Alert>}
-      <div className="flex flex-col gap-1 sm:flex-row sm:justify-between">
-        <Button variant="ghost" onClick={onBack}>
+      <div className="flex flex-col items-start gap-1 sm:flex-row sm:justify-between">
+        <Button variant="ghost" className="-mx-4" onClick={onBack}>
           Usar otro correo
         </Button>
-        <Button variant="ghost" disabled={resend.isPending} onClick={() => resend.mutate()}>
+        <Button
+          variant="ghost"
+          className="-mx-4"
+          disabled={resend.isPending}
+          onClick={() => resend.mutate()}
+        >
           {resend.isPending && <Spinner />}
           Reenviar correo
         </Button>

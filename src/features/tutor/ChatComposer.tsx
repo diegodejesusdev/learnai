@@ -70,7 +70,7 @@ export function ChatComposer({ placeholder, sending, onSend, onStop }: ChatCompo
           resize()
         }}
         onKeyDown={onKeyDown}
-        className={cn(fieldControlClasses, 'min-h-11 flex-1 resize-none py-2.5')}
+        className={cn(fieldControlClasses, 'min-h-12 flex-1 resize-none py-2.5')}
       />
       {sending ? (
         <Button

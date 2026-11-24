@@ -1,7 +1,8 @@
-import { CalendarClock } from 'lucide-react'
-import { ButtonLink } from '@/components/ui/ButtonLink'
+import { ArrowRight } from 'lucide-react'
+import { Link } from 'react-router'
 import { LoadingState } from '@/components/ui/LoadingState'
 import { PageHeader } from '@/components/ui/PageHeader'
+import { Section } from '@/components/ui/Section'
 import { useLatestSession } from '@/features/historial/useSessions'
 import { useStudySummary } from '@/features/historial/useStudyStats'
 import { NextTopicCard } from '@/features/ruta/NextTopicCard'
@@ -46,28 +47,45 @@ function HomeContent({ roadmap, progress, activeTrack, latest, summary }: HomeCo
 
   return (
     <>
-      {suggestion && (
-        <ContinueCard
-          suggestion={suggestion}
-          tracks={roadmap.tracks}
-          topicStatuses={statuses}
-          hasHistory={Boolean(latest.data)}
-        />
-      )}
-      <ButtonLink to="/tutor?modo=hoy" variant="secondary" size="lg">
-        <CalendarClock className="size-5" />
-        ¿Qué estudio hoy?
-      </ButtonLink>
-      <HomeStats summary={summary} />
-      {showNext && <NextTopicCard track={activeTrack} progress={progress} showTrack />}
-      {roadmap.tracks.map((track) => (
-        <TrackProgressCard
-          key={track.id}
-          track={track}
-          progress={progress}
-          active={roadmap.tracks.length > 1 && track.id === activeTrack.id}
-        />
-      ))}
+      <div
+        className={
+          suggestion
+            ? 'grid gap-10 xl:grid-cols-[minmax(0,1fr)_17rem] xl:gap-12'
+            : 'flex flex-col gap-10'
+        }
+      >
+        {suggestion && (
+          <ContinueCard
+            suggestion={suggestion}
+            tracks={roadmap.tracks}
+            topicStatuses={statuses}
+            hasHistory={Boolean(latest.data)}
+          />
+        )}
+        <HomeStats summary={summary} />
+      </div>
+      <div>
+        {showNext && <NextTopicCard track={activeTrack} progress={progress} showTrack />}
+        <Link
+          to="/tutor?modo=hoy"
+          className="group flex min-h-18 items-center justify-between gap-4 border-t-2 border-fg py-4 text-title transition-colors hover:text-accent"
+        >
+          ¿Qué estudio hoy?
+          <ArrowRight className="size-6 shrink-0 transition-transform group-hover:translate-x-1" />
+        </Link>
+      </div>
+      <Section title="Tus rutas">
+        <div className="divide-y divide-border border-y border-border">
+          {roadmap.tracks.map((track) => (
+            <TrackProgressCard
+              key={track.id}
+              track={track}
+              progress={progress}
+              active={roadmap.tracks.length > 1 && track.id === activeTrack.id}
+            />
+          ))}
+        </div>
+      </Section>
     </>
   )
 }
@@ -80,7 +98,7 @@ export function HomePage() {
   return (
     <>
       <PageHeader title="Inicio" description={formatLongDate(new Date())} />
-      <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-12">
         <RoadmapGate>
           {(data) => <HomeContent {...data} latest={latest} summary={summary} />}
         </RoadmapGate>

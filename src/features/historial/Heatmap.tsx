@@ -15,8 +15,8 @@ const KEY_STEPS: Partial<Record<string, number>> = {
 }
 
 // En el móvil, 24 px por cuadro (cómodo para el dedo) y se desplaza de lado;
-// desde sm, 18 px para que quepan los 6 meses.
-const cellSize = 'size-6 sm:size-[18px]'
+// desde sm, más pequeño para que quepan los 6 meses.
+const cellSize = 'size-6 sm:size-5 xl:size-7'
 
 interface HeatmapProps {
   weeks: readonly HeatWeek[]
@@ -47,26 +47,23 @@ export function Heatmap({ weeks, selected, onSelect }: HeatmapProps) {
   return (
     // Sin padding lateral en el contenedor: así la columna fija de los días tapa todo lo que
     // pasa por debajo. El pr-1 deja ver el contorno del día elegido en la última columna.
-    <div ref={scrollRef} className="overflow-x-auto overscroll-x-contain pt-1 pb-2">
+    <div ref={scrollRef} className="overflow-x-auto overscroll-x-contain pt-1 pb-3">
       <div
         role="group"
         aria-label="Minutos por día. Usa las flechas para moverte entre días."
-        className="inline-flex gap-1 pr-1"
+        className="inline-flex gap-1 pr-2"
       >
-        <div className="sticky left-0 z-10 flex flex-col gap-1 bg-surface pr-1" aria-hidden>
-          <span className="h-4" />
+        <div className="sticky left-0 z-10 flex flex-col gap-1 bg-bg pr-2" aria-hidden>
+          <span className="h-5" />
           {WEEKDAYS.map((label, index) => (
-            <span
-              key={index}
-              className="flex h-6 items-center text-[10px] text-fg-muted sm:h-[18px]"
-            >
+            <span key={index} className="flex h-6 items-center text-xs text-fg-muted sm:h-5">
               {label}
             </span>
           ))}
         </div>
         {weeks.map((week) => (
           <div key={week.weekStart} className="flex flex-col gap-1">
-            <span className="h-4 text-[10px] leading-4 whitespace-nowrap text-fg-muted" aria-hidden>
+            <span className="h-5 w-0 text-xs leading-5 whitespace-nowrap text-fg-muted" aria-hidden>
               {week.monthLabel}
             </span>
             {week.cells.map((cell) =>
@@ -88,9 +85,9 @@ export function Heatmap({ weeks, selected, onSelect }: HeatmapProps) {
                   onKeyDown={(event) => handleKeyDown(event, cell.day)}
                   className={cn(
                     cellSize,
-                    'rounded-[4px] transition-transform hover:scale-110',
+                    'transition-transform hover:scale-110',
                     levelClasses[cell.level],
-                    cell.day === selected && 'ring-2 ring-fg ring-offset-1 ring-offset-surface',
+                    cell.day === selected && 'ring-2 ring-fg ring-offset-2 ring-offset-bg',
                   )}
                 />
               ),

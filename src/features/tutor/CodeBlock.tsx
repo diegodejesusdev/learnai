@@ -25,15 +25,15 @@ export function CodeBlock({ children }: { children?: ReactNode }) {
   }
 
   return (
-    <div className="my-3 overflow-hidden rounded-xl border border-border bg-surface-muted">
+    <div className="my-4 overflow-hidden border border-control bg-surface">
       <div className="flex items-center justify-between border-b border-border pl-3">
-        <span className="text-xs text-fg-muted">{languageOf(children) ?? 'código'}</span>
+        <span className="text-sm text-fg-muted">{languageOf(children) ?? 'código'}</span>
         <button
           type="button"
           onClick={() => void copy()}
-          className="flex min-h-10 items-center gap-1.5 px-3 text-xs font-medium text-fg-muted hover:text-fg"
+          className="flex min-h-11 items-center gap-1.5 px-3 text-sm font-semibold text-fg-muted hover:text-fg focus-visible:-outline-offset-4"
         >
-          {copied ? <Check className="size-4 text-done" /> : <Copy className="size-4" />}
+          {copied ? <Check className="size-4 text-fg" /> : <Copy className="size-4" />}
           {copied ? 'Copiado' : 'Copiar'}
         </button>
       </div>

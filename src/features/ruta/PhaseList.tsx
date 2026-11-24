@@ -29,7 +29,7 @@ export function PhaseList({ track, progress }: TrackData) {
       {visible.length === 0 ? (
         <EmptyState icon={ListFilter} title="Ninguna fase con ese estado" />
       ) : (
-        <ol className="flex flex-col gap-3">
+        <ol className="divide-y divide-border border-b border-border">
           {visible.map(({ phase, progress: phaseProgressValue, status }) => (
             <li key={phase.id}>
               <PhaseCard phase={phase} progress={phaseProgressValue} status={status} />

@@ -1,4 +1,3 @@
-import { Card } from '@/components/ui/Card'
 import { Section } from '@/components/ui/Section'
 import type { Track } from '@/lib/roadmap'
 import { ExportCsvButton } from './ExportCsvButton'
@@ -16,9 +15,7 @@ export function SessionsSection({ tracks }: { tracks: readonly Track[] }) {
       description="De la más reciente a la más antigua. Toca una para editarla o borrarla."
       action={<ExportCsvButton tracks={tracks} />}
     >
-      <Card>
-        <SessionFiltersForm filters={filters} tracks={tracks} onChange={setFilters} />
-      </Card>
+      <SessionFiltersForm filters={filters} tracks={tracks} onChange={setFilters} />
       <SessionList
         query={toSessionQuery(filters, tracks)}
         tracks={tracks}

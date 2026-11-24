@@ -7,8 +7,11 @@ import { ConnectionStatus } from './ConnectionStatus'
 /** Cabecera del móvil con acceso a Ajustes (en escritorio está en la barra lateral). */
 export function MobileHeader() {
   return (
-    <header className="sticky top-0 z-20 border-b border-border bg-bg/90 pt-[env(safe-area-inset-top)] backdrop-blur lg:hidden">
-      <div className="mx-auto flex h-14 max-w-3xl items-center gap-2 px-4">
+    <header
+      data-surface="dark"
+      className="sticky top-0 z-20 bg-chrome pt-[env(safe-area-inset-top)] text-chrome-fg lg:hidden"
+    >
+      <div className="flex h-14 items-center gap-2 pl-4 sm:pl-6">
         <Brand />
         <ConnectionStatus className="ml-auto" />
         <NavLink
@@ -16,8 +19,8 @@ export function MobileHeader() {
           aria-label="Ajustes"
           className={({ isActive }) =>
             cn(
-              'flex size-11 items-center justify-center rounded-xl transition-colors hover:bg-surface-muted',
-              isActive ? 'text-accent' : 'text-fg-muted',
+              'flex size-14 shrink-0 items-center justify-center transition-colors focus-visible:-outline-offset-4',
+              isActive ? 'bg-hero text-hero-fg' : 'text-chrome-muted hover:text-chrome-fg',
             )
           }
         >

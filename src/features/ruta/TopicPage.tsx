@@ -2,8 +2,8 @@ import { MessageCircle, Play } from 'lucide-react'
 import { useParams } from 'react-router'
 import { NotFoundPage } from '@/app/NotFoundPage'
 import { ButtonLink } from '@/components/ui/ButtonLink'
-import { Card } from '@/components/ui/Card'
 import { PageHeader } from '@/components/ui/PageHeader'
+import { Section } from '@/components/ui/Section'
 import {
   findTopicIn,
   trackOfTarget,
@@ -34,21 +34,22 @@ function TopicView({ track, topic, phase, progress }: TopicViewProps) {
         description={topic.details}
         back={{ to: `/ruta/${phase.id}`, label: phase.title }}
       />
-      <div className="flex flex-col gap-4">
-        <Card className="flex flex-col gap-3">
-          <h2 className="text-sm font-medium">Estado</h2>
-          <TopicStatusPicker topicId={topic.id} status={status} />
-          <TopicMinutes topicId={topic.id} />
-        </Card>
-        <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
-          <ButtonLink to={`/estudiar?tema=${topic.id}`} size="lg">
-            <Play className="size-5" />
-            Estudiar este tema
-          </ButtonLink>
-          <ButtonLink to={`/tutor?tema=${topic.id}`} variant="secondary" size="lg">
-            <MessageCircle className="size-5" />
-            Preguntarle al tutor
-          </ButtonLink>
+      <div className="grid gap-12 xl:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
+        <div className="flex flex-col gap-8">
+          <div className="flex flex-col gap-3">
+            <ButtonLink to={`/estudiar?tema=${topic.id}`} size="lg">
+              <Play className="size-5 fill-current" />
+              Estudiar este tema
+            </ButtonLink>
+            <ButtonLink to={`/tutor?tema=${topic.id}`} variant="secondary" size="lg">
+              <MessageCircle className="size-5" />
+              Preguntarle al tutor
+            </ButtonLink>
+          </div>
+          <Section title="Estado">
+            <TopicStatusPicker topicId={topic.id} status={status} />
+            <TopicMinutes topicId={topic.id} />
+          </Section>
         </div>
         {/* key: al pasar a otro tema, las notas arrancan con las de ese tema */}
         <TopicNotes key={topic.id} topicId={topic.id} initialNotes={notes} />

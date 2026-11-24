@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { Card } from '@/components/ui/Card'
 import { SaveIndicator } from '@/components/ui/SaveIndicator'
 import { TextAreaField } from '@/components/ui/TextAreaField'
 import { saveStatus } from '@/lib/saveStatus'
@@ -21,10 +20,11 @@ export function TopicNotes({ topicId, initialNotes }: TopicNotesProps) {
   const autosave = useDebouncedSave((value: string) => saveNotes.mutate({ topicId, notes: value }))
 
   return (
-    <Card className="flex flex-col gap-2">
+    <div className="flex flex-col gap-3 border-t-2 border-fg pt-5">
       <TextAreaField
         label="Mis notas"
-        rows={6}
+        large
+        rows={10}
         placeholder="Ideas clave, enlaces, dudas para el tutor…"
         value={notes}
         onChange={(event) => {
@@ -37,6 +37,6 @@ export function TopicNotes({ topicId, initialNotes }: TopicNotesProps) {
         status={saveStatus({ isWaiting: autosave.isWaiting, ...saveNotes })}
         onRetry={() => saveNotes.mutate({ topicId, notes })}
       />
-    </Card>
+    </div>
   )
 }

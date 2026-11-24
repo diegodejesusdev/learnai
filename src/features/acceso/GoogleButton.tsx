@@ -47,7 +47,7 @@ export function GoogleButton({ status }: { status: GoogleStatus }) {
         Continuar con Google
       </Button>
       {status === 'off' && (
-        <p className="text-center text-xs text-fg-muted">
+        <p className="text-sm text-fg-muted">
           Google todavía no está configurado en Supabase (ver docs/SETUP.md §2.6).
         </p>
       )}

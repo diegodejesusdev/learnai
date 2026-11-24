@@ -28,12 +28,12 @@ export function SelectField({
           id={id}
           aria-describedby={describedById(id, hint, error)}
           aria-invalid={error ? true : undefined}
-          className={cn(fieldControlClasses, 'min-h-11 appearance-none pr-10', className)}
+          className={cn(fieldControlClasses, 'min-h-12 appearance-none truncate pr-10', className)}
           {...props}
         >
           {children}
         </select>
-        <ChevronDown className="pointer-events-none absolute top-1/2 right-3 size-4 -translate-y-1/2 text-fg-muted" />
+        <ChevronDown className="pointer-events-none absolute top-1/2 right-3 size-5 -translate-y-1/2 text-fg" />
       </div>
     </Field>
   )

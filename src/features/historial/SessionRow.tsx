@@ -1,5 +1,7 @@
 import { ChevronRight } from 'lucide-react'
 import { Link, useLocation } from 'react-router'
+import { rowClasses } from '@/components/ui/styles'
+import { cn } from '@/lib/cn'
 import { formatDuration, formatShortDate, formatTime } from '@/lib/dates'
 import { studyModeLabels } from '@/lib/labels'
 import { findPhaseIn, findTopicIn, trackOfTarget, trackPhaseLabel, type Track } from '@/lib/roadmap'
@@ -39,27 +41,31 @@ export function SessionRow({ session, tracks, showDate = true }: SessionRowProps
       to={`/historial/sesion/${session.id}`}
       // Para volver al Historial con los mismos filtros y el mismo día elegido.
       state={{ returnTo: location.pathname + location.search }}
-      className="flex min-h-11 items-center gap-3 rounded-xl px-2 py-3 hover:bg-surface-muted"
+      className={cn(rowClasses, 'flex min-h-14 items-start gap-4 py-4')}
     >
-      <div className="flex w-[4.5rem] shrink-0 flex-col text-center whitespace-nowrap">
+      <div className="flex w-18 shrink-0 flex-col pt-px whitespace-nowrap">
         {showDate && (
-          <span className="text-sm font-semibold">{formatShortDate(session.startedAt)}</span>
+          <span className="text-sm font-bold tabular-nums">
+            {formatShortDate(session.startedAt)}
+          </span>
         )}
-        <span className={showDate ? 'text-xs text-fg-muted' : 'text-sm font-medium'}>
+        <span
+          className={cn('tabular-nums', showDate ? 'text-xs text-fg-muted' : 'text-sm font-bold')}
+        >
           {formatTime(session.startedAt)}
         </span>
       </div>
       <div className="flex min-w-0 flex-1 flex-col gap-0.5">
-        <span className="line-clamp-2 font-medium">{title}</span>
+        <span className="line-clamp-2 font-bold tracking-tight">{title}</span>
         <span className="text-sm text-fg-muted">
-          <span className="font-medium text-fg tabular-nums">
+          <span className="font-bold text-fg tabular-nums">
             {formatDuration(session.durationMinutes)}
           </span>
           {` · ${context} · ${studyModeLabels[session.mode]}`}
         </span>
         {session.notes && <span className="truncate text-sm text-fg-muted">{session.notes}</span>}
       </div>
-      <ChevronRight className="size-4 shrink-0 text-fg-muted" />
+      <ChevronRight className="mt-0.5 size-5 shrink-0 text-fg-muted" />
     </Link>
   )
 }

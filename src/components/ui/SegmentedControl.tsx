@@ -1,11 +1,10 @@
-import type { LucideIcon } from 'lucide-react'
-import { useId } from 'react'
+import { useId, type ComponentType } from 'react'
 import { cn } from '@/lib/cn'
 
 export interface SegmentedOption<T extends string> {
   value: T
   label: string
-  icon?: LucideIcon
+  icon?: ComponentType<{ className?: string }>
 }
 
 interface SegmentedControlProps<T extends string> {
@@ -26,9 +25,9 @@ export function SegmentedControl<T extends string>({
   return (
     <fieldset>
       <legend className="sr-only">{label}</legend>
-      <div className="flex gap-1 rounded-xl bg-surface-muted p-1">
+      <div className="grid auto-cols-fr grid-flow-col divide-x divide-control rounded-xs border border-control bg-surface">
         {options.map(({ value: optionValue, label: optionLabel, icon: Icon }) => (
-          <label key={optionValue} className="min-w-0 flex-1">
+          <label key={optionValue} className="min-w-0">
             <input
               type="radio"
               name={name}
@@ -39,9 +38,9 @@ export function SegmentedControl<T extends string>({
             />
             <span
               className={cn(
-                'flex min-h-11 cursor-pointer items-center justify-center gap-1 rounded-lg px-1.5 text-sm font-medium whitespace-nowrap text-fg-muted transition-colors',
-                'peer-checked:bg-surface-raised peer-checked:text-fg peer-checked:shadow-sm',
-                'peer-focus-visible:outline-2 peer-focus-visible:outline-accent',
+                'flex min-h-12 cursor-pointer items-center justify-center gap-1.5 px-1.5 text-sm font-semibold whitespace-nowrap text-fg-muted transition-colors hover:bg-surface-muted hover:text-fg',
+                'peer-checked:bg-action peer-checked:text-action-fg peer-checked:hover:bg-action',
+                'peer-focus-visible:outline-2 peer-focus-visible:-outline-offset-5 peer-focus-visible:outline-current',
               )}
             >
               {Icon && <Icon className="size-4 shrink-0" />}

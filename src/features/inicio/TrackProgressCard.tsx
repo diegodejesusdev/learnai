@@ -1,7 +1,9 @@
-import { ChevronRight, Route } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
+import { Link } from 'react-router'
 import { Badge } from '@/components/ui/Badge'
-import { CardLink } from '@/components/ui/CardLink'
 import { ProgressBar } from '@/components/ui/ProgressBar'
+import { rowClasses } from '@/components/ui/styles'
+import { cn } from '@/lib/cn'
 import { totalProgress } from '@/lib/progress'
 import { topicStatuses } from '@/features/ruta/progressModel'
 import type { TrackData } from '@/features/ruta/RoadmapGate'
@@ -10,20 +12,27 @@ import type { TrackData } from '@/features/ruta/RoadmapGate'
 export function TrackProgressCard({ track, progress, active }: TrackData & { active: boolean }) {
   const total = totalProgress(track.phases, topicStatuses(progress))
   return (
-    <CardLink to={`/ruta?ruta=${track.id}`} className="flex flex-col gap-3">
-      <div className="flex items-center justify-between gap-2">
-        <span className="flex min-w-0 flex-wrap items-center gap-2 text-sm text-fg-muted">
-          <Route className="size-4 shrink-0 text-accent" />
-          {track.title}
+    <Link
+      to={`/ruta?ruta=${track.id}`}
+      className={cn(rowClasses, 'group flex flex-col gap-4 py-6')}
+    >
+      <div className="flex items-end justify-between gap-4">
+        <div className="flex min-w-0 flex-col items-start gap-1">
           {active && <Badge tone="accent">Activa</Badge>}
+          <span className="text-title group-hover:text-accent">{track.title}</span>
+          <span className="text-sm text-fg-muted tabular-nums">
+            {total.done} de {total.total} temas hechos
+          </span>
+        </div>
+        <span
+          aria-hidden
+          className="flex shrink-0 items-center gap-3 text-figure whitespace-nowrap"
+        >
+          {Math.round(total.ratio * 100)} %
+          <ArrowRight className="size-6 transition-transform group-hover:translate-x-1" />
         </span>
-        <ChevronRight className="size-5 shrink-0 text-fg-muted" />
       </div>
-      <p className="text-lg font-semibold">
-        {total.done}{' '}
-        <span className="font-normal text-fg-muted">de {total.total} temas hechos</span>
-      </p>
-      <ProgressBar value={total.ratio} label={`Progreso de ${track.title}`} showLabel />
-    </CardLink>
+      <ProgressBar value={total.ratio} label={`Progreso de ${track.title}`} />
+    </Link>
   )
 }

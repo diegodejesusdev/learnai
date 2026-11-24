@@ -2,7 +2,6 @@ import { Check } from 'lucide-react'
 import { useState } from 'react'
 import { Alert } from '@/components/ui/Alert'
 import { Button } from '@/components/ui/Button'
-import { Card } from '@/components/ui/Card'
 import { Spinner } from '@/components/ui/Spinner'
 import { TextAreaField } from '@/components/ui/TextAreaField'
 import { TextField } from '@/components/ui/TextField'
@@ -46,9 +45,9 @@ export function SessionEditForm({ session, tracks, onDone }: SessionEditFormProp
     setForm({ ...form, [field]: event.target.value })
 
   return (
-    <div className="flex flex-col gap-6">
+    <div className="flex max-w-2xl flex-col gap-10">
       <form
-        className="flex flex-col gap-5"
+        className="flex flex-col gap-8"
         onSubmit={(event) => {
           event.preventDefault()
           setSubmitted(true)
@@ -66,7 +65,7 @@ export function SessionEditForm({ session, tracks, onDone }: SessionEditFormProp
         }}
       >
         <TargetPicker targets={targets} selected={selected} onSelect={setSelectedKey} />
-        <Card className="flex flex-col gap-4">
+        <div className="flex flex-col gap-5">
           <p className="text-sm text-fg-muted">
             Registrada en modo {studyModeLabels[session.mode]}.
           </p>
@@ -86,7 +85,7 @@ export function SessionEditForm({ session, tracks, onDone }: SessionEditFormProp
               required
             />
           </div>
-          <p className="-mt-2 text-xs text-fg-muted">
+          <p className="-mt-3 text-sm text-fg-muted">
             Hora de Colombia. La sesión cuenta en el día en que empezó.
           </p>
           {submitted && !parsed.ok && parsed.field === 'date' && <Alert>{parsed.error}</Alert>}
@@ -102,7 +101,7 @@ export function SessionEditForm({ session, tracks, onDone }: SessionEditFormProp
             error={!parsed.ok && parsed.field === 'duration' ? parsed.error : null}
           />
           <TextAreaField label="Notas" rows={4} value={form.notes} onChange={update('notes')} />
-        </Card>
+        </div>
         {save.isError && (
           <Alert>
             {save.error instanceof SessionGoneError

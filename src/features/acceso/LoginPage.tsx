@@ -1,9 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
 import { useEffect, useState } from 'react'
 import { Navigate, useLocation } from 'react-router'
-import { Logo } from '@/components/layout/Brand'
+import { Wordmark } from '@/components/layout/Brand'
 import { Alert } from '@/components/ui/Alert'
-import { Card } from '@/components/ui/Card'
 import { LoadingState } from '@/components/ui/LoadingState'
 import { useAuth } from './AuthContext'
 import { fetchAuthProviders } from './authApi'
@@ -52,29 +51,34 @@ export function LoginPage() {
       : 'off'
 
   return (
-    <main className="flex min-h-dvh items-center justify-center px-4 py-10">
+    <main className="grid min-h-dvh lg:grid-cols-2">
       <title>Entrar · LearnAI</title>
-      <div className="flex w-full max-w-sm flex-col items-center gap-6">
-        <div className="flex flex-col items-center gap-2 text-center">
-          <Logo className="size-14" />
-          <h1 className="text-2xl font-semibold tracking-tight">Entrar a LearnAI</h1>
-          <p className="text-sm text-fg-muted">Tus rutas de estudio</p>
+      <div
+        data-surface="dark"
+        className="flex flex-col justify-between gap-16 bg-hero px-6 pt-[calc(2rem+env(safe-area-inset-top))] pb-10 text-hero-fg lg:p-14"
+      >
+        <Wordmark className="text-2xl" />
+        <div className="flex flex-col gap-4">
+          <h1 className="text-display text-balance">Entrar a LearnAI</h1>
+          <p className="text-lg text-hero-muted">Tus rutas de estudio</p>
         </div>
-        <Card className="flex w-full flex-col gap-5">
+      </div>
+      <div className="flex items-start px-6 py-10 lg:items-center lg:p-14">
+        <div className="flex w-full max-w-md flex-col gap-6">
           {urlError && <Alert>{urlError}</Alert>}
           {sentTo ? (
             <EmailCodeForm email={sentTo} onBack={() => setSentTo(null)} />
           ) : (
             <>
               <GoogleButton status={googleStatus} />
-              <div className="flex items-center gap-3 text-xs text-fg-muted">
+              <div className="flex items-center gap-4 text-sm text-fg-muted">
                 <span className="h-px flex-1 bg-border" />o con tu correo
                 <span className="h-px flex-1 bg-border" />
               </div>
               <EmailLinkForm enabled={emailEnabled} onSent={setSentTo} />
             </>
           )}
-        </Card>
+        </div>
       </div>
     </main>
   )

@@ -12,20 +12,22 @@ interface PageHeaderProps {
 
 export function PageHeader({ title, description, back, eyebrow }: PageHeaderProps) {
   return (
-    <header className="mb-6 flex flex-col gap-1">
+    <header className="mb-8 flex flex-col gap-2 lg:mb-12 lg:gap-3">
       <title>{`${title} · LearnAI`}</title>
       {back && (
         <Link
           to={back.to}
-          className="mb-1 -ml-2 inline-flex min-h-11 w-fit items-center gap-1 rounded-xl px-2 text-sm font-medium text-fg-muted hover:text-fg"
+          className="inline-flex min-h-11 w-fit max-w-full items-center gap-1.5 text-sm font-semibold text-fg-muted transition-colors hover:text-accent"
         >
-          <ArrowLeft className="size-4" />
+          <ArrowLeft className="size-4 shrink-0" />
           {back.label}
         </Link>
       )}
-      {eyebrow && <div className="text-sm font-medium text-accent">{eyebrow}</div>}
-      <h1 className="text-2xl font-semibold tracking-tight text-balance sm:text-3xl">{title}</h1>
-      {description && <p className="text-pretty text-fg-muted">{description}</p>}
+      {eyebrow && <div className="text-sm font-semibold text-accent">{eyebrow}</div>}
+      <h1 className="text-display text-balance wrap-break-word hyphens-auto">{title}</h1>
+      {description && (
+        <p className="max-w-2xl text-pretty text-fg-muted lg:text-lg">{description}</p>
+      )}
     </header>
   )
 }

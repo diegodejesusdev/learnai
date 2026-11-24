@@ -5,9 +5,12 @@ import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ErrorState } from '@/components/ui/ErrorState'
+import { Hero } from '@/components/ui/Hero'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { ProgressBar } from '@/components/ui/ProgressBar'
 import { Section } from '@/components/ui/Section'
+import { SegmentedControl } from '@/components/ui/SegmentedControl'
+import { Stat } from '@/components/ui/Stat'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { Tabs } from '@/components/ui/Tabs'
 import { TextField } from '@/components/ui/TextField'
@@ -31,9 +34,15 @@ function TabsSample() {
         onChange={setTab}
         panelId="pestana-ejemplo"
       />
-      <p id="pestana-ejemplo" role="tabpanel" className="text-sm text-fg-muted">
+      <p id="pestana-ejemplo" role="tabpanel" className="text-fg-muted">
         Contenido de «{sampleTabs.find((option) => option.value === tab)?.label}».
       </p>
+      <SegmentedControl
+        label="Selección de ejemplo"
+        options={sampleTabs}
+        value={tab}
+        onChange={setTab}
+      />
     </Card>
   )
 }
@@ -43,19 +52,57 @@ export function DesignSystemPage() {
   return (
     <>
       <PageHeader title="Sistema de diseño" back={{ to: '/ajustes', label: 'Ajustes' }} />
-      <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-12">
         <Section title="Colores">
           <ColorSwatches />
         </Section>
 
-        <Section title="Tipografía" description="Inter, con números tabulares para tiempos.">
-          <Card className="flex flex-col gap-2">
-            <p className="text-3xl font-semibold tracking-tight">Título de página</p>
-            <p className="text-lg font-semibold tracking-tight">Título de sección</p>
+        <Section
+          title="Tipografía"
+          description="Inter con tamaño óptico: muy pesada en títulos, tabular en números."
+        >
+          <div className="flex flex-col gap-5">
+            <p className="text-display">text-display</p>
+            <p className="text-lead">text-lead</p>
+            <p className="text-title">text-title</p>
             <p>Texto normal a 16 px para leer cómodo en el móvil.</p>
-            <p className="text-sm text-fg-muted">Texto secundario para descripciones y ayudas.</p>
-            <p className="text-4xl font-semibold tabular-nums">25:00</p>
-          </Card>
+            <p className="text-sm text-fg-muted">
+              Texto secundario a 15 px para descripciones y ayudas.
+            </p>
+            <p className="text-xs text-fg-muted">Lo más pequeño: 13 px.</p>
+            <p className="text-figure">1 h 35 min</p>
+            <p className="text-giant text-meter">42</p>
+          </div>
+        </Section>
+
+        <Section
+          title="Bloque de ahora"
+          description="Uno por pantalla. Negro cuando algo está detenido."
+        >
+          <div className="grid gap-4 lg:grid-cols-2">
+            <Hero className="flex flex-col gap-6">
+              <p className="text-lead">Seguir estudiando</p>
+              <div className="flex flex-wrap gap-3">
+                <Button variant="inverse" size="lg">
+                  Principal
+                </Button>
+                <Button variant="outline" size="lg">
+                  Secundario
+                </Button>
+              </div>
+            </Hero>
+            <Hero tone="chrome" className="flex flex-col gap-2">
+              <p className="text-lead">En pausa</p>
+              <p className="text-hero-muted">El color dice el estado de lejos.</p>
+            </Hero>
+          </div>
+        </Section>
+
+        <Section title="Números">
+          <div className="grid grid-cols-2 gap-4 lg:grid-cols-3">
+            <Stat label="Hoy" value="25 min" hint="Hoy ya cuenta." />
+            <Stat label="Racha" value="3 días" hint="Máxima: 5 días" />
+          </div>
         </Section>
 
         <Section title="Botones" description="Todos miden al menos 44 px de alto.">
@@ -72,7 +119,7 @@ export function DesignSystemPage() {
         </Section>
 
         <Section title="Estados y badges">
-          <Card className="flex flex-wrap gap-2">
+          <Card className="flex flex-wrap items-center gap-x-6 gap-y-3">
             <StatusBadge status="pendiente" />
             <StatusBadge status="en_curso" />
             <StatusBadge status="hecho" />
@@ -81,7 +128,10 @@ export function DesignSystemPage() {
           </Card>
         </Section>
 
-        <Section title="Pestañas" description="Para el PC; en el móvil, un menú desplegable.">
+        <Section
+          title="Pestañas y selección"
+          description="Las pestañas son para el PC; en el móvil, un menú desplegable."
+        >
           <TabsSample />
         </Section>
 

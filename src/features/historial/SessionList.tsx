@@ -1,7 +1,6 @@
 import { History } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { ButtonLink } from '@/components/ui/ButtonLink'
-import { Card } from '@/components/ui/Card'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ErrorState } from '@/components/ui/ErrorState'
 import { LoadingState } from '@/components/ui/LoadingState'
@@ -45,8 +44,8 @@ export function SessionList({ query, tracks, filtered }: SessionListProps) {
   }
 
   return (
-    <Card className={cn('p-2 transition-opacity sm:p-2', list.isPlaceholderData && 'opacity-60')}>
-      <ul aria-label="Sesiones" className="divide-y divide-border">
+    <div className={cn('transition-opacity', list.isPlaceholderData && 'opacity-60')}>
+      <ul aria-label="Sesiones" className="divide-y divide-border border-y border-border">
         {sessions.map((session) => (
           <li key={session.id}>
             <SessionRow session={session} tracks={tracks} />
@@ -55,8 +54,8 @@ export function SessionList({ query, tracks, filtered }: SessionListProps) {
       </ul>
       {list.hasNextPage && (
         <Button
-          variant="ghost"
-          className="mt-1 w-full"
+          variant="secondary"
+          className="mt-5 w-full"
           disabled={list.isFetchingNextPage}
           onClick={() => void list.fetchNextPage()}
         >
@@ -64,6 +63,6 @@ export function SessionList({ query, tracks, filtered }: SessionListProps) {
           Cargar más
         </Button>
       )}
-    </Card>
+    </div>
   )
 }

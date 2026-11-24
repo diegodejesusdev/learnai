@@ -18,7 +18,7 @@ export function TextField({ label, hint, error, className, ...props }: TextField
         id={id}
         aria-describedby={describedById(id, hint, error)}
         aria-invalid={error ? true : undefined}
-        className={cn(fieldControlClasses, 'min-h-11', className)}
+        className={cn(fieldControlClasses, 'min-h-12', className)}
         {...props}
       />
     </Field>

@@ -1,7 +1,6 @@
 import { ListFilter } from 'lucide-react'
 import { useParams } from 'react-router'
 import { NotFoundPage } from '@/app/NotFoundPage'
-import { Card } from '@/components/ui/Card'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { ProgressBar } from '@/components/ui/ProgressBar'
@@ -38,15 +37,14 @@ function PhaseView({ track, phase, progress }: PhaseViewProps) {
         description={phase.summary}
         back={{ to: `/ruta?ruta=${track.id}`, label: 'Ruta' }}
       />
-      <div className="flex flex-col gap-8">
-        <Card>
-          <ProgressBar
-            value={phaseValue.ratio}
-            label={`Progreso · ${phaseValue.done} de ${phaseValue.total} temas`}
-            showLabel
-          />
-        </Card>
-        <Section title="Temas" description="Toca el estado de un tema para avanzarlo.">
+      <div className="grid gap-12 xl:grid-cols-[minmax(0,7fr)_minmax(0,5fr)]">
+        <ProgressBar
+          value={phaseValue.ratio}
+          label={`Progreso · ${phaseValue.done} de ${phaseValue.total} temas`}
+          showLabel
+          className="xl:col-span-2"
+        />
+        <Section title="Temas" description="Toca el círculo de un tema para avanzar su estado.">
           <StatusFilterChips
             label="Filtrar temas por estado"
             value={filter}
@@ -56,18 +54,16 @@ function PhaseView({ track, phase, progress }: PhaseViewProps) {
           {visible.length === 0 ? (
             <EmptyState icon={ListFilter} title="Ningún tema con ese estado" />
           ) : (
-            <Card className="p-2 sm:p-2">
-              <ul className="divide-y divide-border">
-                {visible.map(({ topic, status }) => (
-                  <li key={topic.id}>
-                    <TopicRow topic={topic} status={status} />
-                  </li>
-                ))}
-              </ul>
-            </Card>
+            <ul className="divide-y divide-border border-y border-border">
+              {visible.map(({ topic, status }) => (
+                <li key={topic.id}>
+                  <TopicRow topic={topic} status={status} />
+                </li>
+              ))}
+            </ul>
           )}
         </Section>
-        <Section title="Proyecto de la fase">
+        <Section title="Proyecto de la fase" className="self-start">
           {/* key: el formulario se reinicia si cambias de fase */}
           <ProjectEditor
             key={phase.id}

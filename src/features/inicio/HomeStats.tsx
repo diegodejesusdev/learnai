@@ -1,6 +1,5 @@
-import { Clock, Flame } from 'lucide-react'
 import { ErrorState } from '@/components/ui/ErrorState'
-import { StatCard } from '@/components/ui/StatCard'
+import { Stat } from '@/components/ui/Stat'
 import type { useStudySummary } from '@/features/historial/useStudyStats'
 import { WeeklyGoalCard } from '@/features/historial/WeeklyGoalCard'
 import { formatDuration } from '@/lib/dates'
@@ -13,22 +12,24 @@ export function HomeStats({ summary }: { summary: ReturnType<typeof useStudySumm
   }
   const data = summary.data
   return (
-    <>
-      <div className="grid grid-cols-2 gap-4">
-        <StatCard
-          icon={Clock}
-          label="Hoy"
-          value={data ? formatDuration(data.todayMinutes) : '…'}
-          hint={data && streakHint(data.streaks, data.todayMinutes, data.streakMinMinutes)}
+    <div className="grid grid-cols-2 gap-x-4 gap-y-8 lg:grid-cols-3 lg:gap-x-8 xl:grid-cols-1">
+      <Stat
+        label="Hoy"
+        value={data ? formatDuration(data.todayMinutes) : '…'}
+        hint={data && streakHint(data.streaks, data.todayMinutes, data.streakMinMinutes)}
+      />
+      <Stat
+        label="Racha"
+        value={data ? formatDays(data.streaks.current) : '…'}
+        hint={data && `Máxima: ${formatDays(data.streaks.max)}`}
+      />
+      {data && (
+        <WeeklyGoalCard
+          minutes={data.weekMinutes}
+          goalMinutes={data.weeklyGoalMinutes}
+          className="col-span-2 lg:col-span-1"
         />
-        <StatCard
-          icon={Flame}
-          label="Racha"
-          value={data ? formatDays(data.streaks.current) : '…'}
-          hint={data && `Máxima: ${formatDays(data.streaks.max)}`}
-        />
-      </div>
-      {data && <WeeklyGoalCard minutes={data.weekMinutes} goalMinutes={data.weeklyGoalMinutes} />}
-    </>
+      )}
+    </div>
   )
 }

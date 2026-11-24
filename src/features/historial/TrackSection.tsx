@@ -1,9 +1,8 @@
-import { Card } from '@/components/ui/Card'
 import { ErrorState } from '@/components/ui/ErrorState'
 import { LoadingState } from '@/components/ui/LoadingState'
 import { Section } from '@/components/ui/Section'
 import type { Track } from '@/lib/roadmap'
-import { MinutesBars } from './MinutesBars'
+import { TrackMinutes } from './TrackMinutes'
 import { trackTotals } from './trackTotals'
 import { usePhaseTotals } from './useStudyStats'
 
@@ -22,22 +21,7 @@ export function TrackSection({ tracks }: { tracks: readonly Track[] }) {
   } else if (!totals.data) {
     content = <LoadingState />
   } else {
-    content = (
-      <Card className="flex flex-col gap-2">
-        <MinutesBars
-          caption="Minutos por ruta"
-          column="Ruta"
-          labelWidth={104}
-          rows={trackTotals(tracks, totals.data).map(({ track, minutes, sessions }) => ({
-            label: track.title,
-            title: track.title,
-            name: track.title,
-            minutes,
-            sessions,
-          }))}
-        />
-      </Card>
-    )
+    content = <TrackMinutes totals={trackTotals(tracks, totals.data)} />
   }
 
   return (

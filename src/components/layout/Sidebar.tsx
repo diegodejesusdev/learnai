@@ -11,10 +11,10 @@ function SidebarLink({ to, label, icon: Icon, end }: NavItem) {
       end={end}
       className={({ isActive }) =>
         cn(
-          'flex min-h-11 items-center gap-3 rounded-xl px-3 text-sm font-medium transition-colors',
+          'flex min-h-13 items-center gap-3.5 px-6 font-semibold transition-colors focus-visible:-outline-offset-4',
           isActive
-            ? 'bg-accent-soft text-accent-soft-fg'
-            : 'text-fg-muted hover:bg-surface-muted hover:text-fg',
+            ? 'bg-hero text-hero-fg'
+            : 'text-chrome-muted hover:bg-chrome-hover hover:text-chrome-fg',
         )
       }
     >
@@ -27,20 +27,23 @@ function SidebarLink({ to, label, icon: Icon, end }: NavItem) {
 /** Navegación de escritorio (desde 1024 px). */
 export function Sidebar() {
   return (
-    <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-border bg-surface px-3 py-5 lg:flex">
-      <div className="flex flex-col gap-2 px-2">
+    <aside
+      data-surface="dark"
+      className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col overflow-y-auto bg-chrome pt-8 text-chrome-fg lg:flex"
+    >
+      <div className="flex flex-col items-start gap-3 px-6">
         <Brand />
         <ConnectionStatus />
       </div>
-      <nav aria-label="Navegación principal" className="mt-6 flex flex-1 flex-col">
-        <ul className="flex flex-col gap-1">
+      <nav aria-label="Navegación principal" className="mt-8 flex flex-1 flex-col">
+        <ul>
           {mainNavItems.map((item) => (
             <li key={item.to}>
               <SidebarLink {...item} />
             </li>
           ))}
         </ul>
-        <div className="mt-auto border-t border-border pt-3">
+        <div className="mt-auto py-6">
           <SidebarLink {...settingsNavItem} />
         </div>
       </nav>

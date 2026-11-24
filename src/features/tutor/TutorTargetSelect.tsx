@@ -1,4 +1,5 @@
 import { SelectField } from '@/components/ui/SelectField'
+import { cn } from '@/lib/cn'
 import { phaseLabel, type Track } from '@/lib/roadmap'
 
 interface TutorTargetSelectProps {
@@ -23,7 +24,7 @@ export function TutorTargetSelect({
   onTrackChange,
 }: TutorTargetSelectProps) {
   return (
-    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+    <div className={cn('grid gap-3', tracks.length > 1 && 'grid-cols-2')}>
       {tracks.length > 1 && (
         <SelectField
           label="Ruta"

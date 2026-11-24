@@ -1,5 +1,4 @@
 import { lazy, Suspense } from 'react'
-import { Card } from '@/components/ui/Card'
 import { ErrorState } from '@/components/ui/ErrorState'
 import { LoadingState } from '@/components/ui/LoadingState'
 import { Section } from '@/components/ui/Section'
@@ -34,8 +33,8 @@ export function WeeklySection() {
     }))
     const goal = settings.data.weekly_goal_minutes
     content = (
-      <Card className="flex flex-col gap-2">
-        <Suspense fallback={<div className="h-56" />}>
+      <div className="flex flex-col gap-3">
+        <Suspense fallback={<div className="h-64" />}>
           <WeeklyMinutesChart rows={rows} goalMinutes={goal} />
         </Suspense>
         <ChartDataTable
@@ -46,7 +45,7 @@ export function WeeklySection() {
             formatDuration(row.minutes),
           ])}
         />
-      </Card>
+      </div>
     )
   }
 

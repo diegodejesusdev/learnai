@@ -37,7 +37,7 @@ export function SaveToNotes({ text, messageRef, target, label }: SaveToNotesProp
     return (
       <Button
         variant="ghost"
-        className="self-start text-fg-muted"
+        className="-ml-4 self-start"
         onPointerDown={() => (selectionRef.current = selectionInside(messageRef.current))}
         onClick={() =>
           setDraft(selectionRef.current || selectionInside(messageRef.current) || text)
@@ -61,7 +61,7 @@ export function SaveToNotes({ text, messageRef, target, label }: SaveToNotesProp
     )
 
   return (
-    <div className="flex flex-col gap-2 rounded-xl border border-border bg-surface p-3">
+    <div className="flex flex-col gap-4 border border-control bg-surface p-4">
       <TextAreaField
         label={`Fragmento para tus notas de «${label}»`}
         hint="Recórtalo a lo que quieras guardar. Se agrega al final de tus notas."

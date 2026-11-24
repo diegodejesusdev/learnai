@@ -7,12 +7,14 @@ import { fieldControlClasses } from './styles'
 interface TextAreaFieldProps extends TextareaHTMLAttributes<HTMLTextAreaElement> {
   label: string
   hint?: string
+  large?: boolean
   error?: string | null
 }
 
 export function TextAreaField({
   label,
   hint,
+  large,
   error,
   className,
   rows = 5,
@@ -20,7 +22,7 @@ export function TextAreaField({
 }: TextAreaFieldProps) {
   const id = useId()
   return (
-    <Field id={id} label={label} hint={hint} error={error}>
+    <Field id={id} label={label} hint={hint} large={large} error={error}>
       <textarea
         id={id}
         rows={rows}

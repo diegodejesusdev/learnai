@@ -1,20 +1,25 @@
-import { CircleCheck, CircleDashed, CircleDot, type LucideIcon } from 'lucide-react'
+import { cn } from '@/lib/cn'
 import { statusLabels } from '@/lib/labels'
 import type { ProgressStatus } from '@/types/progress'
-import { Badge, type BadgeTone } from './Badge'
+import { StatusIcon } from './StatusIcon'
 
-const statusStyles: Record<ProgressStatus, { tone: BadgeTone; Icon: LucideIcon }> = {
-  pendiente: { tone: 'pending', Icon: CircleDashed },
-  en_curso: { tone: 'progress', Icon: CircleDot },
-  hecho: { tone: 'done', Icon: CircleCheck },
+const tones: Record<ProgressStatus, string> = {
+  pendiente: 'text-pending',
+  en_curso: 'text-progress',
+  hecho: 'text-done',
 }
 
-/** Estado con color, icono y texto (nunca solo color). */
+/** Estado con forma y texto (nunca solo color). */
 export function StatusBadge({ status }: { status: ProgressStatus }) {
-  const { tone, Icon } = statusStyles[status]
   return (
-    <Badge tone={tone} icon={<Icon className="size-3.5" strokeWidth={2.25} />}>
+    <span
+      className={cn(
+        'inline-flex shrink-0 items-center gap-1.5 text-sm font-semibold whitespace-nowrap',
+        tones[status],
+      )}
+    >
+      <StatusIcon status={status} className="size-4" />
       {statusLabels[status]}
-    </Badge>
+    </span>
   )
 }

@@ -7,9 +7,10 @@ export function BottomNav() {
   return (
     <nav
       aria-label="Navegación principal"
-      className="keyboard-hidden fixed inset-x-0 bottom-0 z-30 border-t border-border bg-surface/95 pb-[env(safe-area-inset-bottom)] backdrop-blur lg:hidden"
+      data-surface="dark"
+      className="keyboard-hidden fixed inset-x-0 bottom-0 z-30 bg-chrome pb-[env(safe-area-inset-bottom)] text-chrome-fg lg:hidden"
     >
-      <ul className="mx-auto grid max-w-xl grid-cols-5">
+      <ul className="grid grid-cols-5">
         {mainNavItems.map(({ to, label, icon: Icon, end }) => (
           <li key={to}>
             <NavLink
@@ -17,14 +18,14 @@ export function BottomNav() {
               end={end}
               className={({ isActive }) =>
                 cn(
-                  'flex min-h-14 flex-col items-center justify-center gap-0.5 text-xs font-medium transition-colors',
-                  isActive ? 'text-accent' : 'text-fg-muted hover:text-fg',
+                  'flex min-h-15 flex-col items-center justify-center gap-1 text-xs font-semibold transition-colors focus-visible:-outline-offset-4',
+                  isActive ? 'bg-hero text-hero-fg' : 'text-chrome-muted hover:text-chrome-fg',
                 )
               }
             >
               {({ isActive }) => (
                 <>
-                  <Icon className="size-6" strokeWidth={isActive ? 2.25 : 1.75} />
+                  <Icon className="size-6" strokeWidth={isActive ? 2.5 : 1.75} />
                   {label}
                 </>
               )}

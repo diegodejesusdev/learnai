@@ -33,7 +33,7 @@ La racha y la meta semanal cuentan todas las rutas juntas.
 - **Secciones:** Inicio · Ruta · Estudiar (el temporizador) · Historial · Tutor.
 - **Móvil:** barra inferior fija con las 5 secciones (icono + etiqueta) y cabecera con acceso a Ajustes.
 - **Escritorio (≥ 1024 px):** barra lateral con las mismas secciones y el contenido centrado con ancho máximo.
-- **Tema:** claro/oscuro automático según el sistema, con interruptor manual en Ajustes (`system` / `light` / `dark`). Colores neutros y un solo acento verde azulado. Los estados tienen color y además texto o icono, nunca solo color.
+- **Tema:** claro/oscuro automático según el sistema, con interruptor manual en Ajustes (`system` / `light` / `dark`). Negro para lo que se toca y el marco, un solo acento vinotinto para lo de ahora y tu avance, y gris para lo demás; el error va en anaranjado. Los estados tienen forma o texto además de color, nunca solo color.
 - **Accesibilidad:** áreas táctiles de 44 px o más, foco visible, `aria-label` en español y contraste AA.
 - **Rutas:** `/`, `/ruta`, `/ruta/:phaseId`, `/ruta/tema/:topicId`, `/estudiar`, `/historial`, `/tutor`, `/tutor/:conversationId`, `/ajustes`, `/ajustes/diseno` (catálogo del sistema de diseño) y `/login`. Cualquier otra ruta muestra un 404. Sin sesión, todas redirigen a `/login`.
 - **Parámetros de consulta:** `/ruta?ruta=<id>` muestra esa ruta y la deja como activa; `/historial?ruta=<id>` filtra por ruta; `/estudiar?tema=<id>` o `?proyecto=<id de fase>` preseleccionan el destino; `/tutor?tema=<id>` o `?proyecto=<id de fase>` preseleccionan el contexto del tutor.

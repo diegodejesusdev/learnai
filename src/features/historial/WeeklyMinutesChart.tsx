@@ -28,11 +28,11 @@ interface WeeklyMinutesChartProps {
 export function WeeklyMinutesChart({ rows, goalMinutes }: WeeklyMinutesChartProps) {
   const ticks = hourTicks(Math.max(goalMinutes, ...rows.map((row) => row.minutes)))
   return (
-    <div className="h-56">
+    <div className="h-64">
       <ResponsiveContainer
         width="100%"
         height="100%"
-        initialDimension={{ width: 320, height: 224 }}
+        initialDimension={{ width: 320, height: 256 }}
       >
         <BarChart data={[...rows]} margin={{ top: 20, right: 4, bottom: 0, left: 0 }}>
           <CartesianGrid vertical={false} stroke="var(--border)" />
@@ -69,16 +69,17 @@ export function WeeklyMinutesChart({ rows, goalMinutes }: WeeklyMinutesChartProp
           {goalMinutes > 0 && (
             <ReferenceLine
               y={goalMinutes}
-              stroke="var(--fg-muted)"
+              stroke="var(--fg)"
+              strokeDasharray="4 4"
               label={{
                 value: `Meta: ${formatDuration(goalMinutes)}`,
                 position: 'insideTopLeft',
                 fill: 'var(--fg-muted)',
-                fontSize: 11,
+                fontSize: 13,
               }}
             />
           )}
-          <Bar dataKey="minutes" fill="var(--accent)" radius={[4, 4, 0, 0]} maxBarSize={24} />
+          <Bar dataKey="minutes" fill="var(--meter)" maxBarSize={40} />
         </BarChart>
       </ResponsiveContainer>
     </div>

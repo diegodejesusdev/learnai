@@ -21,15 +21,14 @@ interface MinutesBarsProps {
   /** Encabezado de la primera columna de la tabla. */
   column: string
   rows: readonly MinutesRow[]
-  labelWidth?: number
 }
 
 /** Barras de minutos con su tabla «Ver los datos». Recharts se descarga solo aquí. */
-export function MinutesBars({ caption, column, rows, labelWidth }: MinutesBarsProps) {
+export function MinutesBars({ caption, column, rows }: MinutesBarsProps) {
   return (
     <>
       <Suspense fallback={<div style={{ height: rows.length * MINUTES_ROW_HEIGHT }} />}>
-        <MinutesBarChart rows={rows} labelWidth={labelWidth} />
+        <MinutesBarChart rows={rows} />
       </Suspense>
       <ChartDataTable
         caption={caption}

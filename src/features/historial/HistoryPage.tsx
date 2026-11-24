@@ -15,7 +15,7 @@ export function HistoryPage() {
         title="Historial"
         description="Tu constancia y el tiempo invertido, en hora de Colombia."
       />
-      <div className="flex flex-col gap-8">
+      <div className="flex flex-col gap-14">
         <HistorySummary />
         <RoadmapGate>
           {({ roadmap: { tracks } }) => (

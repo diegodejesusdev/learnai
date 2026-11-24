@@ -1,7 +1,6 @@
 import { useMutation } from '@tanstack/react-query'
 import { FileDown } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
-import { Card } from '@/components/ui/Card'
 import { Section } from '@/components/ui/Section'
 import { Spinner } from '@/components/ui/Spinner'
 import { useAuth } from '@/features/acceso/AuthContext'
@@ -39,10 +38,11 @@ export function ExportDataSection() {
 
   return (
     <Section
+      split
       title="Mis datos"
       description="Una copia de todo lo tuyo en LearnAI: sesiones, notas, progreso, ajustes y conversaciones con el tutor."
     >
-      <Card className="flex flex-col gap-3">
+      <div className="flex flex-col gap-3">
         <Button
           variant="secondary"
           className="self-start"
@@ -52,8 +52,8 @@ export function ExportDataSection() {
           {exportData.isPending ? <Spinner /> : <FileDown className="size-4" />}
           Exportar mis datos (JSON)
         </Button>
-        {!online && <p className="text-xs text-fg-muted">Necesitas conexión para exportar.</p>}
-      </Card>
+        {!online && <p className="text-sm text-fg-muted">Necesitas conexión para exportar.</p>}
+      </div>
     </Section>
   )
 }

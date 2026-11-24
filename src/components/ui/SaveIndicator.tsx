@@ -12,35 +12,35 @@ export function SaveIndicator({ status, onRetry }: SaveIndicatorProps) {
   return (
     <span
       aria-live="polite"
-      className="inline-flex min-h-5 items-center gap-1.5 text-xs text-fg-muted"
+      className="inline-flex min-h-5 flex-wrap items-center gap-1.5 text-sm text-fg-muted"
     >
       {status === 'saving' && (
         <>
-          <Spinner className="size-3.5" />
+          <Spinner className="size-4" />
           Guardando…
         </>
       )}
       {status === 'saved' && (
         <>
-          <CircleCheck className="size-3.5 text-done" />
+          <CircleCheck className="size-4 text-done" />
           Guardado
         </>
       )}
       {status === 'offline' && (
         <>
-          <CloudOff className="size-3.5" />
+          <CloudOff className="size-4" />
           Sin conexión: se guardará al volver
         </>
       )}
       {status === 'error' && (
         <>
-          <CircleAlert className="size-3.5 text-danger" />
-          <span className="text-danger">No se guardó.</span>
+          <CircleAlert className="size-4 text-danger" />
+          <span className="font-medium text-danger">No se guardó.</span>
           {onRetry && (
             <button
               type="button"
               onClick={onRetry}
-              className="font-medium text-accent underline-offset-2 hover:underline"
+              className="-my-3 inline-flex min-h-11 items-center px-1 font-semibold text-fg underline underline-offset-4"
             >
               Reintentar
             </button>

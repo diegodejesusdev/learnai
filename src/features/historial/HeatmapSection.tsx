@@ -1,5 +1,4 @@
 import { useSearchParams } from 'react-router'
-import { Card } from '@/components/ui/Card'
 import { ErrorState } from '@/components/ui/ErrorState'
 import { LoadingState } from '@/components/ui/LoadingState'
 import { Section } from '@/components/ui/Section'
@@ -47,10 +46,10 @@ export function HeatmapSection({ tracks }: { tracks: readonly Track[] }) {
 
     content = (
       <>
-        <Card className="flex flex-col gap-3">
+        <div className="flex flex-col gap-4">
           <Heatmap weeks={weeks} selected={selected} onSelect={select} />
           <HeatmapLegend minMinutes={minMinutes} />
-        </Card>
+        </div>
         <DayDetail
           day={selected}
           today={today}

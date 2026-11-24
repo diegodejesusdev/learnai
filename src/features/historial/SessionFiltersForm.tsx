@@ -73,7 +73,7 @@ export function SessionFiltersForm({ filters, tracks, onChange }: SessionFilters
         </div>
       </div>
       {hasFilters(filters) && (
-        <Button variant="ghost" className="self-start" onClick={() => onChange(emptyFilters)}>
+        <Button variant="ghost" className="-ml-4 self-start" onClick={() => onChange(emptyFilters)}>
           <X className="size-4" />
           Quitar filtros
         </Button>

@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { Link, useSearchParams } from 'react-router'
 import { Button } from '@/components/ui/Button'
 import { ButtonLink } from '@/components/ui/ButtonLink'
+import { Hero } from '@/components/ui/Hero'
 import { SegmentedControl, type SegmentedOption } from '@/components/ui/SegmentedControl'
 import { Spinner } from '@/components/ui/Spinner'
 import { defaultSettings } from '@/features/ajustes/settingsApi'
@@ -14,7 +15,7 @@ import { nextTopic } from '@/lib/progress'
 import { activeFirst } from '@/lib/roadmap'
 import { NotificationToggle } from './NotificationToggle'
 import { studyTargets, type StudyTarget } from './studyTargets'
-import { TargetPicker } from './TargetPicker'
+import { TargetSearch } from './TargetSearch'
 import { createTimer, type TimerMode } from './timerModel'
 import { useTimerChange } from './useActiveTimer'
 
@@ -68,42 +69,59 @@ export function StudySetup({ roadmap, progress, activeTrack }: RoadmapData) {
     : `?proyecto=${selected?.ref.projectPhaseId ?? ''}`
 
   return (
-    <div className="flex flex-col gap-5">
-      <TargetPicker targets={targets} selected={selected} onSelect={setSelectedKey} />
-      <div className="flex flex-col gap-2">
-        <SegmentedControl
-          label="Modo del temporizador"
-          options={modeOptions}
-          value={mode}
-          onChange={setMode}
-        />
-        <p className="text-sm text-fg-muted">
-          {mode === 'pomodoro' ? (
-            <>
-              {settings.pomodoro_work_min} min de trabajo y {settings.pomodoro_break_min} de
-              descanso, en ciclos. Cámbialo en{' '}
-              <Link
-                to="/ajustes"
-                className="font-medium text-accent underline-offset-2 hover:underline"
-              >
-                Ajustes
-              </Link>
-              .
-            </>
-          ) : (
-            'Cronómetro hacia arriba: se detiene cuando tú quieras.'
-          )}
-        </p>
+    <div className="grid gap-10 xl:grid-cols-2 xl:gap-12">
+      <Hero className="flex flex-col justify-between gap-10 xl:min-h-[28rem]">
+        <div className="flex flex-col gap-3">
+          <p className="text-sm font-medium text-hero-muted">
+            {selected?.context ?? 'Elige qué vas a estudiar'}
+          </p>
+          <p className="text-lead text-balance wrap-break-word hyphens-auto">
+            {selected?.title ?? '—'}
+          </p>
+        </div>
+        <Button
+          variant="inverse"
+          size="xl"
+          onClick={start}
+          disabled={!selected || change.isPending}
+        >
+          {change.isPending ? <Spinner /> : <Play className="size-6 fill-current" />}
+          Iniciar
+        </Button>
+      </Hero>
+      <div className="flex flex-col gap-8">
+        <TargetSearch targets={targets} selected={selected} onSelect={setSelectedKey} />
+        <div className="flex flex-col gap-3">
+          <SegmentedControl
+            label="Modo del temporizador"
+            options={modeOptions}
+            value={mode}
+            onChange={setMode}
+          />
+          <p className="text-sm text-fg-muted">
+            {mode === 'pomodoro' ? (
+              <>
+                {settings.pomodoro_work_min} min de trabajo y {settings.pomodoro_break_min} de
+                descanso, en ciclos. Cámbialo en{' '}
+                <Link
+                  to="/ajustes"
+                  className="font-semibold text-fg underline decoration-control underline-offset-4 hover:decoration-fg"
+                >
+                  Ajustes
+                </Link>
+                .
+              </>
+            ) : (
+              'Cronómetro hacia arriba: se detiene cuando tú quieras.'
+            )}
+          </p>
+          {mode === 'pomodoro' && <NotificationToggle />}
+        </div>
+        <ButtonLink to={`/estudiar/manual${manualQuery}`} variant="secondary" size="lg">
+          <PenLine className="size-5" />
+          Registrar sesión manual
+        </ButtonLink>
       </div>
-      <Button size="lg" onClick={start} disabled={!selected || change.isPending}>
-        {change.isPending ? <Spinner /> : <Play className="size-5" />}
-        Iniciar
-      </Button>
-      {mode === 'pomodoro' && <NotificationToggle />}
-      <ButtonLink to={`/estudiar/manual${manualQuery}`} variant="secondary">
-        <PenLine className="size-4" />
-        Registrar sesión manual
-      </ButtonLink>
     </div>
   )
 }

@@ -1,5 +1,4 @@
 import { useState } from 'react'
-import { Card } from '@/components/ui/Card'
 import { SaveIndicator } from '@/components/ui/SaveIndicator'
 import { Section } from '@/components/ui/Section'
 import { TextField } from '@/components/ui/TextField'
@@ -54,11 +53,11 @@ function StudySettingsForm({ settings, disabled }: StudySettingsFormProps) {
   }
 
   return (
-    <Card className="flex flex-col gap-4">
+    <div className="flex flex-col gap-5">
       <fieldset
         disabled={disabled}
         aria-busy={disabled}
-        className="grid min-w-0 grid-cols-1 gap-4 sm:grid-cols-2"
+        className="grid min-w-0 grid-cols-1 gap-5 sm:grid-cols-2"
       >
         <TextField
           label="Meta semanal (horas)"
@@ -102,7 +101,7 @@ function StudySettingsForm({ settings, disabled }: StudySettingsFormProps) {
           error={rest === null ? 'Entre 1 y 60 minutos.' : null}
         />
       </fieldset>
-      <p className="text-xs text-fg-muted">
+      <p className="text-sm text-fg-muted">
         Los minutos del Pomodoro aplican a las sesiones nuevas; la que está en curso conserva los
         suyos.
       </p>
@@ -110,7 +109,7 @@ function StudySettingsForm({ settings, disabled }: StudySettingsFormProps) {
         status={saveStatus({ isWaiting: autosave.isWaiting, ...save })}
         onRetry={() => save.variables && save.mutate(save.variables)}
       />
-    </Card>
+    </div>
   )
 }
 
@@ -118,6 +117,7 @@ export function StudySettingsSection() {
   const settings = useUserSettings()
   return (
     <Section
+      split
       title="Estudio"
       description="Se guardan en tu cuenta y valen en todos tus dispositivos."
     >

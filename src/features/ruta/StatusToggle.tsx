@@ -1,4 +1,4 @@
-import { StatusBadge } from '@/components/ui/StatusBadge'
+import { StatusIcon } from '@/components/ui/StatusIcon'
 import { statusLabels } from '@/lib/labels'
 import { nextStatus } from '@/lib/progress'
 import type { ProgressStatus } from '@/types/progress'
@@ -20,10 +20,10 @@ export function StatusToggle({ topicId, topicTitle, status }: StatusToggleProps)
       type="button"
       onClick={() => setStatus.mutate({ topicId, status: next })}
       aria-label={`Estado de «${topicTitle}»: ${statusLabels[status]}. Toca para cambiar a ${statusLabels[next]}.`}
-      // Ancho fijo para que la fila no salte al cambiar de «Pendiente» a «Hecho».
-      className="flex min-h-11 w-28 shrink-0 items-center justify-end rounded-xl pr-1 hover:bg-surface-muted"
+      title={statusLabels[status]}
+      className="-ml-3 flex w-13 shrink-0 justify-center pt-4 transition-transform active:scale-90"
     >
-      <StatusBadge status={status} />
+      <StatusIcon status={status} className="size-7" />
     </button>
   )
 }
