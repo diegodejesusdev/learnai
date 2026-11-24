@@ -34,7 +34,7 @@ export function ChecklistSection({ track, progress }: TrackData) {
                   }
                   className="peer sr-only"
                 />
-                <span className="flex size-6 shrink-0 items-center justify-center rounded-xs border-2 border-control bg-surface text-transparent peer-checked:border-done peer-checked:bg-done peer-checked:text-done-fg peer-focus-visible:outline-3 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-fg">
+                <span className="flex size-6 shrink-0 items-center justify-center rounded-md border-2 border-control bg-surface text-transparent peer-checked:border-done peer-checked:bg-done peer-checked:text-done-fg peer-focus-visible:outline-3 peer-focus-visible:outline-offset-2 peer-focus-visible:outline-fg">
                   <Check className="size-4" strokeWidth={3.5} />
                 </span>
                 <span className="flex flex-1 flex-col gap-0.5">

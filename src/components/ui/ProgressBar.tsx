@@ -35,14 +35,14 @@ export function ProgressBar({
         aria-valuemin={0}
         aria-valuemax={100}
         aria-valuenow={percent}
-        className={cn('overflow-hidden bg-track', size === 'sm' ? 'h-1' : 'h-2.5')}
+        className={cn('overflow-hidden rounded-full bg-track', size === 'sm' ? 'h-1' : 'h-2.5')}
       >
         <div
           className={cn(
-            'h-full origin-left transition-transform duration-500',
+            'h-full rounded-full transition-transform duration-500',
             percent === 100 && tone !== 'accent' ? 'bg-done' : 'bg-meter',
           )}
-          style={{ transform: `scaleX(${percent / 100})` }}
+          style={{ transform: `translateX(${percent - 100}%)` }}
         />
       </div>
     </div>

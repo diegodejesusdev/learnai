@@ -17,7 +17,7 @@ export function Toaster() {
             role={item.tone === 'error' ? 'alert' : 'status'}
             data-surface={item.tone === 'error' ? undefined : 'dark'}
             className={cn(
-              'pointer-events-auto flex w-full max-w-md items-start gap-3 rounded-xs py-3 pr-1 pl-4 text-sm font-medium',
+              'pointer-events-auto flex w-full max-w-md items-start gap-3 rounded-control py-3 pr-1 pl-4 text-sm font-medium',
               item.tone === 'error'
                 ? 'bg-danger text-danger-fg'
                 : 'bg-chrome text-chrome-fg ring-1 ring-border',
@@ -29,7 +29,7 @@ export function Toaster() {
               type="button"
               aria-label="Cerrar aviso"
               onClick={() => dismissToast(item.id)}
-              className="-my-2.5 flex size-11 shrink-0 items-center justify-center rounded-xs opacity-80 hover:opacity-100 focus-visible:outline-current"
+              className="-my-2.5 flex size-11 shrink-0 items-center justify-center rounded-control opacity-80 hover:opacity-100 focus-visible:outline-current"
             >
               <X className="size-4" />
             </button>

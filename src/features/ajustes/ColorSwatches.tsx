@@ -55,7 +55,7 @@ export function ColorSwatches() {
           <ul className="grid grid-cols-3 gap-3 sm:grid-cols-4 lg:grid-cols-7">
             {swatches.map(({ name, className }) => (
               <li key={name} className="flex flex-col gap-1.5">
-                <span className={`h-16 border border-border ${className}`} />
+                <span className={`h-16 rounded-control border border-border ${className}`} />
                 <code className="text-xs text-fg-muted">{name}</code>
               </li>
             ))}

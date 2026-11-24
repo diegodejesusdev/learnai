@@ -40,7 +40,7 @@ export function QuizQuestionCard({
                 aria-pressed={answer === index}
                 onClick={() => onAnswer(index)}
                 className={cn(
-                  'flex min-h-12 w-full items-start gap-3 rounded-xs border border-control px-4 py-3 text-left transition-colors',
+                  'flex min-h-12 w-full items-start gap-3 rounded-control border border-control px-4 py-3 text-left transition-colors',
                   !answered && 'hover:border-fg hover:bg-surface-muted',
                   isCorrect && 'border-done bg-done text-done-fg',
                   isWrongChoice && 'border-2 border-danger font-semibold text-danger',

@@ -6,7 +6,7 @@ export function Wordmark({ className }: { className?: string }) {
   return (
     <span className={cn('inline-flex items-center font-extrabold tracking-tighter', className)}>
       Learn
-      <span className="ml-[0.08em] bg-hero-fg px-[0.18em] text-hero">AI</span>
+      <span className="ml-[0.1em] rounded-[0.22em] bg-hero-fg px-[0.2em] text-hero">AI</span>
     </span>
   )
 }

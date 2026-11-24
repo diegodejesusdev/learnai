@@ -22,7 +22,7 @@ export function StatusFilterChips({ label, value, counts, onChange }: StatusFilt
   return (
     <fieldset>
       <legend className="sr-only">{label}</legend>
-      <div className="flex max-w-xl divide-x divide-control rounded-xs border border-control bg-surface">
+      <div className="flex max-w-xl divide-x divide-control overflow-hidden rounded-control border border-control bg-surface">
         {STATUS_FILTERS.map((filter) => (
           <label key={filter} className="min-w-0 flex-auto">
             <input

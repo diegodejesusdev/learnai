@@ -56,7 +56,7 @@ export async function requestNotifications(): Promise<NotificationState> {
 export function showNotification(title: string, body: string): void {
   if (notificationState() !== 'granted') return
   try {
-    new Notification(title, { body, icon: '/favicon.svg', tag: 'learnai-pomodoro' })
+    new Notification(title, { body, icon: '/icon-wine.svg', tag: 'learnai-pomodoro' })
   } catch {
     // En Android Chrome se necesita un service worker (llega con la PWA, fase 7).
   }

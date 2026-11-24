@@ -37,7 +37,7 @@ Especificación completa: `docs/SPEC.md`. Plan por fases: `docs/PLAN.md`. Config
 LearnAI/
 ├── CLAUDE.md
 ├── docs/                      # SPEC.md, PLAN.md
-├── public/                    # favicon.svg (luego iconos de la PWA)
+├── public/                    # icon-wine.svg e íconos de la PWA
 ├── scripts/                   # seed-curriculum.ts (npm run seed) + routeFiles.ts, curriculumRows.ts y seedRoutes.ts
 │                              #   (lógica con test), test-tracks-migration.ts (npm run db:test:migracion)
 ├── src/
@@ -151,7 +151,7 @@ LearnAI/
   - Un color nuevo se agrega como token en los dos temas.
 - **Diseño** (`docs/superpowers/specs/2026-11-24-rediseno-design.md`):
   - Un solo `Hero` por pantalla, con la acción principal en blanco. Lo demás va en listas con líneas (`divide-y`), no en tarjetas.
-  - Títulos con `text-display`, `text-lead`, `text-title`, `text-figure` y `text-giant`. Lo más pequeño es `text-xs` (13 px). Esquinas rectas (`rounded-xs` en controles) y sin sombras.
+  - Títulos con `text-display`, `text-lead`, `text-title`, `text-figure` y `text-giant`. Lo más pequeño es `text-xs` (13 px). Esquinas redondeadas: `rounded-control` en botones y campos, `rounded-block` en `Hero` y tarjetas. Sin sombras.
   - `cn` solo une clases: no mezcles dos del mismo tipo (dos tamaños de letra, dos paddings). Si falta un tamaño, agrégalo a `styles.ts`.
 - **Componentes de UI**: se reutilizan los de `src/components/ui` antes de crear uno nuevo. Todo componente nuevo del sistema se agrega también a `/ajustes/diseno`.
 - **Contenido de las rutas**:
@@ -170,7 +170,7 @@ npm run dev           # Servidor de desarrollo en http://localhost:5173
 npm run dev:host      # Igual, pero accesible desde el móvil en la misma Wi-Fi
 npm run build         # Typecheck + build de producción en dist/
 npm run preview       # Sirve dist/ localmente (preview:host para el móvil)
-npm run pwa:icons     # Regenera los íconos de la PWA desde public/favicon.svg
+npm run pwa:icons     # Regenera los íconos de la PWA desde public/icon-wine.svg
 npm run typecheck     # tsc -b
 npm run lint          # ESLint
 npm run format        # Prettier (format:check solo verifica)

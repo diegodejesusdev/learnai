@@ -9,7 +9,7 @@ import type { QuizResult, TutorMessage } from './tutorApi'
 export function UserBubble({ children }: { children: ReactNode }) {
   return (
     <div className="flex justify-end">
-      <p className="max-w-[85%] bg-action px-4 py-3 wrap-anywhere whitespace-pre-wrap text-action-fg">
+      <p className="max-w-[85%] rounded-block rounded-br-md bg-action px-4 py-3 wrap-anywhere whitespace-pre-wrap text-action-fg">
         {children}
       </p>
     </div>

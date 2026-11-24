@@ -11,7 +11,7 @@ export function MobileHeader() {
       data-surface="dark"
       className="sticky top-0 z-20 bg-chrome pt-[env(safe-area-inset-top)] text-chrome-fg lg:hidden"
     >
-      <div className="flex h-14 items-center gap-2 pl-4 sm:pl-6">
+      <div className="flex h-14 items-center gap-2 pr-2 pl-4 sm:pr-4 sm:pl-6">
         <Brand />
         <ConnectionStatus className="ml-auto" />
         <NavLink
@@ -19,7 +19,7 @@ export function MobileHeader() {
           aria-label="Ajustes"
           className={({ isActive }) =>
             cn(
-              'flex size-14 shrink-0 items-center justify-center transition-colors focus-visible:-outline-offset-4',
+              'flex size-11 shrink-0 items-center justify-center rounded-control transition-colors focus-visible:-outline-offset-2',
               isActive ? 'bg-hero text-hero-fg' : 'text-chrome-muted hover:text-chrome-fg',
             )
           }

@@ -50,7 +50,7 @@ export function ConnectionStatus({ className }: { className?: string }) {
               : undefined
           }
           className={cn(
-            'inline-flex min-h-8 items-center gap-1.5 rounded-xs border px-2.5 text-xs font-semibold',
+            'inline-flex min-h-8 items-center gap-1.5 rounded-control border px-2.5 text-xs font-semibold',
             state === 'offline'
               ? 'border-chrome-fg bg-chrome-fg text-chrome'
               : 'border-chrome-muted text-chrome-fg',

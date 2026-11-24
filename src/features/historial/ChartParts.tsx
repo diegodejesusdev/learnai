@@ -6,7 +6,7 @@ interface ChartTooltipBoxProps {
 /** Contenido del tooltip: el valor primero y en negrita; debajo, qué es. */
 export function ChartTooltipBox({ value, label }: ChartTooltipBoxProps) {
   return (
-    <div className="rounded-xs bg-chrome px-3 py-2 text-sm text-chrome-fg ring-1 ring-border">
+    <div className="rounded-control bg-chrome px-3 py-2 text-sm text-chrome-fg ring-1 ring-border">
       <p className="text-lg font-extrabold tracking-tight tabular-nums">{value}</p>
       <p className="text-chrome-muted">{label}</p>
     </div>

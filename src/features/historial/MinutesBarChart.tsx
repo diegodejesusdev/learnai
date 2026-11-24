@@ -46,7 +46,7 @@ export function MinutesBarChart({ rows }: MinutesBarChartProps) {
             return <ChartTooltipBox value={formatDuration(row.minutes)} label={row.title} />
           }}
         />
-        <Bar dataKey="minutes" fill="var(--meter)" maxBarSize={20}>
+        <Bar dataKey="minutes" fill="var(--meter)" radius={[0, 6, 6, 0]} maxBarSize={20}>
           <LabelList
             dataKey="minutes"
             position="right"

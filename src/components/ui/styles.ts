@@ -7,7 +7,7 @@ export type ButtonVariant = 'primary' | 'secondary' | 'ghost' | 'danger' | 'inve
 export type ButtonSize = 'md' | 'lg' | 'xl' | 'icon'
 
 const buttonBase =
-  'inline-flex select-none items-center justify-center gap-2 rounded-xs font-semibold transition-colors duration-150 active:opacity-80 disabled:cursor-not-allowed disabled:opacity-50'
+  'inline-flex select-none items-center justify-center gap-2 rounded-control font-semibold transition-colors duration-150 active:opacity-80 disabled:cursor-not-allowed disabled:opacity-50'
 
 const buttonVariants: Record<ButtonVariant, string> = {
   primary: 'bg-action text-action-fg not-disabled:hover:bg-action-hover',
@@ -39,11 +39,11 @@ export function buttonClasses(
 }
 
 export function cardClasses(className?: string): string {
-  return cn('block border border-border bg-surface p-4 sm:p-6', className)
+  return cn('block rounded-block border border-border bg-surface p-4 sm:p-6', className)
 }
 
 /** Fila de una lista que se toca: se marca con el fondo, sin moverse. */
 export const rowClasses = 'transition-colors hover:bg-surface-muted active:bg-surface-muted'
 
 export const fieldControlClasses =
-  'w-full rounded-xs border border-control bg-surface px-3 text-base text-fg placeholder:text-fg-muted hover:border-fg disabled:opacity-60 disabled:hover:border-control'
+  'w-full rounded-control border border-control bg-surface px-3 text-base text-fg placeholder:text-fg-muted hover:border-fg disabled:opacity-60 disabled:hover:border-control'

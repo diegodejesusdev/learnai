@@ -157,6 +157,10 @@
 }
 
 @theme {
+  /* Esquinas: controles (botones, campos) y bloques (Hero, tarjetas). */
+  --radius-control: 0.75rem;
+  --radius-block: 1.25rem;
+
   /* Lo más pequeño es 13 px; el texto secundario, 15 px. */
   --text-xs: 0.8125rem;
   --text-xs--line-height: 1.125rem;
@@ -199,9 +203,17 @@
       calc(5rem + env(safe-area-inset-bottom));
   }
 
+  html:has([data-timer-banner]) {
+    scroll-padding-top: calc(8rem + env(safe-area-inset-top));
+  }
+
   @media (min-width: 1024px) {
     html {
       scroll-padding: 1.5rem 0;
+    }
+
+    html:has([data-timer-banner]) {
+      scroll-padding-top: 5rem;
     }
   }
 
@@ -252,12 +264,41 @@
   }
 }
 
+/* ── Barra de la sesión en curso ─────────────────────────────────────────────
+   Baja del negro del marco al vinotinto y se desvanece sobre la página, sin un corte brusco.
+   El desvanecido va fuera de la barra: el texto queda siempre sobre color lleno. */
+.timer-banner {
+  background: linear-gradient(to bottom, var(--chrome), var(--hero));
+}
+
+.timer-banner::after {
+  content: '';
+  position: absolute;
+  inset: 100% 0 auto;
+  height: 2rem;
+  pointer-events: none;
+  background: linear-gradient(
+    to bottom,
+    var(--hero),
+    color-mix(in srgb, var(--hero) 58%, transparent) 26%,
+    color-mix(in srgb, var(--hero) 24%, transparent) 54%,
+    color-mix(in srgb, var(--hero) 7%, transparent) 80%,
+    transparent
+  );
+}
+
+@media (min-width: 1024px) {
+  .timer-banner::after {
+    height: 3rem;
+  }
+}
+
 /* ── Chat del tutor ──────────────────────────────────────────────────────────
    La caja de texto queda pegada abajo, encima de la barra de navegación del móvil.
    Con el teclado abierto (useKeyboardInset) la barra se oculta y la caja sube con el teclado. */
 .chat-composer {
   position: sticky;
-  bottom: calc(3.75rem + env(safe-area-inset-bottom));
+  bottom: calc(4rem + env(safe-area-inset-bottom));
 }
 
 @media (min-width: 1024px) {
@@ -330,6 +371,7 @@ html[data-keyboard='open'] .keyboard-hidden {
 }
 
 .markdown :not(pre) > code {
+  border-radius: 0.375rem;
   background: var(--surface-muted);
   padding: 0.1rem 0.35rem;
   font-size: 0.875em;

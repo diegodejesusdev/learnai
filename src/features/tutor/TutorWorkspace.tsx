@@ -130,9 +130,9 @@ export function TutorWorkspace({ roadmap, progress, activeTrack }: RoadmapData) 
         />
       )}
 
-      {/* -mb-13: el relleno inferior de la página es más alto que la barra del móvil; así la
+      {/* -mb-12: el relleno inferior de la página es más alto que la barra del móvil; así la
           caja queda pegada a la barra también al final de la conversación. */}
-      <div className="chat-composer z-20 -mx-4 -mb-13 flex flex-col gap-2 border-t-2 border-fg bg-bg px-4 pt-3 pb-3 sm:-mx-6 sm:px-6 lg:mx-0 lg:-mb-20 lg:px-0 lg:pb-6">
+      <div className="chat-composer z-20 -mx-4 -mb-12 flex flex-col gap-2 border-t-2 border-fg bg-bg px-4 pt-3 pb-3 sm:-mx-6 sm:px-6 lg:mx-0 lg:-mb-20 lg:px-0 lg:pb-6">
         {!online && (
           <Alert>
             Sin conexión: el tutor necesita internet. Tus conversaciones guardadas vuelven al

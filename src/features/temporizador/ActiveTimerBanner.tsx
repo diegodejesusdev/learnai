@@ -22,7 +22,8 @@ export function ActiveTimerBanner() {
   return (
     <div
       data-surface="dark"
-      className="sticky top-[calc(3.5rem+env(safe-area-inset-top))] z-10 bg-hero text-hero-fg lg:top-0"
+      data-timer-banner
+      className="timer-banner sticky top-[calc(3.5rem+env(safe-area-inset-top))] z-10 text-hero-fg lg:top-0"
     >
       <Link
         to="/estudiar"

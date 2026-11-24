@@ -25,7 +25,7 @@ export function CodeBlock({ children }: { children?: ReactNode }) {
   }
 
   return (
-    <div className="my-4 overflow-hidden border border-control bg-surface">
+    <div className="my-4 overflow-hidden rounded-control border border-control bg-surface">
       <div className="flex items-center justify-between border-b border-border pl-3">
         <span className="text-sm text-fg-muted">{languageOf(children) ?? 'código'}</span>
         <button

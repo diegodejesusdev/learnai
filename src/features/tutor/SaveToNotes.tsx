@@ -61,7 +61,7 @@ export function SaveToNotes({ text, messageRef, target, label }: SaveToNotesProp
     )
 
   return (
-    <div className="flex flex-col gap-4 border border-control bg-surface p-4">
+    <div className="flex flex-col gap-4 rounded-block border border-control bg-surface p-4">
       <TextAreaField
         label={`Fragmento para tus notas de «${label}»`}
         hint="Recórtalo a lo que quieras guardar. Se agrega al final de tus notas."

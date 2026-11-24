@@ -6,16 +6,16 @@ interface HeroProps extends HTMLAttributes<HTMLElement> {
   tone?: 'hero' | 'chrome'
 }
 
-/** El bloque de «lo de ahora»: uno por pantalla. En el móvil llega hasta los bordes. */
+/** El bloque de «lo de ahora»: uno por pantalla. */
 export function Hero({ tone = 'hero', className, ...props }: HeroProps) {
   return (
     <section
       data-surface="dark"
       className={cn(
-        '-mx-4 px-4 py-8 transition-colors duration-300 sm:-mx-6 sm:px-6 lg:mx-0 lg:p-10',
+        'rounded-block px-5 py-7 transition-colors duration-300 sm:p-8 lg:p-10',
         tone === 'hero'
           ? 'bg-hero text-hero-fg'
-          : 'border-y border-border bg-chrome text-chrome-fg [--hero-muted:var(--chrome-muted)] lg:border',
+          : 'border border-border bg-chrome text-chrome-fg [--hero-muted:var(--chrome-muted)]',
         className,
       )}
       {...props}

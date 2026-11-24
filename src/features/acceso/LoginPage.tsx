@@ -55,7 +55,7 @@ export function LoginPage() {
       <title>Entrar · LearnAI</title>
       <div
         data-surface="dark"
-        className="flex flex-col justify-between gap-16 bg-hero px-6 pt-[calc(2rem+env(safe-area-inset-top))] pb-10 text-hero-fg lg:p-14"
+        className="flex flex-col justify-between gap-16 rounded-b-block bg-hero px-6 pt-[calc(2rem+env(safe-area-inset-top))] pb-10 text-hero-fg lg:m-4 lg:rounded-block lg:p-12"
       >
         <Wordmark className="text-2xl" />
         <div className="flex flex-col gap-4">

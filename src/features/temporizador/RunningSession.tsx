@@ -53,8 +53,8 @@ export function RunningSession({ timer, title, context, onFinish }: RunningSessi
               'leading-[0.8] font-extrabold tracking-[-0.045em] tabular-nums',
               // Con horas («1:05:32») son más cifras: más pequeño para que quepa a 360 px.
               view.clock.length > 5
-                ? 'text-[clamp(4rem,20vw,9rem)] lg:text-[clamp(6rem,11vw,10rem)]'
-                : 'text-[clamp(5.5rem,28vw,13rem)] lg:text-[clamp(8rem,15vw,13rem)]',
+                ? 'text-[clamp(3.25rem,17.5vw,9rem)] lg:text-[clamp(6rem,11vw,10rem)]'
+                : 'text-[clamp(4.75rem,27vw,13rem)] lg:text-[clamp(8rem,15vw,13rem)]',
             )}
             role="timer"
             aria-label={`${view.phaseLabel}: ${view.clock}${view.paused ? ', en pausa' : ''}`}
@@ -68,11 +68,11 @@ export function RunningSession({ timer, title, context, onFinish }: RunningSessi
               aria-valuemin={0}
               aria-valuemax={100}
               aria-valuenow={Math.round(view.blockProgress * 100)}
-              className="h-2.5 overflow-hidden bg-hero-fg/25"
+              className="h-2.5 overflow-hidden rounded-full bg-hero-fg/25"
             >
               <div
-                className="h-full origin-left bg-hero-fg transition-transform duration-500"
-                style={{ transform: `scaleX(${view.blockProgress})` }}
+                className="h-full rounded-full bg-hero-fg transition-transform duration-500"
+                style={{ transform: `translateX(${(view.blockProgress - 1) * 100}%)` }}
               />
             </div>
           )}

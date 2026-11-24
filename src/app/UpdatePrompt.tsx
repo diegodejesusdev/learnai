@@ -35,7 +35,7 @@ export function UpdatePrompt() {
         role="alertdialog"
         aria-labelledby="update-title"
         data-surface="dark"
-        className="pointer-events-auto flex w-full max-w-md flex-col gap-4 rounded-xs bg-chrome p-4 text-chrome-fg ring-1 ring-border"
+        className="pointer-events-auto flex w-full max-w-md flex-col gap-4 rounded-block bg-chrome p-4 text-chrome-fg ring-1 ring-border"
       >
         <div className="flex items-start gap-2">
           <p id="update-title" className="flex-1 font-semibold">
@@ -45,7 +45,7 @@ export function UpdatePrompt() {
             type="button"
             aria-label="Cerrar aviso"
             onClick={() => setNeedRefresh(false)}
-            className="-m-3 flex size-11 shrink-0 items-center justify-center rounded-xs text-chrome-muted hover:text-chrome-fg"
+            className="-m-3 flex size-11 shrink-0 items-center justify-center rounded-control text-chrome-muted hover:text-chrome-fg"
           >
             <X className="size-4" />
           </button>

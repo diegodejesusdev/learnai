@@ -10,7 +10,7 @@ export function BottomNav() {
       data-surface="dark"
       className="keyboard-hidden fixed inset-x-0 bottom-0 z-30 bg-chrome pb-[env(safe-area-inset-bottom)] text-chrome-fg lg:hidden"
     >
-      <ul className="grid grid-cols-5">
+      <ul className="grid grid-cols-5 gap-1 px-1.5 py-1.5">
         {mainNavItems.map(({ to, label, icon: Icon, end }) => (
           <li key={to}>
             <NavLink
@@ -18,7 +18,7 @@ export function BottomNav() {
               end={end}
               className={({ isActive }) =>
                 cn(
-                  'flex min-h-15 flex-col items-center justify-center gap-1 text-xs font-semibold transition-colors focus-visible:-outline-offset-4',
+                  'flex min-h-13 flex-col items-center justify-center gap-0.5 rounded-control text-xs font-semibold transition-colors focus-visible:-outline-offset-2',
                   isActive ? 'bg-hero text-hero-fg' : 'text-chrome-muted hover:text-chrome-fg',
                 )
               }

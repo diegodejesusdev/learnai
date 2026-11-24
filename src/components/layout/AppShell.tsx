@@ -12,7 +12,7 @@ export function AppShell() {
     <div className="min-h-dvh">
       <a
         href="#contenido"
-        className="sr-only z-50 rounded-xs bg-hero px-4 py-3 font-semibold text-hero-fg focus:not-sr-only focus:fixed focus:top-2 focus:left-2"
+        className="sr-only z-50 rounded-control bg-hero px-4 py-3 font-semibold text-hero-fg focus:not-sr-only focus:fixed focus:top-2 focus:left-2"
       >
         Saltar al contenido
       </a>

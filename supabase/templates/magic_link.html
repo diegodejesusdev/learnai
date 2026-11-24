@@ -4,9 +4,9 @@
     style="
       margin: 0;
       padding: 24px;
-      background: #f7f8fa;
+      background: #f0edee;
       font-family: -apple-system, 'Segoe UI', Roboto, sans-serif;
-      color: #151a23;
+      color: #171214;
     "
   >
     <div
@@ -14,40 +14,76 @@
         max-width: 440px;
         margin: 0 auto;
         background: #ffffff;
-        border: 1px solid #e3e6eb;
-        border-radius: 16px;
-        padding: 28px;
+        border: 1px solid #e0dadc;
+        border-radius: 20px;
+        overflow: hidden;
       "
     >
-      <h1 style="margin: 0 0 12px; font-size: 20px">Entra a LearnAI</h1>
-      <p style="margin: 0 0 20px; font-size: 15px; line-height: 1.5; color: #5a6372">
-        Toca el botón para entrar en este dispositivo.
-      </p>
-      <p style="margin: 0 0 24px">
-        <a
-          href="{{ .ConfirmationURL }}"
+      <div style="background: #6b0f2a; padding: 28px">
+        <p style="margin: 0 0 28px; font-size: 18px; font-weight: 800; color: #ffffff">
+          Learn<span
+            style="
+              margin-left: 2px;
+              padding: 0 4px;
+              border-radius: 4px;
+              background: #ffffff;
+              color: #6b0f2a;
+            "
+            >AI</span
+          >
+        </p>
+        <h1
           style="
-            display: inline-block;
-            background: #0f766e;
+            margin: 0;
+            font-size: 30px;
+            line-height: 1.1;
+            font-weight: 800;
+            letter-spacing: -0.5px;
             color: #ffffff;
-            text-decoration: none;
-            font-weight: 600;
-            padding: 12px 20px;
-            border-radius: 12px;
           "
         >
-          Entrar a LearnAI
-        </a>
-      </p>
-      <p style="margin: 0 0 8px; font-size: 15px; line-height: 1.5; color: #5a6372">
-        ¿Usas la app instalada en el móvil? Escribe este código en la pantalla de acceso:
-      </p>
-      <p style="margin: 0 0 24px; font-size: 28px; font-weight: 700; letter-spacing: 6px">
-        {{ .Token }}
-      </p>
-      <p style="margin: 0; font-size: 13px; color: #5a6372">
-        El enlace y el código vencen en una hora. Si no pediste este correo, ignóralo.
-      </p>
+          Entra a LearnAI
+        </h1>
+      </div>
+      <div style="padding: 28px">
+        <p style="margin: 0 0 20px; font-size: 16px; line-height: 1.5; color: #574d51">
+          Toca el botón para entrar en este dispositivo.
+        </p>
+        <p style="margin: 0 0 28px">
+          <a
+            href="{{ .ConfirmationURL }}"
+            style="
+              display: inline-block;
+              background: #6b0f2a;
+              color: #ffffff;
+              text-decoration: none;
+              font-size: 16px;
+              font-weight: 700;
+              padding: 15px 24px;
+              border-radius: 12px;
+            "
+          >
+            Entrar a LearnAI
+          </a>
+        </p>
+        <p style="margin: 0 0 8px; font-size: 16px; line-height: 1.5; color: #574d51">
+          ¿Usas la app instalada en el móvil? Escribe este código en la pantalla de acceso:
+        </p>
+        <p
+          style="
+            margin: 0 0 28px;
+            font-size: 34px;
+            font-weight: 800;
+            letter-spacing: 6px;
+            color: #171214;
+          "
+        >
+          {{ .Token }}
+        </p>
+        <p style="margin: 0; font-size: 14px; line-height: 1.5; color: #574d51">
+          El enlace y el código vencen en una hora. Si no pediste este correo, ignóralo.
+        </p>
+      </div>
     </div>
   </body>
 </html>

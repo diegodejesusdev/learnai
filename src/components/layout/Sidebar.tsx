@@ -11,7 +11,7 @@ function SidebarLink({ to, label, icon: Icon, end }: NavItem) {
       end={end}
       className={({ isActive }) =>
         cn(
-          'flex min-h-13 items-center gap-3.5 px-6 font-semibold transition-colors focus-visible:-outline-offset-4',
+          'mx-3 flex min-h-12 items-center gap-3.5 rounded-control px-3.5 font-semibold transition-colors',
           isActive
             ? 'bg-hero text-hero-fg'
             : 'text-chrome-muted hover:bg-chrome-hover hover:text-chrome-fg',
@@ -36,7 +36,7 @@ export function Sidebar() {
         <ConnectionStatus />
       </div>
       <nav aria-label="Navegación principal" className="mt-8 flex flex-1 flex-col">
-        <ul>
+        <ul className="flex flex-col gap-1">
           {mainNavItems.map((item) => (
             <li key={item.to}>
               <SidebarLink {...item} />

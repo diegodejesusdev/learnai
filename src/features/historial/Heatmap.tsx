@@ -85,7 +85,7 @@ export function Heatmap({ weeks, selected, onSelect }: HeatmapProps) {
                   onKeyDown={(event) => handleKeyDown(event, cell.day)}
                   className={cn(
                     cellSize,
-                    'transition-transform hover:scale-110',
+                    'rounded-[5px] transition-transform hover:scale-110',
                     levelClasses[cell.level],
                     cell.day === selected && 'ring-2 ring-fg ring-offset-2 ring-offset-bg',
                   )}

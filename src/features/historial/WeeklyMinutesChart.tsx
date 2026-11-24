@@ -79,7 +79,7 @@ export function WeeklyMinutesChart({ rows, goalMinutes }: WeeklyMinutesChartProp
               }}
             />
           )}
-          <Bar dataKey="minutes" fill="var(--meter)" maxBarSize={40} />
+          <Bar dataKey="minutes" fill="var(--meter)" radius={[6, 6, 0, 0]} maxBarSize={40} />
         </BarChart>
       </ResponsiveContainer>
     </div>

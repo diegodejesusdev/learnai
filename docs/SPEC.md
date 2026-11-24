@@ -21,7 +21,7 @@ La racha y la meta semanal cuentan todas las rutas juntas.
 | Requisito | Detalle |
 |---|---|
 | Mobile-first | Diseño pensado primero para 360 px. En escritorio se aprovecha el ancho. |
-| PWA instalable | `vite-plugin-pwa`: manifiesto en español (`standalone`, `lang: es-CO`, atajos a Estudiar y «Hoy»), íconos de 64/192/512, *maskable* y `apple-touch-icon` (generados desde `public/favicon.svg` con `npm run pwa:icons`). El service worker guarda todo el build, así que la app abre sin conexión. Cuando hay una versión nueva, aparece «Hay una versión nueva de LearnAI» con el botón «Actualizar»; nunca se actualiza sola a mitad de algo. |
+| PWA instalable | `vite-plugin-pwa`: manifiesto en español (`standalone`, `lang: es-CO`, atajos a Estudiar y «Hoy»), íconos de 64/192/512, *maskable* y `apple-touch-icon` (generados desde `public/icon-wine.svg` con `npm run pwa:icons`). El service worker guarda todo el build, así que la app abre sin conexión. Cuando hay una versión nueva, aparece «Hay una versión nueva de LearnAI» con el botón «Actualizar»; nunca se actualiza sola a mitad de algo. |
 | Sincronización | Los datos viven en Supabase. Al iniciar sesión en otro dispositivo se ve lo mismo. |
 | Login | Enlace mágico por correo (el mismo correo trae un código de respaldo) y Google, con Supabase Auth. Los registros públicos se desactivan después de crear la cuenta. |
 | Aislamiento | Toda fila de datos de usuario lleva `user_id` y RLS, aunque haya un solo usuario. |

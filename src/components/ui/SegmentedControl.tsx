@@ -25,7 +25,7 @@ export function SegmentedControl<T extends string>({
   return (
     <fieldset>
       <legend className="sr-only">{label}</legend>
-      <div className="grid auto-cols-fr grid-flow-col divide-x divide-control rounded-xs border border-control bg-surface">
+      <div className="grid auto-cols-fr grid-flow-col divide-x divide-control overflow-hidden rounded-control border border-control bg-surface">
         {options.map(({ value: optionValue, label: optionLabel, icon: Icon }) => (
           <label key={optionValue} className="min-w-0">
             <input

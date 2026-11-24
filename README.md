@@ -59,7 +59,7 @@ npm run preview        # sirve dist/ en local
 npm run db:test        # pruebas de la base (RLS, funciones, seguridad)
 npm run db:test:migracion  # la migración de las rutas sobre una copia con datos
 npm run db:types       # regenera src/types/database.ts tras una migración
-npm run pwa:icons      # regenera los íconos de la app desde public/favicon.svg
+npm run pwa:icons      # regenera los íconos de la app desde public/icon-wine.svg
 ```
 
 ## Desplegar
