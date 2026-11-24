@@ -26,7 +26,7 @@ export function DayDetail({ day, today, total, minMinutes, tracks }: DayDetailPr
   const sessions = useDaySessions(day, minutes > 0)
 
   return (
-    <div className="flex flex-col gap-3 border-t border-border pt-5">
+    <div className="flex flex-col gap-3 border-t border-border pt-5 wide:border-t-0 wide:pt-0">
       <div aria-live="polite" className="flex flex-col gap-0.5">
         <div className="flex flex-wrap items-baseline justify-between gap-x-3">
           <h3 className="text-lg font-bold tracking-tight">{dayTitle(day, today)}</h3>

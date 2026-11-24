@@ -70,7 +70,7 @@ export function StudySetup({ roadmap, progress, activeTrack }: RoadmapData) {
 
   return (
     <div className="grid gap-10 xl:grid-cols-2 xl:gap-12">
-      <Hero className="flex flex-col justify-between gap-10 xl:min-h-[28rem]">
+      <Hero className="flex flex-col justify-between gap-10 xl:sticky xl:top-8 xl:min-h-[28rem] xl:self-start">
         <div className="flex flex-col gap-3">
           <p className="text-sm font-medium text-hero-muted">
             {selected?.context ?? 'Elige qué vas a estudiar'}

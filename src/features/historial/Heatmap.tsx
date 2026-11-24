@@ -16,7 +16,9 @@ const KEY_STEPS: Partial<Record<string, number>> = {
 
 // En el móvil, 24 px por cuadro (cómodo para el dedo) y se desplaza de lado;
 // desde sm, más pequeño para que quepan los 6 meses.
-const cellSize = 'size-6 sm:size-5 xl:size-7'
+const cellSize = 'size-6 sm:size-5 xl:size-7 wide:size-[22px] 3xl:size-7'
+// Los nombres de los días, con el mismo alto que su fila.
+const rowHeight = 'h-6 sm:h-5 xl:h-7 wide:h-[22px] 3xl:h-7'
 
 interface HeatmapProps {
   weeks: readonly HeatWeek[]
@@ -56,7 +58,7 @@ export function Heatmap({ weeks, selected, onSelect }: HeatmapProps) {
         <div className="sticky left-0 z-10 flex flex-col gap-1 bg-bg pr-2" aria-hidden>
           <span className="h-5" />
           {WEEKDAYS.map((label, index) => (
-            <span key={index} className="flex h-6 items-center text-xs text-fg-muted sm:h-5">
+            <span key={index} className={cn(rowHeight, 'flex items-center text-xs text-fg-muted')}>
               {label}
             </span>
           ))}

@@ -75,7 +75,7 @@ export function ManualSessionForm({ roadmap, progress, activeTrack }: RoadmapDat
 
   return (
     <form
-      className="flex max-w-2xl flex-col gap-8"
+      className="flex max-w-2xl flex-col gap-8 xl:grid xl:max-w-none xl:grid-cols-2 xl:items-start xl:gap-x-14"
       onSubmit={(event) => {
         event.preventDefault()
         setSubmitted(true)
@@ -100,58 +100,60 @@ export function ManualSessionForm({ roadmap, progress, activeTrack }: RoadmapDat
       }}
     >
       <TargetPicker targets={targets} selected={selected} onSelect={setSelectedKey} />
-      <div className="flex flex-col gap-5">
-        <div className="grid grid-cols-2 gap-3">
+      <div className="contents xl:flex xl:flex-col xl:gap-8">
+        <div className="flex flex-col gap-5">
+          <div className="grid grid-cols-2 gap-3">
+            <TextField
+              label="Fecha"
+              type="date"
+              value={form.date}
+              onChange={update('date')}
+              required
+            />
+            <TextField
+              label="Hora de inicio"
+              type="time"
+              value={form.time}
+              onChange={update('time')}
+              required
+            />
+          </div>
+          <p className="-mt-3 text-sm text-fg-muted">Hora de Colombia.</p>
+          {submitted && !parsed.ok && parsed.field === 'date' && <Alert>{parsed.error}</Alert>}
           <TextField
-            label="Fecha"
-            type="date"
-            value={form.date}
-            onChange={update('date')}
-            required
+            label="Duración (minutos)"
+            type="number"
+            inputMode="numeric"
+            min={1}
+            max={720}
+            value={form.duration}
+            onChange={update('duration')}
+            error={!parsed.ok && parsed.field === 'duration' ? parsed.error : null}
           />
-          <TextField
-            label="Hora de inicio"
-            type="time"
-            value={form.time}
-            onChange={update('time')}
-            required
+          <TextAreaField
+            label="¿Qué aprendiste?"
+            rows={4}
+            value={form.notes}
+            onChange={update('notes')}
           />
+          <label className="flex min-h-11 cursor-pointer items-center gap-3">
+            <input
+              type="checkbox"
+              checked={markDone}
+              onChange={(event) => setMarkDone(event.target.checked)}
+              className="size-6 shrink-0 accent-[var(--meter)]"
+            />
+            <span>Marcar «{selected?.title ?? ''}» como hecho</span>
+          </label>
         </div>
-        <p className="-mt-3 text-sm text-fg-muted">Hora de Colombia.</p>
-        {submitted && !parsed.ok && parsed.field === 'date' && <Alert>{parsed.error}</Alert>}
-        <TextField
-          label="Duración (minutos)"
-          type="number"
-          inputMode="numeric"
-          min={1}
-          max={720}
-          value={form.duration}
-          onChange={update('duration')}
-          error={!parsed.ok && parsed.field === 'duration' ? parsed.error : null}
-        />
-        <TextAreaField
-          label="¿Qué aprendiste?"
-          rows={4}
-          value={form.notes}
-          onChange={update('notes')}
-        />
-        <label className="flex min-h-11 cursor-pointer items-center gap-3">
-          <input
-            type="checkbox"
-            checked={markDone}
-            onChange={(event) => setMarkDone(event.target.checked)}
-            className="size-6 shrink-0 accent-[var(--meter)]"
-          />
-          <span>Marcar «{selected?.title ?? ''}» como hecho</span>
-        </label>
+        {save.isError && (
+          <Alert>No se pudo registrar la sesión. Revisa tu conexión e inténtalo de nuevo.</Alert>
+        )}
+        <Button type="submit" size="lg" disabled={save.isPending || !selected}>
+          {save.isPending ? <Spinner /> : <Check className="size-5" />}
+          Guardar sesión
+        </Button>
       </div>
-      {save.isError && (
-        <Alert>No se pudo registrar la sesión. Revisa tu conexión e inténtalo de nuevo.</Alert>
-      )}
-      <Button type="submit" size="lg" disabled={save.isPending || !selected}>
-        {save.isPending ? <Spinner /> : <Check className="size-5" />}
-        Guardar sesión
-      </Button>
     </form>
   )
 }

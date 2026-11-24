@@ -45,9 +45,9 @@ export function SessionEditForm({ session, tracks, onDone }: SessionEditFormProp
     setForm({ ...form, [field]: event.target.value })
 
   return (
-    <div className="flex max-w-2xl flex-col gap-10">
+    <div className="flex max-w-2xl flex-col gap-10 xl:max-w-none">
       <form
-        className="flex flex-col gap-8"
+        className="flex flex-col gap-8 xl:grid xl:grid-cols-2 xl:items-start xl:gap-x-14"
         onSubmit={(event) => {
           event.preventDefault()
           setSubmitted(true)
@@ -65,54 +65,56 @@ export function SessionEditForm({ session, tracks, onDone }: SessionEditFormProp
         }}
       >
         <TargetPicker targets={targets} selected={selected} onSelect={setSelectedKey} />
-        <div className="flex flex-col gap-5">
-          <p className="text-sm text-fg-muted">
-            Registrada en modo {studyModeLabels[session.mode]}.
-          </p>
-          <div className="grid grid-cols-2 gap-3">
+        <div className="contents xl:flex xl:flex-col xl:gap-8">
+          <div className="flex flex-col gap-5">
+            <p className="text-sm text-fg-muted">
+              Registrada en modo {studyModeLabels[session.mode]}.
+            </p>
+            <div className="grid grid-cols-2 gap-3">
+              <TextField
+                label="Fecha"
+                type="date"
+                value={form.date}
+                onChange={update('date')}
+                required
+              />
+              <TextField
+                label="Hora de inicio"
+                type="time"
+                value={form.time}
+                onChange={update('time')}
+                required
+              />
+            </div>
+            <p className="-mt-3 text-sm text-fg-muted">
+              Hora de Colombia. La sesión cuenta en el día en que empezó.
+            </p>
+            {submitted && !parsed.ok && parsed.field === 'date' && <Alert>{parsed.error}</Alert>}
             <TextField
-              label="Fecha"
-              type="date"
-              value={form.date}
-              onChange={update('date')}
-              required
+              label="Minutos de estudio"
+              type="number"
+              inputMode="numeric"
+              min={1}
+              max={720}
+              value={form.duration}
+              onChange={update('duration')}
+              hint="Tiempo neto, sin descansos ni pausas."
+              error={!parsed.ok && parsed.field === 'duration' ? parsed.error : null}
             />
-            <TextField
-              label="Hora de inicio"
-              type="time"
-              value={form.time}
-              onChange={update('time')}
-              required
-            />
+            <TextAreaField label="Notas" rows={4} value={form.notes} onChange={update('notes')} />
           </div>
-          <p className="-mt-3 text-sm text-fg-muted">
-            Hora de Colombia. La sesión cuenta en el día en que empezó.
-          </p>
-          {submitted && !parsed.ok && parsed.field === 'date' && <Alert>{parsed.error}</Alert>}
-          <TextField
-            label="Minutos de estudio"
-            type="number"
-            inputMode="numeric"
-            min={1}
-            max={720}
-            value={form.duration}
-            onChange={update('duration')}
-            hint="Tiempo neto, sin descansos ni pausas."
-            error={!parsed.ok && parsed.field === 'duration' ? parsed.error : null}
-          />
-          <TextAreaField label="Notas" rows={4} value={form.notes} onChange={update('notes')} />
+          {save.isError && (
+            <Alert>
+              {save.error instanceof SessionGoneError
+                ? 'Esta sesión ya no existe: puede que la hayas eliminado en otro dispositivo.'
+                : 'No se pudo guardar. Revisa tu conexión e inténtalo de nuevo.'}
+            </Alert>
+          )}
+          <Button type="submit" size="lg" disabled={save.isPending || !selected}>
+            {save.isPending ? <Spinner /> : <Check className="size-5" />}
+            Guardar cambios
+          </Button>
         </div>
-        {save.isError && (
-          <Alert>
-            {save.error instanceof SessionGoneError
-              ? 'Esta sesión ya no existe: puede que la hayas eliminado en otro dispositivo.'
-              : 'No se pudo guardar. Revisa tu conexión e inténtalo de nuevo.'}
-          </Alert>
-        )}
-        <Button type="submit" size="lg" disabled={save.isPending || !selected}>
-          {save.isPending ? <Spinner /> : <Check className="size-5" />}
-          Guardar cambios
-        </Button>
       </form>
       <DeleteSessionPanel session={session} onDeleted={onDone} />
     </div>

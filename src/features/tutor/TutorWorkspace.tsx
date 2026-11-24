@@ -8,10 +8,13 @@ import type { RoadmapData } from '@/features/ruta/RoadmapGate'
 import { allPhases, findPhaseIn, findTopicIn, findTrack, trackOfTarget } from '@/lib/roadmap'
 import { useOnline } from '@/lib/offline'
 import { useKeyboardInset } from '@/lib/useKeyboardInset'
+import { useMediaQuery, WIDE_SCREEN } from '@/lib/useMediaQuery'
 import { ChatThread } from './ChatThread'
 import { ConversationBar } from './ConversationBar'
+import { ConversationList } from './ConversationList'
 import { EmptyChat } from './EmptyChat'
 import { ModeComposer } from './ModeComposer'
+import { TutorPanel } from './TutorPanel'
 import { TutorTargetSelect } from './TutorTargetSelect'
 import { tutorModes } from './tutorModes'
 import { defaultTarget } from './tutorTarget'
@@ -61,6 +64,8 @@ export function TutorWorkspace({ roadmap, progress, activeTrack }: RoadmapData) 
   })
   useKeyboardInset()
   const online = useOnline()
+  const wide = useMediaQuery(WIDE_SCREEN)
+  const Conversations = wide ? ConversationList : ConversationBar
 
   const subject = isProject
     ? (project?.project.title ?? 'tu proyecto')
@@ -75,7 +80,9 @@ export function TutorWorkspace({ roadmap, progress, activeTrack }: RoadmapData) 
     (state.conversation === 'latest' && conversations.isPending) || messages.isLoading
 
   return (
-    <div className="flex max-w-3xl flex-col gap-6">
+    // En el móvil todo va en una columna (los grupos son «contents»). En el PC, el chat a la
+    // izquierda y, a la derecha, qué se estudia, las conversaciones y el contexto.
+    <div className="flex max-w-3xl flex-col gap-6 xl:grid xl:max-w-none xl:grid-cols-[minmax(0,1fr)_20rem] xl:grid-rows-[auto_1fr] xl:gap-x-12 3xl:grid-cols-[minmax(0,1fr)_26rem] 3xl:gap-x-16">
       <div className="flex flex-col gap-2">
         <SegmentedControl
           label="Modo del tutor"
@@ -87,74 +94,89 @@ export function TutorWorkspace({ roadmap, progress, activeTrack }: RoadmapData) 
           {tutorModes.find((mode) => mode.value === state.mode)?.description}
         </p>
       </div>
-      {state.mode !== 'daily_plan' && (
-        <TutorTargetSelect
-          kind={isProject ? 'project' : 'topic'}
-          tracks={tracks}
-          track={track}
-          value={isProject ? state.phaseId : state.topicId}
+      <div className="contents xl:sticky xl:top-[calc(2rem+var(--banner-height,0px))] xl:col-start-2 xl:row-span-2 xl:row-start-1 xl:flex xl:flex-col xl:gap-8 xl:self-start">
+        {state.mode !== 'daily_plan' && (
+          <TutorTargetSelect
+            kind={isProject ? 'project' : 'topic'}
+            tracks={tracks}
+            track={track}
+            value={isProject ? state.phaseId : state.topicId}
+            disabled={chat.sending}
+            onChange={(id) =>
+              update({ ...(isProject ? { phaseId: id } : { topicId: id }), conversation: 'latest' })
+            }
+            onTrackChange={(id) => {
+              const next = findTrack(tracks, id)
+              if (next) update({ ...defaultTarget(next, statuses), conversation: 'latest' })
+            }}
+          />
+        )}
+        <Conversations
+          conversations={conversations.data ?? []}
+          selectedId={conversationId}
           disabled={chat.sending}
-          onChange={(id) =>
-            update({ ...(isProject ? { phaseId: id } : { topicId: id }), conversation: 'latest' })
-          }
-          onTrackChange={(id) => {
-            const next = findTrack(tracks, id)
-            if (next) update({ ...defaultTarget(next, statuses), conversation: 'latest' })
-          }}
+          onSelect={(id) => update({ conversation: { id } })}
+          onNew={() => update({ conversation: 'new' })}
         />
-      )}
-      <ConversationBar
-        conversations={conversations.data ?? []}
-        selectedId={conversationId}
-        disabled={chat.sending}
-        onSelect={(id) => update({ conversation: { id } })}
-        onNew={() => update({ conversation: 'new' })}
-      />
+        {wide && (
+          <TutorPanel
+            mode={state.mode}
+            tracks={tracks}
+            progress={progress}
+            topic={topic}
+            project={project}
+          />
+        )}
+      </div>
 
-      {conversations.isError || messages.isError ? (
-        <ErrorState
-          title="No pudimos cargar la conversación"
-          onRetry={() =>
-            void (conversations.isError ? conversations.refetch() : messages.refetch())
-          }
-        />
-      ) : resolving ? (
-        <LoadingState />
-      ) : (
-        <ChatThread
-          messages={conversationId ? (messages.data ?? []) : []}
-          pending={chat.pending}
-          quizTopicId={state.mode === 'quiz' ? state.topicId : null}
-          notesTarget={notesTarget}
-          empty={<EmptyChat mode={state.mode} subject={subject} track={track} onSend={chat.send} />}
-        />
-      )}
+      <div className="contents xl:col-start-1 xl:row-start-2 xl:flex xl:min-h-[calc(100dvh-26rem)] xl:flex-col xl:gap-6">
+        {conversations.isError || messages.isError ? (
+          <ErrorState
+            title="No pudimos cargar la conversación"
+            onRetry={() =>
+              void (conversations.isError ? conversations.refetch() : messages.refetch())
+            }
+          />
+        ) : resolving ? (
+          <LoadingState />
+        ) : (
+          <ChatThread
+            messages={conversationId ? (messages.data ?? []) : []}
+            pending={chat.pending}
+            quizTopicId={state.mode === 'quiz' ? state.topicId : null}
+            notesTarget={notesTarget}
+            empty={
+              <EmptyChat mode={state.mode} subject={subject} track={track} onSend={chat.send} />
+            }
+          />
+        )}
 
-      {/* -mb-12: el relleno inferior de la página es más alto que la barra del móvil; así la
+        {/* -mb-12: el relleno inferior de la página es más alto que la barra del móvil; así la
           caja queda pegada a la barra también al final de la conversación. */}
-      <div className="chat-composer z-20 -mx-4 -mb-12 flex flex-col gap-2 border-t-2 border-fg bg-bg px-4 pt-3 pb-3 sm:-mx-6 sm:px-6 lg:mx-0 lg:-mb-20 lg:px-0 lg:pb-6">
-        {!online && (
-          <Alert>
-            Sin conexión: el tutor necesita internet. Tus conversaciones guardadas vuelven al
-            conectarte.
-          </Alert>
-        )}
-        {chat.error && <Alert>{chat.error}</Alert>}
-        <ModeComposer
-          mode={state.mode}
-          subject={subject}
-          track={track}
-          sending={chat.sending}
-          onSend={chat.send}
-          onStop={chat.stop}
-        />
-        {chat.remaining !== null && chat.remaining <= 10 && (
-          <p className="text-xs text-fg-muted">
-            {chat.remaining === 1
-              ? 'Te queda 1 mensaje hoy.'
-              : `Te quedan ${chat.remaining} mensajes hoy.`}
-          </p>
-        )}
+        <div className="chat-composer z-20 -mx-4 -mb-12 flex flex-col gap-2 border-t-2 border-fg bg-bg px-4 pt-3 pb-3 sm:-mx-6 sm:px-6 lg:mx-0 lg:-mb-20 lg:px-0 lg:pb-6 xl:mt-auto">
+          {!online && (
+            <Alert>
+              Sin conexión: el tutor necesita internet. Tus conversaciones guardadas vuelven al
+              conectarte.
+            </Alert>
+          )}
+          {chat.error && <Alert>{chat.error}</Alert>}
+          <ModeComposer
+            mode={state.mode}
+            subject={subject}
+            track={track}
+            sending={chat.sending}
+            onSend={chat.send}
+            onStop={chat.stop}
+          />
+          {chat.remaining !== null && chat.remaining <= 10 && (
+            <p className="text-xs text-fg-muted">
+              {chat.remaining === 1
+                ? 'Te queda 1 mensaje hoy.'
+                : `Te quedan ${chat.remaining} mensajes hoy.`}
+            </p>
+          )}
+        </div>
       </div>
     </div>
   )

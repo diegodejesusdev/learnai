@@ -151,6 +151,7 @@ LearnAI/
   - Un color nuevo se agrega como token en los dos temas.
 - **Diseño** (`docs/superpowers/specs/2026-11-24-rediseno-design.md`):
   - Un solo `Hero` por pantalla, con la acción principal en blanco. Lo demás va en listas con líneas (`divide-y`), no en tarjetas.
+  - En el PC se usa todo el ancho (hasta 1600 px) en columnas: `xl` (1280), `wide` (1408) y `3xl` (1728). Un grupo que solo existe en el PC va con `contents` en el móvil, para no cambiarlo. Lo que solo se monta en pantallas anchas usa `useMediaQuery(WIDE_SCREEN)` (p. ej. `TutorPanel`).
   - Títulos con `text-display`, `text-lead`, `text-title`, `text-figure` y `text-giant`. Lo más pequeño es `text-xs` (13 px). Esquinas redondeadas: `rounded-control` en botones y campos, `rounded-block` en `Hero` y tarjetas. Sin sombras.
   - `cn` solo une clases: no mezcles dos del mismo tipo (dos tamaños de letra, dos paddings). Si falta un tamaño, agrégalo a `styles.ts`.
 - **Componentes de UI**: se reutilizan los de `src/components/ui` antes de crear uno nuevo. Todo componente nuevo del sistema se agrega también a `/ajustes/diseno`.

@@ -21,12 +21,16 @@ export function HistoryPage() {
           {({ roadmap: { tracks } }) => (
             <>
               <HeatmapSection tracks={tracks} />
-              <WeeklySection />
-              {tracks.length > 1 && (
+              {tracks.length > 1 ? (
                 <>
-                  <TrackSection tracks={tracks} />
+                  <div className="flex flex-col gap-14 wide:grid wide:grid-cols-[minmax(0,3fr)_minmax(0,2fr)] wide:gap-x-14">
+                    <WeeklySection />
+                    <TrackSection tracks={tracks} />
+                  </div>
                   <TrackFilter tracks={tracks} />
                 </>
+              ) : (
+                <WeeklySection />
               )}
               <PhaseSection tracks={tracks} />
               <SessionsSection tracks={tracks} />

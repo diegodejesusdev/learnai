@@ -3,7 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { TutorStreamEvent } from '@shared/tutorTypes'
 import { defaultSettings, fetchUserSettings } from '@/features/ajustes/settingsApi'
-import { fetchProgress } from '@/features/ruta/progressApi'
+import { fetchProgress, fetchTopicMinutes } from '@/features/ruta/progressApi'
 import { emptySnapshot } from '@/features/ruta/progressModel'
 import { fetchRoadmap } from '@/features/ruta/roadmapApi'
 import { dismissToast, getToasts } from '@/lib/toast'
@@ -20,7 +20,10 @@ import {
 } from './tutorApi'
 
 vi.mock('@/features/ruta/roadmapApi', () => ({ fetchRoadmap: vi.fn() }))
-vi.mock('@/features/ruta/progressApi', () => ({ fetchProgress: vi.fn() }))
+vi.mock('@/features/ruta/progressApi', () => ({
+  fetchProgress: vi.fn(),
+  fetchTopicMinutes: vi.fn(),
+}))
 vi.mock('./tutorApi', async (importOriginal) => ({
   ...(await importOriginal<typeof import('./tutorApi')>()),
   fetchConversations: vi.fn(),
@@ -61,6 +64,7 @@ function streamEvents(events: TutorStreamEvent[]) {
 beforeEach(() => {
   vi.mocked(fetchRoadmap).mockResolvedValue(roadmapFixture())
   vi.mocked(fetchProgress).mockResolvedValue(emptySnapshot)
+  vi.mocked(fetchTopicMinutes).mockResolvedValue(0)
   vi.mocked(fetchUserSettings).mockResolvedValue(defaultSettings)
   vi.mocked(fetchConversations).mockResolvedValue([])
   vi.mocked(fetchMessages).mockResolvedValue([])
@@ -275,5 +279,118 @@ describe('qué estudio hoy', () => {
       conversationId: null,
       message: 'Tengo 1 hora para estudiar hoy. ¿Qué hago?',
     })
+  })
+})
+
+describe('panel del PC', () => {
+  const PANEL = 'Contexto del tutor'
+  const OTHER = '7c1d2e3f-4a5b-4c6d-8e7f-0a1b2c3d4e5f'
+
+  /** Simula una pantalla ancha (jsdom no tiene matchMedia). */
+  function onWideScreen() {
+    vi.stubGlobal('matchMedia', (query: string) => ({
+      matches: query.includes('min-width'),
+      addEventListener: () => {},
+      removeEventListener: () => {},
+    }))
+  }
+
+  afterEach(() => vi.unstubAllGlobals())
+
+  it('en el móvil no aparece: la conversación se elige en el menú', async () => {
+    renderApp('/tutor?tema=f1-t5')
+    expect(await screen.findByRole('combobox', { name: 'Conversación' })).toBeInTheDocument()
+    expect(screen.queryByRole('complementary', { name: PANEL })).not.toBeInTheDocument()
+    expect(fetchTopicMinutes).not.toHaveBeenCalled()
+  })
+
+  it('muestra lo que sabe del tema: estado, tiempo y notas, con accesos', async () => {
+    onWideScreen()
+    vi.mocked(fetchTopicMinutes).mockResolvedValue(65)
+    vi.mocked(fetchProgress).mockResolvedValue({
+      ...emptySnapshot,
+      topics: { 'f1-t5': { status: 'en_curso', notes: 'Validar la firma', completed_at: null } },
+    })
+    renderApp('/tutor?tema=f1-t5')
+    const panel = within(await screen.findByRole('complementary', { name: PANEL }))
+    expect(panel.getByText('En curso')).toBeInTheDocument()
+    expect(await panel.findByText('1 h 5 min estudiados')).toBeInTheDocument()
+    expect(panel.getByText('Validar la firma')).toBeInTheDocument()
+    expect(panel.getByRole('link', { name: 'Ver tema' })).toHaveAttribute(
+      'href',
+      '/ruta/tema/f1-t5',
+    )
+    expect(panel.getByRole('link', { name: 'Estudiar este tema' })).toHaveAttribute(
+      'href',
+      '/estudiar?tema=f1-t5',
+    )
+  })
+
+  it('sin notas, lo dice', async () => {
+    onWideScreen()
+    renderApp('/tutor?tema=f1-t5')
+    const panel = within(await screen.findByRole('complementary', { name: PANEL }))
+    expect(panel.getByText('Aún no tienes notas aquí.')).toBeInTheDocument()
+  })
+
+  it('las conversaciones van en una lista: la abierta se marca y otra se abre al tocarla', async () => {
+    onWideScreen()
+    vi.mocked(fetchConversations).mockResolvedValue([
+      { id: CONVERSATION, title: 'Qué es un webhook', updatedAt: '2026-11-20T15:00:00Z' },
+      { id: OTHER, title: 'Validar la firma', updatedAt: '2026-11-18T15:00:00Z' },
+    ])
+    renderApp('/tutor?tema=f1-t5')
+    const list = within(await screen.findByRole('list', { name: 'Conversaciones' }))
+    expect(screen.queryByRole('combobox', { name: 'Conversación' })).not.toBeInTheDocument()
+    expect(list.getByRole('button', { name: /Qué es un webhook/ })).toHaveAttribute(
+      'aria-current',
+      'true',
+    )
+    await userEvent.click(list.getByRole('button', { name: /Validar la firma/ }))
+    await waitFor(() => expect(fetchMessages).toHaveBeenCalledWith(OTHER))
+    expect(list.getByRole('button', { name: /Validar la firma/ })).toHaveAttribute(
+      'aria-current',
+      'true',
+    )
+    await userEvent.click(screen.getByRole('button', { name: 'Nueva' }))
+    expect(await screen.findByText('Pregúntale al tutor sobre «Webhooks»')).toBeInTheDocument()
+  })
+
+  it('en Proyecto, muestra el estado y las notas del proyecto', async () => {
+    onWideScreen()
+    vi.mocked(fetchProgress).mockResolvedValue({
+      ...emptySnapshot,
+      projects: {
+        f2: {
+          status: 'hecho',
+          repo_url: null,
+          demo_url: null,
+          notes: 'Falta la alerta',
+          completed_at: null,
+        },
+      },
+    })
+    renderApp('/tutor?proyecto=f2')
+    const panel = within(await screen.findByRole('complementary', { name: PANEL }))
+    expect(panel.getByText('Hecho')).toBeInTheDocument()
+    expect(panel.getByText('Falta la alerta')).toBeInTheDocument()
+    expect(panel.getByRole('link', { name: 'Ver proyecto' })).toHaveAttribute('href', '/ruta/f2')
+  })
+
+  it('en Hoy, muestra el avance y el siguiente tema de cada ruta', async () => {
+    onWideScreen()
+    vi.mocked(fetchProgress).mockResolvedValue({
+      ...emptySnapshot,
+      topics: { 'f0-t1': { status: 'hecho', notes: '', completed_at: null } },
+    })
+    renderApp('/tutor?modo=hoy')
+    const panel = within(await screen.findByRole('complementary', { name: PANEL }))
+    expect(panel.getByText('1 de 100 temas')).toBeInTheDocument()
+    expect(panel.getByText('0 de 110 temas')).toBeInTheDocument()
+    expect(panel.getByRole('link', { name: 'Mapeo de procesos y BPMN básico' })).toHaveAttribute(
+      'href',
+      '/ruta/tema/f0-t2',
+    )
+    expect(panel.getByRole('link', { name: 'Roles del mundo de datos' })).toBeInTheDocument()
   })
 })

@@ -320,7 +320,7 @@ Todos los días y semanas se calculan en hora de Bogotá. Una sesión cuenta en 
 **Interfaz** (`/tutor?modo=explicar|quiz|proyecto|hoy&tema=…&proyecto=…&conversacion=…`)
 - El estado va en la URL: los enlaces desde Ruta e Inicio abren lo correcto y recargar no pierde la conversación.
 - **Ruta:** un selector encima del tema. Abre en la ruta del tema o proyecto de la URL o, si no hay, en la activa. Cambiarla propone su siguiente tema.
-- **Conversaciones:** se guardan por tema (o proyecto) y modo. Se abre la más reciente, hay un selector con las anteriores y un botón «Nueva».
+- **Conversaciones:** se guardan por tema (o proyecto) y modo. Se abre la más reciente, hay un selector con las anteriores y un botón «Nueva». En el PC (desde 1280 px), las conversaciones van en una lista al lado del chat, con lo que el tutor sabe: estado, tiempo y notas del tema o proyecto, o el avance de cada ruta en «Hoy».
 - **Respuestas:** se muestran en Markdown sin HTML, con `react-markdown` + `remark-gfm`. Los bloques de código muestran el lenguaje y un botón «Copiar».
 - **Guardar en notas:** en Explicar y Revisar proyecto, abre un editor con la selección (o la respuesta entera) para recortarla. Se agrega al final de las notas del tema o del proyecto con la función SQL `append_topic_notes` / `append_project_notes`, que no pisa cambios hechos en otro dispositivo.
 - **Teclado del móvil:**

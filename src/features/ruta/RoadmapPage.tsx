@@ -20,7 +20,10 @@ function RoadmapView({ roadmap, progress, activeTrack }: RoadmapData) {
   return (
     <div className="flex flex-col gap-8">
       <TrackSelector tracks={tracks} value={track.id} onChange={showTrack} panelId={PANEL_ID} />
-      <div {...panel} className="flex flex-col gap-12">
+      <div
+        {...panel}
+        className="flex flex-col gap-12 wide:grid wide:grid-cols-[minmax(0,1fr)_28rem] wide:items-start wide:gap-x-14 3xl:grid-cols-[minmax(0,1fr)_32rem]"
+      >
         {track.phases.length === 0 ? (
           <EmptyState
             icon={Route}
@@ -29,9 +32,11 @@ function RoadmapView({ roadmap, progress, activeTrack }: RoadmapData) {
           />
         ) : (
           <>
-            <div className="flex flex-col gap-8">
-              <p className="max-w-2xl text-pretty text-fg-muted lg:text-lg">{track.goal}</p>
-              <OverviewCard track={track} progress={progress} />
+            <div className="flex flex-col gap-8 wide:contents">
+              <div className="flex flex-col gap-8 wide:justify-between wide:self-stretch">
+                <p className="max-w-2xl text-pretty text-fg-muted lg:text-lg">{track.goal}</p>
+                <OverviewCard track={track} progress={progress} />
+              </div>
               <NextTopicCard track={track} progress={progress} />
             </div>
             <PhaseList track={track} progress={progress} />

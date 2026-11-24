@@ -50,7 +50,7 @@ function HomeContent({ roadmap, progress, activeTrack, latest, summary }: HomeCo
       <div
         className={
           suggestion
-            ? 'grid gap-10 xl:grid-cols-[minmax(0,1fr)_17rem] xl:gap-12'
+            ? 'grid gap-10 xl:grid-cols-[minmax(0,1fr)_17rem] xl:gap-12 3xl:grid-cols-[minmax(0,1fr)_22rem] 3xl:gap-16'
             : 'flex flex-col gap-10'
         }
       >
@@ -75,7 +75,7 @@ function HomeContent({ roadmap, progress, activeTrack, latest, summary }: HomeCo
         </Link>
       </div>
       <Section title="Tus rutas">
-        <div className="divide-y divide-border border-y border-border">
+        <div className="divide-y divide-border border-y border-border wide:grid wide:grid-cols-2 wide:items-end wide:gap-x-12 wide:divide-y-0 3xl:gap-x-16">
           {roadmap.tracks.map((track) => (
             <TrackProgressCard
               key={track.id}

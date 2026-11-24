@@ -4,7 +4,7 @@ import { SelectField } from '@/components/ui/SelectField'
 import { formatShortDate } from '@/lib/dates'
 import type { TutorConversation } from './tutorApi'
 
-interface ConversationBarProps {
+export interface ConversationBarProps {
   conversations: readonly TutorConversation[]
   /** null = conversación nueva (aún sin guardar). */
   selectedId: string | null
@@ -13,7 +13,7 @@ interface ConversationBarProps {
   onNew: () => void
 }
 
-/** Historial de conversaciones de este tema y modo, y el botón de conversación nueva. */
+/** Conversaciones de este tema y modo en un menú, y el botón de conversación nueva. */
 export function ConversationBar({
   conversations,
   selectedId,

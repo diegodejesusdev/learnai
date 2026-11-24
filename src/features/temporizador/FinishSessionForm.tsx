@@ -69,7 +69,7 @@ export function FinishSessionForm({ timer, title, alreadyDone, onBack }: FinishS
 
   return (
     <form
-      className="flex max-w-2xl flex-col gap-6"
+      className="flex max-w-2xl flex-col gap-6 xl:max-w-none"
       onSubmit={(event) => {
         event.preventDefault()
         if (durationError) return
@@ -106,7 +106,7 @@ export function FinishSessionForm({ timer, title, alreadyDone, onBack }: FinishS
           {title} · de {formatTime(timer.startedAt)} a {formatTime(draft.endedAt)}
         </p>
       </div>
-      <div className="flex flex-col gap-5">
+      <div className="flex flex-col gap-5 xl:grid xl:grid-cols-2 xl:items-start xl:gap-x-14">
         <TextField
           label="Duración (minutos de estudio)"
           type="number"

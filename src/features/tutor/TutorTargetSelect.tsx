@@ -24,7 +24,7 @@ export function TutorTargetSelect({
   onTrackChange,
 }: TutorTargetSelectProps) {
   return (
-    <div className={cn('grid gap-3', tracks.length > 1 && 'grid-cols-2')}>
+    <div className={cn('grid gap-3', tracks.length > 1 && 'grid-cols-2 xl:grid-cols-1')}>
       {tracks.length > 1 && (
         <SelectField
           label="Ruta"

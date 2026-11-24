@@ -21,7 +21,7 @@ export function AppShell() {
       <main id="contenido" className="lg:pl-60">
         <ActiveTimerBanner />
         {/* El padding inferior deja espacio para la barra de navegación del móvil. */}
-        <div className="w-full max-w-6xl px-4 pt-8 pb-[calc(7rem+env(safe-area-inset-bottom))] sm:px-6 lg:px-12 lg:pt-14 lg:pb-20">
+        <div className="w-full max-w-[100rem] px-4 pt-8 pb-[calc(7rem+env(safe-area-inset-bottom))] sm:px-6 lg:px-12 lg:pt-14 lg:pb-20 3xl:px-16">
           <Outlet />
         </div>
       </main>

@@ -45,8 +45,8 @@ export function HeatmapSection({ tracks }: { tracks: readonly Track[] }) {
     }
 
     content = (
-      <>
-        <div className="flex flex-col gap-4">
+      <div className="flex flex-col gap-5 wide:grid wide:grid-cols-[auto_minmax(0,1fr)] wide:gap-x-14">
+        <div className="flex min-w-0 flex-col gap-4">
           <Heatmap weeks={weeks} selected={selected} onSelect={select} />
           <HeatmapLegend minMinutes={minMinutes} />
         </div>
@@ -57,7 +57,7 @@ export function HeatmapSection({ tracks }: { tracks: readonly Track[] }) {
           minMinutes={minMinutes}
           tracks={tracks}
         />
-      </>
+      </div>
     )
   }
 

@@ -24,8 +24,9 @@ export function PhaseSection({ tracks }: { tracks: readonly Track[] }) {
     content = <LoadingState />
   } else {
     const byPhase = new Map(totals.data.map((total) => [total.phaseId, total]))
-    content = (filtered ? [filtered] : tracks).map((track) => (
-      <div key={track.id} className="flex flex-col gap-3">
+    const shown = filtered ? [filtered] : tracks
+    content = shown.map((track) => (
+      <div key={track.id} className="flex min-w-0 flex-col gap-3">
         {tracks.length > 1 && <h3 className="text-lg font-bold tracking-tight">{track.title}</h3>}
         <MinutesBars
           caption={`Minutos por fase · ${track.title}`}
@@ -41,6 +42,13 @@ export function PhaseSection({ tracks }: { tracks: readonly Track[] }) {
         />
       </div>
     ))
+    if (shown.length > 1) {
+      content = (
+        <div className="flex flex-col gap-5 wide:grid wide:grid-cols-2 wide:gap-x-14">
+          {content}
+        </div>
+      )
+    }
   }
 
   return (
