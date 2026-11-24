@@ -38,6 +38,8 @@
   --hero: #6b0f2a;
   --hero-fg: #ffffff;
   --hero-muted: #e9c9d2;
+  /* Tramo medio del desvanecido: más vivo, para que sobre blanco no se vea gris. */
+  --hero-fade: #9a1b41;
 
   /* Barras, gráficas y marcas de avance. */
   --meter: #7a1230;
@@ -86,6 +88,7 @@
   --hero: #7a1230;
   --hero-fg: #ffffff;
   --hero-muted: #ebcad3;
+  --hero-fade: #7a1230;
 
   --meter: #cb3d62;
   --track: #2a2326;
@@ -265,10 +268,10 @@
 }
 
 /* ── Barra de la sesión en curso ─────────────────────────────────────────────
-   Baja del negro del marco al vinotinto y se desvanece sobre la página, sin un corte brusco.
-   El desvanecido va fuera de la barra: el texto queda siempre sobre color lleno. */
+   Vinotinto lleno que se desvanece sobre la página, sin un corte brusco. El desvanecido va
+   fuera de la barra: el texto queda siempre sobre color lleno. */
 .timer-banner {
-  background: linear-gradient(to bottom, var(--chrome), var(--hero));
+  background: var(--hero);
 }
 
 .timer-banner::after {
@@ -280,16 +283,17 @@
   background: linear-gradient(
     to bottom,
     var(--hero),
-    color-mix(in srgb, var(--hero) 58%, transparent) 26%,
-    color-mix(in srgb, var(--hero) 24%, transparent) 54%,
-    color-mix(in srgb, var(--hero) 7%, transparent) 80%,
+    color-mix(in srgb, var(--hero-fade) 84%, transparent) 16%,
+    color-mix(in srgb, var(--hero-fade) 56%, transparent) 38%,
+    color-mix(in srgb, var(--hero-fade) 26%, transparent) 62%,
+    color-mix(in srgb, var(--hero-fade) 7%, transparent) 84%,
     transparent
   );
 }
 
 @media (min-width: 1024px) {
   .timer-banner::after {
-    height: 3rem;
+    height: 3.5rem;
   }
 }
 

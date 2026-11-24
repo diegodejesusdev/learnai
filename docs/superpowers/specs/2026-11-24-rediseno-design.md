@@ -12,7 +12,7 @@ Base de la skill `ui-ux-pro-max`: estilo *Minimalism & Swiss*, una sola letra (I
 - **Un bloque vinotinto por pantalla** (`Hero`): lo que toca hacer, con la acción principal en blanco.
 - **Letra grande:** títulos de 40 a 64 px, peso 800, números gigantes. Inter con tamaño óptico (misma dependencia).
 - **Reglas gruesas, sin sombras.** Listas con líneas en vez de tarjetas. Esquinas redondeadas (retoque que pidió Diego el 24 nov 2026; antes eran rectas).
-- **Barra de la sesión en curso:** baja del negro al vinotinto y se desvanece sobre la página, sin corte brusco.
+- **Barra de la sesión en curso:** vinotinto lleno que se desvanece sobre la página, sin negro encima ni corte brusco.
 - **Marco negro:** barra lateral, cabecera y barra inferior; lo activo, en un bloque vinotinto.
 - **Estados:** vacío (pendiente), medio vinotinto (en curso), lleno negro con check (hecho). Siempre ícono + texto o nombre accesible.
 
