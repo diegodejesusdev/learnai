@@ -2,7 +2,12 @@ import { onlineManager } from '@tanstack/react-query'
 import { act, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { phases } from '@/data/curriculum'
+import { automationTrack, dataTrack, phases } from '@/data/curriculum'
+import {
+  defaultSettings,
+  fetchUserSettings,
+  saveUserSettings,
+} from '@/features/ajustes/settingsApi'
 import { dismissToast, getToasts } from '@/lib/toast'
 import { renderApp, roadmapFixture } from '@/test/renderApp'
 import {
@@ -52,6 +57,8 @@ const NOW = '2026-11-19T15:00:00.000Z'
 beforeEach(() => {
   server = structuredClone(snapshot)
   vi.mocked(fetchRoadmap).mockResolvedValue(roadmapFixture())
+  vi.mocked(fetchUserSettings).mockResolvedValue(defaultSettings)
+  vi.mocked(saveUserSettings).mockResolvedValue()
   vi.mocked(fetchProgress).mockImplementation(() => Promise.resolve(structuredClone(server)))
   vi.mocked(fetchTopicMinutes).mockResolvedValue(0)
   vi.mocked(saveTopicStatus).mockImplementation((id, status) => {
@@ -106,6 +113,124 @@ describe('página Ruta', () => {
       .getAllByRole('heading', { level: 3 })
       .map((heading) => heading.textContent)
     expect(titles).toEqual([phases[0]?.title, phases[1]?.title])
+  })
+})
+
+describe('elegir ruta', () => {
+  const inData = { ...defaultSettings, active_track_id: 'ingenieria-datos' }
+
+  it('abre en automatización, con las dos rutas para elegir', async () => {
+    renderApp('/ruta')
+    const tabs = await screen.findAllByRole('tab')
+    expect(tabs.map((tab) => tab.textContent)).toEqual([
+      'Automatización para negocios',
+      'Ingeniería de datos',
+    ])
+    expect(tabs[0]).toHaveAttribute('aria-selected', 'true')
+    expect(screen.getByRole('combobox', { name: 'Ruta' })).toHaveValue('automatizacion')
+  })
+
+  it('la pestaña cambia de ruta y la recuerda en la cuenta', async () => {
+    renderApp('/ruta')
+    await userEvent.click(await screen.findByRole('tab', { name: 'Ingeniería de datos' }))
+    expect(await screen.findByText('Progreso total · 0 de 110 temas')).toBeInTheDocument()
+    expect(screen.getByText('Proyectos:').parentElement).toHaveTextContent('Proyectos: 0/13')
+    expect(screen.getByText('Checklist final:').parentElement).toHaveTextContent(
+      'Checklist final: 0/15',
+    )
+    expect(screen.getByText('13 fases')).toBeInTheDocument()
+    expect(screen.getByText(dataTrack.goal)).toBeInTheDocument()
+    await waitFor(() => expect(saveUserSettings).toHaveBeenCalledTimes(1))
+    expect(vi.mocked(saveUserSettings).mock.calls[0]?.[0]).toEqual({
+      active_track_id: 'ingenieria-datos',
+    })
+  })
+
+  it('el menú desplegable del móvil hace lo mismo', async () => {
+    renderApp('/ruta')
+    await userEvent.selectOptions(
+      await screen.findByRole('combobox', { name: 'Ruta' }),
+      'ingenieria-datos',
+    )
+    expect(await screen.findByText('Progreso total · 0 de 110 temas')).toBeInTheDocument()
+    await waitFor(() =>
+      expect(vi.mocked(saveUserSettings).mock.calls[0]?.[0]).toEqual({
+        active_track_id: 'ingenieria-datos',
+      }),
+    )
+  })
+
+  it('con las flechas del teclado se pasa de una pestaña a otra', async () => {
+    renderApp('/ruta')
+    const [first] = await screen.findAllByRole('tab')
+    first?.focus()
+    await userEvent.keyboard('{ArrowRight}')
+    const data = screen.getByRole('tab', { name: 'Ingeniería de datos' })
+    await waitFor(() => expect(data).toHaveAttribute('aria-selected', 'true'))
+    expect(data).toHaveFocus()
+  })
+
+  it('abre en la última elegida, sin volver a guardarla', async () => {
+    vi.mocked(fetchUserSettings).mockResolvedValue(inData)
+    renderApp('/ruta')
+    expect(await screen.findByText('Progreso total · 0 de 110 temas')).toBeInTheDocument()
+    expect(saveUserSettings).not.toHaveBeenCalled()
+  })
+
+  it('un enlace a una ruta concreta la muestra y la deja como activa', async () => {
+    renderApp('/ruta?ruta=ingenieria-datos')
+    expect(await screen.findByText('Progreso total · 0 de 110 temas')).toBeInTheDocument()
+    await waitFor(() => expect(saveUserSettings).toHaveBeenCalledTimes(1))
+  })
+
+  it('una ruta desconocida en la URL se ignora', async () => {
+    renderApp('/ruta?ruta=no-existe')
+    expect(await screen.findByText('Progreso total · 2 de 100 temas')).toBeInTheDocument()
+    expect(saveUserSettings).not.toHaveBeenCalled()
+  })
+
+  it('si guardar la elección falla, avisa una vez y la ruta sigue a la vista', async () => {
+    vi.mocked(saveUserSettings).mockRejectedValue(new Error('sin red'))
+    renderApp('/ruta')
+    await userEvent.click(await screen.findByRole('tab', { name: 'Ingeniería de datos' }))
+    expect(await screen.findByRole('alert')).toHaveTextContent('No se pudo recordar la ruta')
+    expect(screen.getByText('Progreso total · 0 de 110 temas')).toBeInTheDocument()
+    expect(saveUserSettings).toHaveBeenCalledTimes(1)
+  })
+
+  it('cambiar de ruta conserva el filtro por estado', async () => {
+    renderApp('/ruta?estado=en_curso')
+    await userEvent.click(await screen.findByRole('tab', { name: 'Ingeniería de datos' }))
+    expect(await screen.findByText('Ninguna fase con ese estado')).toBeInTheDocument()
+  })
+
+  it('con una sola ruta no hay nada que elegir', async () => {
+    vi.mocked(fetchRoadmap).mockResolvedValue({ tracks: [automationTrack] })
+    renderApp('/ruta')
+    expect(await screen.findByText('Progreso total · 2 de 100 temas')).toBeInTheDocument()
+    expect(screen.queryByRole('tab')).not.toBeInTheDocument()
+    expect(screen.queryByRole('combobox', { name: 'Ruta' })).not.toBeInTheDocument()
+  })
+
+  it('una ruta sin fases lo dice, en vez de felicitar por haberla terminado', async () => {
+    vi.mocked(fetchUserSettings).mockResolvedValue(inData)
+    vi.mocked(fetchRoadmap).mockResolvedValue({
+      tracks: [automationTrack, { ...dataTrack, phases: [], checklist: [] }],
+    })
+    renderApp('/ruta')
+    expect(await screen.findByText('Esta ruta está vacía')).toBeInTheDocument()
+    expect(screen.queryByText(/Completaste todos los temas/)).not.toBeInTheDocument()
+    // Se puede volver a la otra.
+    expect(screen.getAllByRole('tab')).toHaveLength(2)
+  })
+
+  it('la fase y el tema dicen de qué ruta son y vuelven a ella', async () => {
+    renderApp('/ruta/de-f1')
+    expect(await screen.findByText('Ingeniería de datos · Fase 1')).toBeInTheDocument()
+    expect(screen.getByRole('link', { name: 'Ruta', current: false })).toHaveAttribute(
+      'href',
+      '/ruta?ruta=ingenieria-datos',
+    )
   })
 })
 
@@ -183,6 +308,17 @@ describe('checklist final', () => {
     await waitFor(() => expect(item).toBeChecked())
     expect(saveChecklistItem).toHaveBeenCalledWith('c2', true)
     expect(await screen.findByText('2 de 14 logros')).toBeInTheDocument()
+  })
+
+  it('cada ruta tiene la suya: marcar una no cambia la cuenta de la otra', async () => {
+    renderApp('/ruta?ruta=ingenieria-datos')
+    await userEvent.click(await screen.findByRole('checkbox', { name: /plan de ejecución/ }))
+    expect(saveChecklistItem).toHaveBeenCalledWith('de-c1', true)
+    expect(await screen.findByText('1 de 15 logros')).toBeInTheDocument()
+    expect(screen.queryByRole('checkbox', { name: /Consumo cualquier API/ })).toBeNull()
+
+    await userEvent.click(screen.getByRole('tab', { name: 'Automatización para negocios' }))
+    expect(await screen.findByText('1 de 14 logros')).toBeInTheDocument()
   })
 })
 

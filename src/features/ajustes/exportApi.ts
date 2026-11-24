@@ -13,6 +13,11 @@ export interface ExportRows {
   conversations: Tables<'tutor_conversations'>[]
   messages: Tables<'tutor_messages'>[]
   quizResults: Tables<'quiz_results'>[]
+  // Contenido: para saber de qué ruta es cada registro.
+  tracks: Tables<'tracks'>[]
+  phases: Pick<Tables<'phases'>, 'id' | 'track_id'>[]
+  topics: Pick<Tables<'topics'>, 'id' | 'phase_id'>[]
+  checklistItems: Pick<Tables<'checklist_items'>, 'id' | 'track_id'>[]
 }
 
 const PAGE = 1000
@@ -43,6 +48,10 @@ export async function fetchExportRows(): Promise<ExportRows> {
     conversations,
     messages,
     quizResults,
+    tracks,
+    phases,
+    topics,
+    checklistItems,
   ] = await Promise.all([
     supabase.from('user_settings').select('*').maybeSingle(),
     allRows((from, to) =>
@@ -71,6 +80,18 @@ export async function fetchExportRows(): Promise<ExportRows> {
     allRows((from, to) =>
       supabase.from('quiz_results').select('*').order('created_at').order('id').range(from, to),
     ),
+    allRows((from, to) =>
+      supabase.from('tracks').select('*').order('sort_order').order('id').range(from, to),
+    ),
+    allRows((from, to) =>
+      supabase.from('phases').select('id, track_id').order('id').range(from, to),
+    ),
+    allRows((from, to) =>
+      supabase.from('topics').select('id, phase_id').order('id').range(from, to),
+    ),
+    allRows((from, to) =>
+      supabase.from('checklist_items').select('id, track_id').order('id').range(from, to),
+    ),
   ])
   if (settings.error) throw settings.error
   return {
@@ -82,5 +103,9 @@ export async function fetchExportRows(): Promise<ExportRows> {
     conversations,
     messages,
     quizResults,
+    tracks,
+    phases,
+    topics,
+    checklistItems,
   }
 }

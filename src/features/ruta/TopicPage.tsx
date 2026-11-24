@@ -4,7 +4,13 @@ import { NotFoundPage } from '@/app/NotFoundPage'
 import { ButtonLink } from '@/components/ui/ButtonLink'
 import { Card } from '@/components/ui/Card'
 import { PageHeader } from '@/components/ui/PageHeader'
-import { findTopicIn, phaseLabel, type TopicWithPhase } from '@/lib/roadmap'
+import {
+  findTopicIn,
+  trackOfTarget,
+  trackPhaseLabel,
+  type TopicWithPhase,
+  type Track,
+} from '@/lib/roadmap'
 import type { ProgressSnapshot } from './progressApi'
 import { topicProgressOf } from './progressModel'
 import { RoadmapGate } from './RoadmapGate'
@@ -12,14 +18,19 @@ import { TopicMinutes } from './TopicMinutes'
 import { TopicNotes } from './TopicNotes'
 import { TopicStatusPicker } from './TopicStatusPicker'
 
-function TopicView({ topic, phase, progress }: TopicWithPhase & { progress: ProgressSnapshot }) {
+interface TopicViewProps extends TopicWithPhase {
+  track: Track
+  progress: ProgressSnapshot
+}
+
+function TopicView({ track, topic, phase, progress }: TopicViewProps) {
   const { status, notes } = topicProgressOf(progress, topic.id)
 
   return (
     <>
       <PageHeader
         title={topic.title}
-        eyebrow={`${phaseLabel(phase)} · ${phase.title}`}
+        eyebrow={`${trackPhaseLabel(track, phase)} · ${phase.title}`}
         description={topic.details}
         back={{ to: `/ruta/${phase.id}`, label: phase.title }}
       />
@@ -47,12 +58,14 @@ function TopicView({ topic, phase, progress }: TopicWithPhase & { progress: Prog
 }
 
 export function TopicPage() {
-  const { topicId } = useParams()
+  const { topicId = '' } = useParams()
   return (
     <RoadmapGate>
       {({ roadmap, progress }) => {
-        const found = findTopicIn(roadmap.phases, topicId)
-        return found ? <TopicView {...found} progress={progress} /> : <NotFoundPage />
+        const track = trackOfTarget(roadmap.tracks, { topicId, projectPhaseId: null })
+        const found = findTopicIn(track?.phases ?? [], topicId)
+        if (!track || !found) return <NotFoundPage />
+        return <TopicView track={track} {...found} progress={progress} />
       }}
     </RoadmapGate>
   )

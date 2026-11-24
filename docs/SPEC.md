@@ -2,7 +2,14 @@
 
 ## 1. Objetivo y usuario
 
-LearnAI es una app web personal para estudiar la ruta «Automatización para negocios» (`curriculum.json`). Esa ruta tiene 9 fases (f0–f8), 100 temas, un proyecto por fase y una checklist final de 14 ítems. La meta es ~10 h/semana durante ~20 semanas.
+LearnAI es una app web personal para estudiar varias rutas (`src/data/routes/`, un JSON por ruta). Cada una tiene fases, temas, un proyecto por fase y una checklist final:
+
+| Ruta (`tracks.id`) | Contenido | Meta |
+|---|---|---|
+| Automatización para negocios (`automatizacion`) | 9 fases (f0–f8), 100 temas, 14 ítems | ~10 h/semana durante ~20 semanas |
+| Ingeniería de datos (`ingenieria-datos`) | 13 fases (de-f0–de-f12), 110 temas, 15 ítems | ~10 h/semana durante ~26 semanas |
+
+La racha y la meta semanal cuentan todas las rutas juntas.
 
 - **Usuario:** una sola persona (Diego), estudiante de ciencia de datos en Colombia.
 - **Dispositivos:** PC y móvil, con la misma experiencia en ambos.
@@ -29,17 +36,21 @@ LearnAI es una app web personal para estudiar la ruta «Automatización para neg
 - **Tema:** claro/oscuro automático según el sistema, con interruptor manual en Ajustes (`system` / `light` / `dark`). Colores neutros y un solo acento verde azulado. Los estados tienen color y además texto o icono, nunca solo color.
 - **Accesibilidad:** áreas táctiles de 44 px o más, foco visible, `aria-label` en español y contraste AA.
 - **Rutas:** `/`, `/ruta`, `/ruta/:phaseId`, `/ruta/tema/:topicId`, `/estudiar`, `/historial`, `/tutor`, `/tutor/:conversationId`, `/ajustes`, `/ajustes/diseno` (catálogo del sistema de diseño) y `/login`. Cualquier otra ruta muestra un 404. Sin sesión, todas redirigen a `/login`.
-- **Parámetros de consulta:** `/estudiar?tema=<id>` o `?proyecto=<id de fase>` preseleccionan el destino; `/tutor?tema=<id>` o `?proyecto=<id de fase>` preseleccionan el contexto del tutor.
+- **Parámetros de consulta:** `/ruta?ruta=<id>` muestra esa ruta y la deja como activa; `/historial?ruta=<id>` filtra por ruta; `/estudiar?tema=<id>` o `?proyecto=<id de fase>` preseleccionan el destino; `/tutor?tema=<id>` o `?proyecto=<id de fase>` preseleccionan el contexto del tutor.
 
 ## 4. Módulos
 
 ### 4.1 Ruta
 
 **Qué hace**
-- **Página Ruta:**
-  - Arriba, el progreso total de la ruta y, aparte, proyectos (x/9) y checklist (x/14).
+- **Elegir ruta:**
+  - Pestañas en el PC (≥ 1024 px) y menú desplegable en el móvil. Con una sola ruta no aparece.
+  - Recuerda la última en la cuenta (`user_settings.active_track_id`): es la **ruta activa** en todos los dispositivos. Vacía, o de una ruta que ya no existe = la primera.
+  - La ruta que se ve va en la URL (`?ruta=`). Verla la deja como activa.
+- **Página Ruta** (todo, de la ruta elegida):
+  - Arriba, la meta, el progreso total y, aparte, proyectos y checklist.
   - Después, la tarjeta «Siguiente tema».
-  - Las 9 fases como tarjetas con título, resumen, semanas estimadas, barra (temas hechos / total) y estado de la fase.
+  - Las fases como tarjetas con título, resumen, semanas estimadas, barra (temas hechos / total) y estado de la fase.
   - Al final, la checklist final en su propia sección.
 - **Página de fase:**
   - Progreso de la fase.
@@ -51,7 +62,7 @@ LearnAI es una app web personal para estudiar la ruta «Automatización para neg
   - Minutos estudiados en ese tema (suma de sus sesiones).
   - Botones «Estudiar este tema» (`/estudiar?tema=<id>`) y «Preguntarle al tutor» (`/tutor?tema=<id>`).
   - Notas con autoguardado.
-- **Checklist final:** los 14 ítems con casilla y la fecha en que se lograron.
+- **Checklist final:** los ítems de la ruta, con casilla y la fecha en que se lograron. Cada ruta tiene la suya.
 
 **Reglas**
 - **Estados:** `pendiente` → «Pendiente», `en_curso` → «En curso», `hecho` → «Hecho» (enum `progress_status`). Si un tema no tiene fila de progreso, se considera pendiente.
@@ -59,11 +70,11 @@ LearnAI es una app web personal para estudiar la ruta «Automatización para neg
 - **Al pasar a «Hecho»** se guarda `completed_at`. Si vuelve a otro estado, `completed_at` se limpia (trigger de la base; la app lo imita en el cambio optimista).
 - **Progreso** (decisión de Diego en la fase 3):
   - de una fase = temas hechos / temas de la fase;
-  - total = temas hechos / 100;
+  - total = temas hechos / temas de la ruta (cada ruta por separado);
   - los proyectos y la checklist se muestran aparte.
   - Solo cuenta lo «hecho»; «en curso» no suma.
 - **Estado de una fase** (para la tarjeta y el filtro): «hecho» si todos sus temas lo están, «en curso» si alguno está empezado, «pendiente» si ninguno.
-- **Siguiente tema:** el primer tema «en curso» en el orden de la ruta; si no hay, el primer «pendiente». Si todo está hecho, se muestra una felicitación.
+- **Siguiente tema** (uno por ruta): el primer tema «en curso» en el orden de la ruta; si no hay, el primer «pendiente». Si todo está hecho, se muestra una felicitación. Lo que pasa en una ruta no cambia la sugerencia de otra.
 - **Filtros:** Todos / Pendientes / En curso / Hechos.
   - En Ruta filtran las fases (por su estado) y en la página de fase filtran los temas.
   - Cada filtro muestra cuántos elementos hay.
@@ -83,8 +94,8 @@ LearnAI es una app web personal para estudiar la ruta «Automatización para neg
 ### 4.2 Temporizador (sección «Estudiar»)
 
 **Destino de la sesión:** cada sesión va ligada a **un tema o al proyecto de una fase** (exactamente uno de los dos).
-- **Buscador por nombre:** ignora tildes y mayúsculas, y exige todas las palabras. Encuentra temas y proyectos.
-- **Destino por defecto:** el que viene en la URL (`?tema=` / `?proyecto=`, p. ej. desde la página de tema); si no hay, el siguiente tema sugerido (§4.1).
+- **Buscador por nombre:** ignora tildes y mayúsculas, y exige todas las palabras. Encuentra temas y proyectos de todas las rutas, agrupados por ruta: la activa primero y hasta 6 por ruta.
+- **Destino por defecto:** el que viene en la URL (`?tema=` / `?proyecto=`, p. ej. desde la página de tema); si no hay, el siguiente tema de la ruta activa (§4.1).
 
 **Modos**
 - **Pomodoro:** bloques de trabajo y descanso con los minutos de `user_settings` (por defecto 25/5).
@@ -189,9 +200,15 @@ Todos los días y semanas se calculan en hora de Bogotá. Una sesión cuenta en 
 
 **Gráficas (Recharts)**
 - **Minutos por semana:** columnas de las últimas 12 semanas (lunes a domingo) con una línea en la meta semanal.
-- **Minutos por fase:** barras horizontales de las 9 fases, con el tiempo al final de cada barra. Las sesiones de proyecto suman a su fase.
+- **Minutos por ruta:** barras horizontales, una por ruta, de toda la historia. Son la suma de los totales por fase (`trackTotals.ts`). No la cambia el filtro.
+- **Minutos por fase:** barras horizontales de todas las fases, con el tiempo al final de cada barra. Las sesiones de proyecto suman a su fase. Sin filtro hay una gráfica por ruta.
 - Cada gráfica tiene «Ver los datos», una tabla con los mismos valores, y un tooltip al tocar o pasar por las barras.
 - Recharts se descarga solo al abrir el Historial: va en un fragmento aparte, no en el arranque de la app.
+
+**Filtro por ruta** (`?ruta=`)
+- Cambia la lista de sesiones y los minutos por fase.
+- No cambia el mapa de calor, las rachas, la meta ni las semanas: cuentan todas las rutas juntas.
+- Cambiar de ruta limpia la fase y el tema elegidos. Una fase de otra ruta en la URL se ignora.
 
 **Meta semanal**
 - Por defecto 600 min (las 10 h/semana de la ruta); se edita en Ajustes.
@@ -201,6 +218,7 @@ Todos los días y semanas se calculan en hora de Bogotá. Una sesión cuenta en 
 - **Orden:** de la más reciente a la más antigua, de 20 en 20 con «Cargar más».
 - **Filtros:**
   - rango de fechas (días de Bogotá, ambos incluidos);
+  - ruta;
   - fase;
   - tema o proyecto de esa fase.
   - Van en la URL, así que se conservan al volver de editar.
@@ -222,6 +240,7 @@ Todos los días y semanas se calculan en hora de Bogotá. Una sesión cuenta en 
   - `fecha`, `hora_inicio` y `hora_fin`, en hora de Bogotá; la fecha es la del inicio.
   - `duracion_min`.
   - `modo`.
+  - `ruta` (por ejemplo, «Ingeniería de datos»).
   - `fase` (por ejemplo, «Fase 1 · Bases técnicas…»).
   - `tipo` (`tema` o `proyecto`).
   - `tema_o_proyecto`.
@@ -266,22 +285,25 @@ Todos los días y semanas se calculan en hora de Bogotá. Una sesión cuenta en 
 - **Detener:** el botón corta la conexión. La función lo nota y guarda lo que el modelo alcanzó a escribir.
 
 **Contexto del modelo.** Lo arma el servidor en cada mensaje (`_shared/tutorContext.ts`), nunca el navegador:
-- La fecha de hoy en Colombia, la ruta y su meta.
-- **Tema** (Explicar y Quiz): su fase (título y resumen), el título y los detalles del tema, su estado y tus notas. Las notas se recortan a 3000 caracteres y se marcan como datos, no como instrucciones.
-- **Proyecto** (Revisar proyecto): enunciado, temas de la fase, estado, repositorio, demo y notas.
-- Resumen corto del progreso:
+- La fecha de hoy en Colombia.
+- **Tema** (Explicar y Quiz): su ruta con la meta, su fase (título y resumen), el título y los detalles del tema, su estado y tus notas. Las notas se recortan a 3000 caracteres y se marcan como datos, no como instrucciones.
+- **Proyecto** (Revisar proyecto): su ruta con la meta, enunciado, temas de la fase, estado, repositorio, demo y notas.
+- Resumen corto del progreso en la ruta del tema o del proyecto. En «Hoy», el de todas las rutas, y cuál es la activa:
   - temas hechos y proyectos hechos;
   - avance por fase;
   - temas en curso;
   - siguientes pendientes;
   - en «Hoy», también los minutos de la semana frente a la meta.
-- Tus últimas 5 sesiones, en hora de Colombia.
+- Tus últimas 5 sesiones, en hora de Colombia, cada una con su ruta.
 - **Historial:** las últimas 20 entradas de la conversación. En el Quiz no se reenvían los JSON: solo se pide no repetir las preguntas anteriores.
 
 **Instrucción de sistema** (`_shared/tutorPrompts.ts`):
-- En español.
-- Tutor paciente y directo para alguien que aprende automatización para negocios en Colombia.
-- Usa ejemplos de pequeños negocios colombianos, con montos en pesos.
+- En español. Tutor paciente y directo.
+- **Se adapta a la ruta** (`_shared/tutorTracks.ts`): quién es el estudiante, qué ejemplos usar y qué riesgos mirar en un proyecto.
+  - Automatización: pequeños negocios colombianos, con montos en pesos.
+  - Ingeniería de datos: datos de Colombia, con SQL o Python cuando aclara; idempotencia, calidad y costos.
+  - Otra ruta: un perfil genérico con su título y su meta.
+- **«¿Qué estudio hoy?»** conoce todas las rutas: propone primero los temas en curso de cualquiera, luego el siguiente de la activa, y dice de qué ruta es cada bloque.
 - Si no sabe algo o puede estar desactualizado (precios, planes, versiones, límites, normas), lo dice y sugiere verificarlo en la documentación oficial.
 - Responde en Markdown.
 
@@ -297,6 +319,7 @@ Todos los días y semanas se calculan en hora de Bogotá. Una sesión cuenta en 
 
 **Interfaz** (`/tutor?modo=explicar|quiz|proyecto|hoy&tema=…&proyecto=…&conversacion=…`)
 - El estado va en la URL: los enlaces desde Ruta e Inicio abren lo correcto y recargar no pierde la conversación.
+- **Ruta:** un selector encima del tema. Abre en la ruta del tema o proyecto de la URL o, si no hay, en la activa. Cambiarla propone su siguiente tema.
 - **Conversaciones:** se guardan por tema (o proyecto) y modo. Se abre la más reciente, hay un selector con las anteriores y un botón «Nueva».
 - **Respuestas:** se muestran en Markdown sin HTML, con `react-markdown` + `remark-gfm`. Los bloques de código muestran el lenguaje y un botón «Copiar».
 - **Guardar en notas:** en Explicar y Revisar proyecto, abre un editor con la selección (o la respuesta entera) para recortarla. Se agrega al final de las notas del tema o del proyecto con la función SQL `append_topic_notes` / `append_project_notes`, que no pisa cambios hechos en otro dispositivo.
@@ -312,14 +335,14 @@ Todos los días y semanas se calculan en hora de Bogotá. Una sesión cuenta en 
 
 - **«Seguir estudiando»**: la tarjeta principal. Abre, en este orden:
   - la sesión en curso, si hay una;
-  - si no, el tema o proyecto de la última sesión, si aún no está «hecho»;
-  - si no, el siguiente tema sugerido.
+  - si no, el tema o proyecto de la última sesión (de cualquier ruta), si aún no está «hecho»;
+  - si no, el siguiente tema de la ruta activa.
   - Sin ninguna sesión todavía, el botón dice «Empezar a estudiar».
-- **Minutos de hoy** (Bogotá), con lo que falta para que hoy cuente en la racha.
+- **Minutos de hoy** (Bogotá), de todas las rutas, con lo que falta para que hoy cuente en la racha.
 - **Racha actual y máxima.**
 - **Meta semanal:** barra con los minutos de la semana (lunes a domingo) sobre la meta.
-- **Siguiente tema:** la misma sugerencia que en Ruta. Solo aparece si no es ya lo que propone «Seguir estudiando».
-- **Progreso de la ruta** (temas hechos / 100), que enlaza a Ruta.
+- **Siguiente tema** de la ruta activa: la misma sugerencia que en Ruta. Solo aparece si no es ya lo que propone «Seguir estudiando».
+- **Progreso de cada ruta** (temas hechos / total), con la activa marcada. Al tocar una se abre en Ruta.
 - **Acceso a «¿Qué estudio hoy?»** del tutor (fase 6).
 
 ### 4.6 Ajustes
@@ -332,7 +355,7 @@ Todos los días y semanas se calculan en hora de Bogotá. Una sesión cuenta en 
   - botón «Instalar app» cuando el navegador lo permite (Chrome y Edge);
   - en iPhone y iPad, los pasos Compartir → Agregar a inicio;
   - si ya está instalada, lo dice.
-- **Exportar mis datos (JSON):** ajustes, progreso con notas, sesiones, conversaciones con el tutor (con sus mensajes) y resultados de quiz, más un resumen. No incluye `user_id`. Archivo `learnai-datos-AAAA-MM-DD.json`.
+- **Exportar mis datos (JSON):** ajustes, progreso con notas, sesiones, conversaciones con el tutor (con sus mensajes) y resultados de quiz, más un resumen general y otro por ruta (`rutas`). Cada registro lleva el id de su ruta (`ruta`; nulo en «¿Qué estudio hoy?»). `formato: 2`. No incluye `user_id`. Archivo `learnai-datos-AAAA-MM-DD.json`.
 - Cerrar sesión.
 
 ### 4.7 Autenticación
@@ -357,20 +380,24 @@ Convenciones:
 - Las tablas de usuario llevan `user_id uuid not null default auth.uid() references auth.users on delete cascade`.
 - `updated_at` se mantiene con un trigger.
 
-### 5.1 Contenido de la ruta (solo lectura)
+### 5.1 Contenido de las rutas (solo lectura)
 
-Se carga desde `curriculum.json` con `npm run seed` (`scripts/seed-curriculum.ts`):
+Se carga desde todos los JSON de `src/data/routes/` con `npm run seed` (`scripts/seed-curriculum.ts`):
 - Hace upsert por id con la clave service role, así que se puede repetir sin duplicar.
-- Valida antes que no haya ids repetidos.
-- Avisa (sin borrar) de los ids que estén en la base pero ya no en el JSON, para no perder el progreso ligado a ellos.
-- Los ids del JSON (`f0`, `f0-t1`, `c1`) son las claves primarias y no se renombran nunca.
+- Antes de escribir revisa la forma de cada archivo, que no haya ids repetidos (en una ruta ni entre rutas) y que ningún id sea, en la base, de otra ruta. Con un error no escribe nada.
+- Avisa (sin borrar) de los ids que estén en la base pero ya no en los JSON, para no perder el progreso ligado a ellos.
+- Los ids del JSON (`f0`, `f0-t1`, `c1`, `de-f0`…) son las claves primarias y no se renombran nunca.
+- Solo escribe `tracks`, `phases`, `topics` y `checklist_items`.
+
+`curriculum_meta` ya no se usa. Se conserva para las apps instaladas antes de las rutas, que aún la leen.
 
 ```
-curriculum_meta(id int pk = 1, version int, title text, goal text)
-phases(id text pk, sort_order int, title text, summary text, estimated_weeks int,
+curriculum_meta(id int pk = 1, version int, title text, goal text)   -- sin uso
+tracks(id text pk, sort_order int, title text, goal text)
+phases(id text pk, track_id text fk → tracks, sort_order int, title text, summary text, estimated_weeks int,
        project_title text, project_description text)
 topics(id text pk, phase_id text fk → phases, sort_order int, title text, details text)
-checklist_items(id text pk, sort_order int, text text)
+checklist_items(id text pk, track_id text fk → tracks, sort_order int, text text)
 ```
 
 ### 5.2 Datos del usuario
@@ -420,8 +447,9 @@ tutor_messages(id uuid pk, conversation_id, user_id,
 
 user_settings(user_id pk, weekly_goal_minutes int default 600, pomodoro_work_min int default 25,
               pomodoro_break_min int default 5, streak_min_minutes int default 15,
-              theme default 'system', updated_at)
+              theme default 'system', active_track_id fk → tracks null, updated_at)
   theme ∈ {system, light, dark}
+  active_track_id: la ruta activa; nulo = la primera. Si se borra la ruta, vuelve a nulo
   streak_min_minutes entre 1 y 240
   se crea con un trigger sobre auth.users al registrar el usuario
 ```
@@ -550,4 +578,4 @@ Las variables de la Edge Function van en `supabase/functions/.env` en local y co
 - Varios usuarios o compartir el progreso.
 - Quizzes estructurados con puntaje guardado.
 - Que el tutor lea repositorios o páginas por URL.
-- Editar el contenido de la ruta desde la app (se edita `curriculum.json` y se genera una migración nueva).
+- Editar el contenido de la ruta desde la app (se editan los JSON de `src/data/routes` y se corre el seed).

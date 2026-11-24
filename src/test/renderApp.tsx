@@ -5,7 +5,7 @@ import { RouterProvider } from 'react-router/dom'
 import { vi } from 'vitest'
 import { routes } from '@/app/routes'
 import { ThemeProvider } from '@/app/ThemeProvider'
-import { curriculum, phases } from '@/data/curriculum'
+import { tracks } from '@/data/curriculum'
 import { AuthContext, type AuthContextValue } from '@/features/acceso/AuthContext'
 import type { Roadmap } from '@/features/ruta/roadmapApi'
 
@@ -20,14 +20,9 @@ export const signedOut: AuthContextValue = {
   signOut: vi.fn(() => Promise.resolve()),
 }
 
-/** La ruta real (curriculum.json) con la forma que devuelve Supabase. */
+/** Las rutas reales (src/data/routes) con la forma que devuelve Supabase. */
 export function roadmapFixture(): Roadmap {
-  return {
-    title: curriculum.title,
-    goal: curriculum.goal,
-    phases: [...phases],
-    checklist: [...curriculum.final_checklist],
-  }
+  return { tracks: [...tracks] }
 }
 
 /** Monta la app completa en una ruta, con sesión simulada y sin red. */

@@ -13,6 +13,7 @@ import type { RoadmapData } from '@/features/ruta/RoadmapGate'
 import { progressKey } from '@/features/ruta/useProgress'
 import { formatDuration, toDateInputValue, toTimeInputValue } from '@/lib/dates'
 import { nextTopic } from '@/lib/progress'
+import { activeFirst } from '@/lib/roadmap'
 import { syncScope } from '@/lib/offline'
 import { invalidateSessionQueries } from '@/lib/sessionQueries'
 import { toast } from '@/lib/toast'
@@ -25,12 +26,12 @@ import { recordManualSession } from './timerApi'
 
 const DEFAULT_MINUTES = 30
 
-export function ManualSessionForm({ roadmap, progress }: RoadmapData) {
+export function ManualSessionForm({ roadmap, progress, activeTrack }: RoadmapData) {
   const [params] = useSearchParams()
   const navigate = useNavigate()
   const queryClient = useQueryClient()
-  const targets = studyTargets(roadmap.phases)
-  const suggestion = nextTopic(roadmap.phases, topicStatuses(progress))
+  const targets = studyTargets(activeFirst(roadmap.tracks, activeTrack.id))
+  const suggestion = nextTopic(activeTrack.phases, topicStatuses(progress))
   const [selectedKey, setSelectedKey] = useState(() => {
     const fromUrl = params.get('tema')
       ? `tema:${params.get('tema')}`

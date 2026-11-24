@@ -1,22 +1,29 @@
 import { addDaysToKey, zonedInputToDate } from '@/lib/dates'
-import { findPhaseIn, findTopicIn } from '@/lib/roadmap'
+import { allPhases, findPhaseIn, findTopicIn, findTrack, type Track } from '@/lib/roadmap'
 import type { Phase } from '@/types/curriculum'
 import { emptySessionQuery, type SessionQuery } from './sessionsApi'
 
 /**
- * Filtros de la lista de sesiones, tal como van en la URL (?desde=…&hasta=…&fase=…&tema=…).
+ * Filtros de la lista de sesiones, tal como van en la URL (?desde=…&hasta=…&ruta=…&fase=…&tema=…).
  * Van en la URL para que se conserven al volver de editar una sesión. '' = sin filtro.
  */
 export interface SessionFilters {
   /** Días de Bogotá 'yyyy-MM-dd', ambos incluidos. */
   from: string
   to: string
+  trackId: string
   phaseId: string
   /** 'tema:<id>' o 'proyecto:<id de fase>' (como en studyTargets). */
   targetKey: string
 }
 
-export const emptyFilters: SessionFilters = { from: '', to: '', phaseId: '', targetKey: '' }
+export const emptyFilters: SessionFilters = {
+  from: '',
+  to: '',
+  trackId: '',
+  phaseId: '',
+  targetKey: '',
+}
 
 function validDay(value: string | null): string {
   return value && zonedInputToDate(value, '00:00') ? value : ''
@@ -28,6 +35,7 @@ export function readSessionFilters(params: URLSearchParams): SessionFilters {
   return {
     from: validDay(params.get('desde')),
     to: validDay(params.get('hasta')),
+    trackId: params.get('ruta') ?? '',
     phaseId: params.get('fase') ?? project ?? '',
     targetKey: topic ? `tema:${topic}` : project ? `proyecto:${project}` : '',
   }
@@ -39,9 +47,10 @@ export function writeSessionFilters(
   filters: SessionFilters,
 ): URLSearchParams {
   const next = new URLSearchParams(params)
-  for (const name of ['desde', 'hasta', 'fase', 'tema', 'proyecto']) next.delete(name)
+  for (const name of ['desde', 'hasta', 'ruta', 'fase', 'tema', 'proyecto']) next.delete(name)
   if (filters.from) next.set('desde', filters.from)
   if (filters.to) next.set('hasta', filters.to)
+  if (filters.trackId) next.set('ruta', filters.trackId)
   if (filters.phaseId) next.set('fase', filters.phaseId)
   const [kind, id] = filters.targetKey.split(':')
   if (id && kind === 'tema') next.set('tema', id)
@@ -53,8 +62,20 @@ export function hasFilters(filters: SessionFilters): boolean {
   return Object.values(filters).some(Boolean)
 }
 
-/** Los filtros, traducidos a la consulta. Los días se cuentan en hora de Bogotá. */
-export function toSessionQuery(filters: SessionFilters, phases: readonly Phase[]): SessionQuery {
+function scopeOf(phases: readonly Phase[]): SessionQuery['scope'] {
+  return {
+    phaseIds: phases.map((phase) => phase.id),
+    topicIds: phases.flatMap((phase) => phase.topics.map((topic) => topic.id)),
+  }
+}
+
+/**
+ * Los filtros, traducidos a la consulta. Los días se cuentan en hora de Bogotá. Con una ruta
+ * elegida, una fase o un tema de otra ruta (p. ej. de una URL vieja) se ignoran.
+ */
+export function toSessionQuery(filters: SessionFilters, tracks: readonly Track[]): SessionQuery {
+  const track = findTrack(tracks, filters.trackId)
+  const phases = track?.phases ?? allPhases(tracks)
   const query: SessionQuery = { ...emptySessionQuery }
   if (filters.from) query.from = zonedInputToDate(filters.from, '00:00')?.toISOString() ?? null
   if (filters.to) {
@@ -67,7 +88,8 @@ export function toSessionQuery(filters: SessionFilters, phases: readonly Phase[]
     query.target = { topicId: null, projectPhaseId: id }
   } else {
     const phase = findPhaseIn(phases, filters.phaseId)
-    if (phase) query.phase = { id: phase.id, topicIds: phase.topics.map((topic) => topic.id) }
+    if (phase) query.scope = scopeOf([phase])
+    else if (track) query.scope = scopeOf(track.phases)
   }
   return query
 }

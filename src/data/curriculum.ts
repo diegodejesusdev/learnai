@@ -1,24 +1,31 @@
-import { findPhaseIn, findTopicIn, type TopicWithPhase } from '@/lib/roadmap'
+import type { Track } from '@/lib/roadmap'
 import type { Curriculum, Phase } from '@/types/curriculum'
-import data from './curriculum.json'
 
-// Copia de /curriculum.json. Las secciones leen la ruta de Supabase; solo el Tutor (hasta la
-// fase 6) y los tests usan este archivo.
-// Un test verifica que esta copia y la de la raíz sigan idénticas.
-export const curriculum: Curriculum = data
+// Las rutas de src/data/routes/, para los tests. La app las lee de Supabase (el seed las carga).
+const files = import.meta.glob<Curriculum>('./routes/*.json', { eager: true, import: 'default' })
 
-export const phases: readonly Phase[] = [...curriculum.phases].sort((a, b) => a.order - b.order)
-
-export const allTopics: readonly TopicWithPhase[] = phases.flatMap((phase) =>
-  phase.topics.map((topic) => ({ topic, phase })),
-)
-
-export function findPhase(phaseId: string | undefined): Phase | undefined {
-  return findPhaseIn(phases, phaseId)
+/** El archivo de una ruta con la misma forma que devuelve fetchRoadmap. */
+function toTrack(curriculum: Curriculum): Track {
+  return {
+    ...curriculum.track,
+    goal: curriculum.goal,
+    phases: [...curriculum.phases].sort((a, b) => a.order - b.order),
+    checklist: curriculum.final_checklist,
+  }
 }
 
-export function findTopic(topicId: string | undefined): TopicWithPhase | undefined {
-  return findTopicIn(phases, topicId)
+export const tracks: readonly Track[] = Object.values(files)
+  .map(toTrack)
+  .sort((a, b) => a.order - b.order)
+
+function trackById(id: string): Track {
+  const track = tracks.find((candidate) => candidate.id === id)
+  if (!track) throw new Error(`Falta la ruta ${id} en src/data/routes`)
+  return track
 }
 
-export { phaseLabel } from '@/lib/roadmap'
+export const automationTrack = trackById('automatizacion')
+export const dataTrack = trackById('ingenieria-datos')
+
+/** Fases de automatización, la ruta que usa la mayoría de los tests. */
+export const phases: readonly Phase[] = automationTrack.phases

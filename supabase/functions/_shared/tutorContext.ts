@@ -5,13 +5,20 @@ export type ProgressStatus = 'pendiente' | 'en_curso' | 'hecho'
 
 export interface ContextPhase {
   id: string
-  /** Número de la fase (0 a 8). */
+  /** Número de la fase dentro de su ruta. */
   order: number
   title: string
   summary: string
   projectTitle: string
   projectDescription: string
   topics: { id: string; title: string; details: string }[]
+}
+
+export interface ContextTrack {
+  id: string
+  title: string
+  goal: string
+  phases: ContextPhase[]
 }
 
 export interface ContextSession {
@@ -22,10 +29,10 @@ export interface ContextSession {
 }
 
 export interface TutorContextData {
-  curriculumTitle: string
-  goal: string
-  /** Todas las fases, en orden. */
-  phases: ContextPhase[]
+  /** Todas las rutas, en orden, con sus fases. */
+  tracks: ContextTrack[]
+  /** La última ruta elegida. null = la primera. */
+  activeTrackId: string | null
   /** Estado por id de tema / de fase (proyecto). Sin fila = pendiente. */
   topicStatuses: Partial<Record<string, ProgressStatus>>
   projectStatuses: Partial<Record<string, ProgressStatus>>
@@ -124,14 +131,54 @@ export function summarizeProgress(
   }
 }
 
-function sessionTarget(session: ContextSession, phases: readonly ContextPhase[]): string {
-  for (const phase of phases) {
-    if (session.projectPhaseId === phase.id)
-      return `Proyecto de la ${phaseLabel(phase)}: ${phase.projectTitle}`
-    const topic = phase.topics.find((candidate) => candidate.id === session.topicId)
-    if (topic) return `${topic.title} (${phaseLabel(phase)})`
+/** La fase del tema o del proyecto, con su ruta. */
+function findTarget(
+  tracks: readonly ContextTrack[],
+  target: { topicId: string | null; projectPhaseId: string | null },
+) {
+  for (const track of tracks) {
+    for (const phase of track.phases) {
+      const topic = phase.topics.find((candidate) => candidate.id === target.topicId)
+      if (topic || phase.id === target.projectPhaseId) return { track, phase, topic }
+    }
   }
-  return 'Tema que ya no está en la ruta'
+  return undefined
+}
+
+function sessionTarget(session: ContextSession, tracks: readonly ContextTrack[]): string {
+  const found = findTarget(tracks, session)
+  if (!found) return 'Tema que ya no está en la ruta'
+  const { track, phase, topic } = found
+  const title = topic?.title ?? `Proyecto ${phase.projectTitle}`
+  return `${title} (${track.title}, ${phaseLabel(phase)})`
+}
+
+/** De qué rutas se habla: la del tema o la del proyecto; en «¿Qué estudio hoy?», todas. */
+export function contextTracks(data: TutorContextData): ContextTrack[] {
+  if (!data.topic && !data.project) return data.tracks
+  const found = findTarget(data.tracks, {
+    topicId: data.topic?.id ?? null,
+    projectPhaseId: data.project?.phaseId ?? null,
+  })
+  return found ? [found.track] : data.tracks
+}
+
+function progressLines(track: ContextTrack, data: TutorContextData, label: string): string[] {
+  const summary = summarizeProgress(track.phases, data.topicStatuses, data.projectStatuses)
+  return [
+    '',
+    `## Progreso en «${track.title}»${label}`,
+    `Meta: ${track.goal}`,
+    `Temas hechos: ${summary.doneTopics} de ${summary.totalTopics}. Proyectos hechos: ${summary.doneProjects} de ${summary.totalProjects}.`,
+    `Por fase: ${summary.perPhase
+      .map(
+        (phase) =>
+          `${phase.label} ${phase.done}/${phase.total}${phase.projectDone ? ' + proyecto' : ''}`,
+      )
+      .join(', ')}.`,
+    `En curso: ${summary.inProgress.length > 0 ? summary.inProgress.join('; ') : 'ninguno'}.`,
+    `Siguientes pendientes: ${summary.nextPending.length > 0 ? summary.nextPending.join('; ') : 'ninguno'}.`,
+  ]
 }
 
 /** Bloque de texto con lo que el tutor sabe del estudiante. Va al final del prompt de sistema. */
@@ -139,17 +186,16 @@ export function buildTutorContext(data: TutorContextData, now: Date): string {
   const lines: string[] = [
     '# Contexto del estudiante (datos de LearnAI)',
     `Hoy es ${bogotaToday.format(now)} (hora de Colombia).`,
-    `Ruta: «${data.curriculumTitle}». Meta: ${data.goal}`,
   ]
 
   if (data.topic) {
-    const topicId = data.topic.id
-    const phase = data.phases.find((candidate) => candidate.topics.some((t) => t.id === topicId))
-    const topic = phase?.topics.find((candidate) => candidate.id === topicId)
-    if (phase && topic) {
+    const found = findTarget(data.tracks, { topicId: data.topic.id, projectPhaseId: null })
+    if (found?.topic) {
+      const { track, phase, topic } = found
       lines.push(
         '',
         '## Tema de esta conversación',
+        `Ruta del tema: «${track.title}». Meta: ${track.goal}`,
         `${phaseLabel(phase)}: ${phase.title}. ${phase.summary}`.trim(),
         `Tema: ${topic.title}. ${topic.details}`.trim(),
         `Estado del tema: ${statusLabels[statusOf(data.topicStatuses, topic.id)]}.`,
@@ -165,11 +211,13 @@ export function buildTutorContext(data: TutorContextData, now: Date): string {
 
   if (data.project) {
     const project = data.project
-    const phase = data.phases.find((candidate) => candidate.id === project.phaseId)
-    if (phase) {
+    const found = findTarget(data.tracks, { topicId: null, projectPhaseId: project.phaseId })
+    if (found) {
+      const { track, phase } = found
       lines.push(
         '',
         '## Proyecto de esta conversación',
+        `Ruta del proyecto: «${track.title}». Meta: ${track.goal}`,
         `${phaseLabel(phase)}: ${phase.title}. ${phase.summary}`.trim(),
         `Proyecto: ${phase.projectTitle}.`,
         `Enunciado: ${phase.projectDescription || '(sin descripción)'}`,
@@ -187,20 +235,13 @@ export function buildTutorContext(data: TutorContextData, now: Date): string {
     }
   }
 
-  const summary = summarizeProgress(data.phases, data.topicStatuses, data.projectStatuses)
-  lines.push(
-    '',
-    '## Progreso en la ruta',
-    `Temas hechos: ${summary.doneTopics} de ${summary.totalTopics}. Proyectos hechos: ${summary.doneProjects} de ${summary.totalProjects}.`,
-    `Por fase: ${summary.perPhase
-      .map(
-        (phase) =>
-          `${phase.label} ${phase.done}/${phase.total}${phase.projectDone ? ' + proyecto' : ''}`,
-      )
-      .join(', ')}.`,
-    `En curso: ${summary.inProgress.length > 0 ? summary.inProgress.join('; ') : 'ninguno'}.`,
-    `Siguientes pendientes: ${summary.nextPending.length > 0 ? summary.nextPending.join('; ') : 'ninguno'}.`,
-  )
+  const shown = contextTracks(data)
+  const active = data.tracks.find((track) => track.id === data.activeTrackId) ?? data.tracks[0]
+  const isPlan = !data.topic && !data.project
+  for (const track of shown) {
+    const label = isPlan && shown.length > 1 && track === active ? ' (ruta activa)' : ''
+    lines.push(...progressLines(track, data, label))
+  }
   if (data.week) {
     lines.push(
       `Esta semana (lunes a domingo) lleva ${formatDuration(data.week.minutes)} de su meta de ${formatDuration(data.week.goalMinutes)}.`,
@@ -212,7 +253,7 @@ export function buildTutorContext(data: TutorContextData, now: Date): string {
   if (sessions.length === 0) lines.push('Todavía no hay sesiones registradas.')
   for (const session of sessions) {
     lines.push(
-      `- ${bogotaDateTime.format(new Date(session.startedAt))} · ${formatDuration(session.durationMinutes)} · ${sessionTarget(session, data.phases)}`,
+      `- ${bogotaDateTime.format(new Date(session.startedAt))} · ${formatDuration(session.durationMinutes)} · ${sessionTarget(session, data.tracks)}`,
     )
   }
   return lines.join('\n')

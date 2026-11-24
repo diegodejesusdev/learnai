@@ -47,7 +47,7 @@ export function SessionEditPage() {
       ) : (
         <RoadmapGate>
           {({ roadmap }) => (
-            <SessionEditForm session={data} phases={roadmap.phases} onDone={goBack} />
+            <SessionEditForm session={data} tracks={roadmap.tracks} onDone={goBack} />
           )}
         </RoadmapGate>
       )}

@@ -1,15 +1,19 @@
 import { Sparkles, Square } from 'lucide-react'
 import { useId, useState } from 'react'
+import { trackProfile } from '@shared/tutorTracks'
 import type { TutorMode } from '@shared/tutorTypes'
 import { Button } from '@/components/ui/Button'
 import { fieldControlClasses } from '@/components/ui/styles'
 import { cn } from '@/lib/cn'
+import type { Track } from '@/lib/roadmap'
 import { ChatComposer } from './ChatComposer'
 
 interface ModeComposerProps {
   mode: TutorMode
   /** «Webhooks» o el título del proyecto. */
   subject: string
+  /** La ruta del tema o del proyecto. */
+  track: Track
   sending: boolean
   onSend: (text: string) => Promise<boolean>
   onStop: () => void
@@ -17,7 +21,12 @@ interface ModeComposerProps {
 
 const TIME_OPTIONS = ['30 minutos', '45 minutos', '1 hora', '2 horas'] as const
 
-function QuizComposer({ sending, onSend, onStop }: Omit<ModeComposerProps, 'mode' | 'subject'>) {
+function QuizComposer({
+  track,
+  sending,
+  onSend,
+  onStop,
+}: Omit<ModeComposerProps, 'mode' | 'subject'>) {
   const [focus, setFocus] = useState('')
   const id = useId()
   return (
@@ -41,7 +50,7 @@ function QuizComposer({ sending, onSend, onStop }: Omit<ModeComposerProps, 'mode
         id={id}
         value={focus}
         onChange={(event) => setFocus(event.target.value)}
-        placeholder="Enfoque opcional: firmas, errores…"
+        placeholder={trackProfile(track).ui.quizFocus}
         className={cn(fieldControlClasses, 'min-h-11 min-w-0 flex-1')}
       />
       {sending ? (
@@ -60,11 +69,14 @@ function QuizComposer({ sending, onSend, onStop }: Omit<ModeComposerProps, 'mode
 }
 
 /** La caja de abajo, según el modo: chat, quiz o plan con atajos de tiempo. */
-export function ModeComposer({ mode, subject, sending, onSend, onStop }: ModeComposerProps) {
-  if (mode === 'quiz') return <QuizComposer sending={sending} onSend={onSend} onStop={onStop} />
+export function ModeComposer(props: ModeComposerProps) {
+  const { mode, subject, track, sending, onSend, onStop } = props
+  if (mode === 'quiz') {
+    return <QuizComposer track={track} sending={sending} onSend={onSend} onStop={onStop} />
+  }
   const placeholder = {
     explain: `Pregunta sobre «${subject}»…`,
-    project_review: 'Pega tu solución, el JSON del flujo o el README…',
+    project_review: trackProfile(track).ui.paste,
     daily_plan: '¿Cuánto tiempo tienes hoy?',
   }[mode]
   return (

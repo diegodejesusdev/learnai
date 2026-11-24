@@ -1,8 +1,9 @@
 import { describe, expect, it } from 'vitest'
-import { toPhase, type PhaseRow } from './roadmapApi'
+import { toPhase, toTracks, type PhaseRow } from './roadmapApi'
 
 const row: PhaseRow = {
   id: 'f1',
+  track_id: 'automatizacion',
   sort_order: 1,
   title: 'Bases técnicas',
   summary: 'Resumen',
@@ -29,5 +30,35 @@ describe('toPhase', () => {
         { id: 'f1-t2', title: 'APIs REST', details: 'b' },
       ],
     })
+  })
+})
+
+describe('toTracks', () => {
+  const trackRows = [
+    { id: 'automatizacion', sort_order: 1, title: 'Automatización', goal: 'Vender' },
+    { id: 'ingenieria-datos', sort_order: 2, title: 'Datos', goal: 'Empleo' },
+  ]
+  const phaseRows = [
+    { ...row, id: 'de-f0', track_id: 'ingenieria-datos', sort_order: 0, topics: [] },
+    { ...row, id: 'f0', sort_order: 0, topics: [] },
+    row,
+  ]
+  const items = [
+    { id: 'c1', track_id: 'automatizacion', text: 'Uno' },
+    { id: 'de-c1', track_id: 'ingenieria-datos', text: 'Dos' },
+  ]
+
+  it('cada ruta con sus fases y su checklist, sin mezclarlas', () => {
+    const [automation, data] = toTracks(trackRows, phaseRows, items)
+    expect(automation).toMatchObject({ id: 'automatizacion', order: 1, goal: 'Vender' })
+    expect(automation?.phases.map((phase) => phase.id)).toEqual(['f0', 'f1'])
+    expect(automation?.checklist).toEqual([{ id: 'c1', text: 'Uno' }])
+    expect(data?.phases.map((phase) => phase.id)).toEqual(['de-f0'])
+    expect(data?.checklist).toEqual([{ id: 'de-c1', text: 'Dos' }])
+  })
+
+  it('una ruta sin fases (seed a medias) queda vacía, no rompe', () => {
+    const [, data] = toTracks(trackRows, [row], [])
+    expect(data).toMatchObject({ id: 'ingenieria-datos', phases: [], checklist: [] })
   })
 })

@@ -10,3 +10,6 @@ export function hourTicks(maxMinutes: number): number[] {
   const top = Math.ceil(hours / step) * step
   return Array.from({ length: top / step + 1 }, (_, index) => index * step * 60)
 }
+
+/** Alto de cada barra de minutos por fase o por ruta. */
+export const MINUTES_ROW_HEIGHT = 36

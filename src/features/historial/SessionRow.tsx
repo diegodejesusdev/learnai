@@ -2,34 +2,38 @@ import { ChevronRight } from 'lucide-react'
 import { Link, useLocation } from 'react-router'
 import { formatDuration, formatShortDate, formatTime } from '@/lib/dates'
 import { studyModeLabels } from '@/lib/labels'
-import { findPhaseIn, findTopicIn, phaseLabel } from '@/lib/roadmap'
-import type { Phase } from '@/types/curriculum'
+import { findPhaseIn, findTopicIn, trackOfTarget, trackPhaseLabel, type Track } from '@/lib/roadmap'
 import type { StudySession } from './sessionsApi'
 
 interface SessionRowProps {
   session: StudySession
-  phases: readonly Phase[]
+  tracks: readonly Track[]
   /** En el detalle de un día ya se sabe la fecha: solo se muestra la hora. */
   showDate?: boolean
 }
 
-function describeTarget(session: StudySession, phases: readonly Phase[]) {
+function describeTarget(session: StudySession, tracks: readonly Track[]) {
   const { topicId, projectPhaseId } = session.target
+  const track = trackOfTarget(tracks, session.target)
+  const phases = track?.phases ?? []
   if (topicId !== null) {
     const found = findTopicIn(phases, topicId)
-    return { title: found?.topic.title ?? topicId, context: found ? phaseLabel(found.phase) : '' }
+    return {
+      title: found?.topic.title ?? topicId,
+      context: track && found ? trackPhaseLabel(track, found.phase) : '',
+    }
   }
   const phase = findPhaseIn(phases, projectPhaseId)
   return {
     title: phase?.project.title ?? projectPhaseId,
-    context: phase ? `Proyecto · ${phaseLabel(phase)}` : 'Proyecto',
+    context: track && phase ? `Proyecto · ${trackPhaseLabel(track, phase)}` : 'Proyecto',
   }
 }
 
 /** Una sesión en una lista. Al tocarla se abre para editarla o borrarla. */
-export function SessionRow({ session, phases, showDate = true }: SessionRowProps) {
+export function SessionRow({ session, tracks, showDate = true }: SessionRowProps) {
   const location = useLocation()
-  const { title, context } = describeTarget(session, phases)
+  const { title, context } = describeTarget(session, tracks)
   return (
     <Link
       to={`/historial/sesion/${session.id}`}

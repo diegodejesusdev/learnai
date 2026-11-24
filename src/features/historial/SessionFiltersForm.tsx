@@ -2,18 +2,19 @@ import { X } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { SelectField } from '@/components/ui/SelectField'
 import { TextField } from '@/components/ui/TextField'
-import { findPhaseIn, phaseLabel } from '@/lib/roadmap'
-import type { Phase } from '@/types/curriculum'
+import { allPhases, findPhaseIn, findTrack, phaseLabel, type Track } from '@/lib/roadmap'
 import { emptyFilters, hasFilters, type SessionFilters } from './sessionFilters'
 
 interface SessionFiltersFormProps {
   filters: SessionFilters
-  phases: readonly Phase[]
+  tracks: readonly Track[]
   onChange: (filters: SessionFilters) => void
 }
 
-export function SessionFiltersForm({ filters, phases, onChange }: SessionFiltersFormProps) {
-  const phase = findPhaseIn(phases, filters.phaseId)
+export function SessionFiltersForm({ filters, tracks, onChange }: SessionFiltersFormProps) {
+  const track = findTrack(tracks, filters.trackId)
+  const shown = track ? [track] : tracks
+  const phase = findPhaseIn(allPhases(shown), filters.phaseId)
   const set = (patch: Partial<SessionFilters>) => onChange({ ...filters, ...patch })
 
   return (
@@ -36,14 +37,18 @@ export function SessionFiltersForm({ filters, phases, onChange }: SessionFilters
         <div className="col-span-2 sm:col-span-1">
           <SelectField
             label="Fase"
-            value={filters.phaseId}
+            value={phase?.id ?? ''}
             onChange={(event) => set({ phaseId: event.target.value, targetKey: '' })}
           >
             <option value="">Todas</option>
-            {phases.map((candidate) => (
-              <option key={candidate.id} value={candidate.id}>
-                {phaseLabel(candidate)} · {candidate.title}
-              </option>
+            {shown.map((candidate) => (
+              <optgroup key={candidate.id} label={candidate.title}>
+                {candidate.phases.map((option) => (
+                  <option key={option.id} value={option.id}>
+                    {phaseLabel(option)} · {option.title}
+                  </option>
+                ))}
+              </optgroup>
             ))}
           </SelectField>
         </div>

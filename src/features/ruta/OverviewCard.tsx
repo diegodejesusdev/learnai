@@ -2,13 +2,13 @@ import { Card } from '@/components/ui/Card'
 import { ProgressBar } from '@/components/ui/ProgressBar'
 import { doneCount, totalProgress } from '@/lib/progress'
 import { checklistDoneCount, projectStatuses, topicStatuses } from './progressModel'
-import type { RoadmapData } from './RoadmapGate'
+import type { TrackData } from './RoadmapGate'
 
-/** Progreso total de la ruta (temas) y, aparte, proyectos y checklist. */
-export function OverviewCard({ roadmap, progress }: RoadmapData) {
-  const topics = totalProgress(roadmap.phases, topicStatuses(progress))
+/** Progreso total de una ruta (temas) y, aparte, proyectos y checklist. */
+export function OverviewCard({ track, progress }: TrackData) {
+  const topics = totalProgress(track.phases, topicStatuses(progress))
   const projects = doneCount(
-    roadmap.phases.map((phase) => phase.id),
+    track.phases.map((phase) => phase.id),
     projectStatuses(progress),
   )
 
@@ -29,7 +29,7 @@ export function OverviewCard({ roadmap, progress }: RoadmapData) {
         <span>
           Checklist final:{' '}
           <strong className="font-medium text-fg tabular-nums">
-            {checklistDoneCount(progress)}/{roadmap.checklist.length}
+            {checklistDoneCount(progress, track.checklist)}/{track.checklist.length}
           </strong>
         </span>
       </p>

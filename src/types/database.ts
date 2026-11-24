@@ -86,19 +86,30 @@ export type Database = {
           id: string
           sort_order: number
           text: string
+          track_id: string
         }
         ComputedFields: never
         Insert: {
           id: string
           sort_order: number
           text: string
+          track_id: string
         }
         Update: {
           id?: string
           sort_order?: number
           text?: string
+          track_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: 'checklist_items_track_id_fkey'
+            columns: ['track_id']
+            isOneToOne: false
+            referencedRelation: 'tracks'
+            referencedColumns: ['id']
+          },
+        ]
       }
       checklist_progress: {
         Row: {
@@ -161,6 +172,7 @@ export type Database = {
           sort_order: number
           summary: string
           title: string
+          track_id: string
         }
         ComputedFields: never
         Insert: {
@@ -171,6 +183,7 @@ export type Database = {
           sort_order: number
           summary?: string
           title: string
+          track_id: string
         }
         Update: {
           estimated_weeks?: number
@@ -180,8 +193,17 @@ export type Database = {
           sort_order?: number
           summary?: string
           title?: string
+          track_id?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: 'phases_track_id_fkey'
+            columns: ['track_id']
+            isOneToOne: false
+            referencedRelation: 'tracks'
+            referencedColumns: ['id']
+          },
+        ]
       }
       project_progress: {
         Row: {
@@ -404,6 +426,28 @@ export type Database = {
           },
         ]
       }
+      tracks: {
+        Row: {
+          goal: string
+          id: string
+          sort_order: number
+          title: string
+        }
+        ComputedFields: never
+        Insert: {
+          goal?: string
+          id: string
+          sort_order: number
+          title: string
+        }
+        Update: {
+          goal?: string
+          id?: string
+          sort_order?: number
+          title?: string
+        }
+        Relationships: []
+      }
       tutor_conversations: {
         Row: {
           created_at: string
@@ -500,6 +544,7 @@ export type Database = {
       }
       user_settings: {
         Row: {
+          active_track_id: string | null
           pomodoro_break_min: number
           pomodoro_work_min: number
           streak_min_minutes: number
@@ -510,6 +555,7 @@ export type Database = {
         }
         ComputedFields: never
         Insert: {
+          active_track_id?: string | null
           pomodoro_break_min?: number
           pomodoro_work_min?: number
           streak_min_minutes?: number
@@ -519,6 +565,7 @@ export type Database = {
           weekly_goal_minutes?: number
         }
         Update: {
+          active_track_id?: string | null
           pomodoro_break_min?: number
           pomodoro_work_min?: number
           streak_min_minutes?: number
@@ -527,7 +574,15 @@ export type Database = {
           user_id?: string
           weekly_goal_minutes?: number
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: 'user_settings_active_track_id_fkey'
+            columns: ['active_track_id']
+            isOneToOne: false
+            referencedRelation: 'tracks'
+            referencedColumns: ['id']
+          },
+        ]
       }
     }
     Views: {

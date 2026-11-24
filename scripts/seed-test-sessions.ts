@@ -1,7 +1,7 @@
 // Sesiones de prueba para comprobar a mano el Historial y el Inicio (fase 5).
 // SOLO para Supabase local: se niega a correr contra la nube.
 //
-//   npm run seed:sesiones -- --correo tu@correo.com   → borra las de prueba anteriores y crea 16
+//   npm run seed:sesiones -- --correo tu@correo.com   → borra las de prueba anteriores y crea 17
 //   npm run seed:sesiones -- --correo tu@correo.com --borrar   → solo las borra
 //
 // Las sesiones llevan «[prueba]» al inicio de las notas: así se pueden borrar sin tocar las tuyas.
@@ -10,6 +10,7 @@
 // comprobación independiente.
 import { createClient } from '@supabase/supabase-js'
 import type { Database } from '../src/types/database.ts'
+import { loadRoutes, ROUTES_DIR } from './routeFiles.ts'
 
 const MARK = '[prueba]'
 const OFFSET_MS = 5 * 3_600_000 // Bogotá = UTC−5 todo el año
@@ -71,6 +72,8 @@ interface Plan {
 const plans: Plan[] = [
   { daysAgo: 0, time: 'now-30', minutes: 25, span: 25, mode: 'free', topic: 'f2-t1' },
   { daysAgo: 1, time: '20:00', minutes: 40, span: 45, mode: 'pomodoro', topic: 'f1-t5' },
+  // La otra ruta, el mismo día: la racha cuenta las dos juntas.
+  { daysAgo: 1, time: '07:00', minutes: 30, span: 30, mode: 'free', topic: 'de-f0-t1' },
   {
     daysAgo: 2,
     time: '23:40',
@@ -187,7 +190,7 @@ const weekMinutes = (monday: string) =>
     .filter(([day]) => mondayOf(day) === monday)
     .reduce((sum, [, minutes]) => sum + minutes, 0)
 const phaseOf = (row: (typeof rows)[number]) =>
-  row.project_phase_id ?? row.topic_id?.split('-')[0] ?? '?'
+  row.project_phase_id ?? row.topic_id?.replace(/-t\d+$/, '') ?? '?'
 const byPhase = new Map<string, number>()
 for (const row of rows)
   byPhase.set(phaseOf(row), (byPhase.get(phaseOf(row)) ?? 0) + row.duration_minutes)
@@ -200,6 +203,11 @@ console.log('  Minutos por semana (lunes → minutos):')
 for (const monday of weeks) console.log(`    ${monday}  ${weekMinutes(monday)}`)
 console.log('  Minutos por fase:')
 for (const [phase, minutes] of [...byPhase].sort()) console.log(`    ${phase}  ${minutes}`)
+console.log('  Minutos por ruta:')
+for (const route of await loadRoutes(ROUTES_DIR)) {
+  const minutes = route.phases.reduce((sum, phase) => sum + (byPhase.get(phase.id) ?? 0), 0)
+  console.log(`    ${route.track.title}  ${minutes}`)
+}
 console.log(
   `  Total: ${rows.length} sesiones, ${rows.reduce((sum, row) => sum + row.duration_minutes, 0)} min`,
 )

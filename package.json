@@ -23,6 +23,7 @@
     "db:stop": "supabase stop",
     "db:reset": "supabase db reset",
     "db:test": "supabase test db",
+    "db:test:migracion": "node scripts/test-tracks-migration.ts",
     "db:types": "supabase gen types typescript --local > src/types/database.ts && prettier --write src/types/database.ts",
     "seed": "node --env-file=.env.local scripts/seed-curriculum.ts",
     "seed:cloud": "node --env-file=.env.cloud scripts/seed-curriculum.ts",

@@ -11,7 +11,7 @@ import { TargetPicker } from '@/features/temporizador/TargetPicker'
 import { toDateInputValue, toTimeInputValue } from '@/lib/dates'
 import { studyModeLabels } from '@/lib/labels'
 import { toast } from '@/lib/toast'
-import type { Phase } from '@/types/curriculum'
+import type { Track } from '@/lib/roadmap'
 import { DeleteSessionPanel } from './DeleteSessionPanel'
 import { parseSessionEdit } from './sessionEdit'
 import { SessionGoneError, type StudySession } from './sessionsApi'
@@ -19,13 +19,13 @@ import { useUpdateSession } from './useSessions'
 
 interface SessionEditFormProps {
   session: StudySession
-  phases: readonly Phase[]
+  tracks: readonly Track[]
   /** Al guardar o eliminar: vuelve al Historial. */
   onDone: () => void
 }
 
-export function SessionEditForm({ session, phases, onDone }: SessionEditFormProps) {
-  const targets = studyTargets(phases)
+export function SessionEditForm({ session, tracks, onDone }: SessionEditFormProps) {
+  const targets = studyTargets(tracks)
   const [selectedKey, setSelectedKey] = useState(() => targetKeyOf(session.target))
   const [form, setForm] = useState({
     date: toDateInputValue(session.startedAt),

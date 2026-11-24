@@ -10,7 +10,10 @@ import { CACHE_MAX_AGE } from '@/lib/queryClient'
 // el progreso y el historial se ven sin conexión, y la cola de cambios pendientes sobrevive
 // a cerrar la app. Al cerrar sesión, AuthProvider vacía la caché y esta copia con ella.
 
-/** Cambiarlo invalida las copias guardadas (p. ej. si cambia la forma de los datos). */
+/**
+ * Cambiarlo borra las copias guardadas y, con ellas, los cambios en cola que aún no se han subido.
+ * Si cambia la forma de los datos de una consulta, cambia su clave (como roadmapKey), no esto.
+ */
 const CACHE_VERSION = 'v1'
 const CACHE_KEY = 'learnai-cache'
 

@@ -1,5 +1,10 @@
 {
   "version": 1,
+  "track": {
+    "id": "automatizacion",
+    "title": "Automatización para negocios",
+    "order": 1
+  },
   "title": "Ruta de aprendizaje: Automatización para negocios",
   "goal": "Poder vender e implementar automatizaciones a pequeños negocios en unas 20 semanas (10 h/semana).",
   "phases": [

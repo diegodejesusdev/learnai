@@ -1,10 +1,11 @@
 import { screen, waitFor } from '@testing-library/react'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { defaultSettings, fetchUserSettings } from '@/features/ajustes/settingsApi'
 import { fetchDayTotals, fetchWeekTotals } from '@/features/historial/historyApi'
 import { fetchLatestSession } from '@/features/historial/sessionsApi'
 import { todayKey } from '@/features/historial/useStudyStats'
 import { fetchProgress } from '@/features/ruta/progressApi'
-import { emptySnapshot } from '@/features/ruta/progressModel'
+import { emptySnapshot, withTopicStatus } from '@/features/ruta/progressModel'
 import { fetchRoadmap } from '@/features/ruta/roadmapApi'
 import { addDaysToKey, startOfWeekKey } from '@/lib/dates'
 import { renderApp, roadmapFixture } from '@/test/renderApp'
@@ -17,6 +18,7 @@ const today = todayKey()
 beforeEach(() => {
   vi.mocked(fetchRoadmap).mockResolvedValue(roadmapFixture())
   vi.mocked(fetchProgress).mockResolvedValue(emptySnapshot)
+  vi.mocked(fetchUserSettings).mockResolvedValue(defaultSettings)
   vi.mocked(fetchLatestSession).mockResolvedValue(null)
   vi.mocked(fetchDayTotals).mockResolvedValue([])
   vi.mocked(fetchWeekTotals).mockResolvedValue([])
@@ -74,5 +76,71 @@ describe('Inicio', () => {
       'href',
       '/tutor?modo=hoy',
     )
+  })
+
+  describe('con dos rutas', () => {
+    const NOW = '2026-11-20T15:00:00.000Z'
+    const inData = { ...defaultSettings, active_track_id: 'ingenieria-datos' }
+
+    it('muestra el progreso de cada ruta y enlaza a ella', async () => {
+      const progress = withTopicStatus(
+        withTopicStatus(emptySnapshot, 'f0-t1', 'hecho', NOW),
+        'de-f0-t1',
+        'hecho',
+        NOW,
+      )
+      vi.mocked(fetchProgress).mockResolvedValue(withTopicStatus(progress, 'f0-t2', 'hecho', NOW))
+      renderApp('/')
+      const automation = await screen.findByRole('link', { name: /Automatización para negocios/ })
+      expect(automation).toHaveTextContent('2 de 100 temas hechos')
+      expect(automation).toHaveAttribute('href', '/ruta?ruta=automatizacion')
+      const data = screen.getByRole('link', { name: /Ingeniería de datos/ })
+      expect(data).toHaveTextContent('1 de 110 temas hechos')
+      expect(data).toHaveAttribute('href', '/ruta?ruta=ingenieria-datos')
+      // Con texto, no solo con color: cuál es la activa.
+      expect(automation).toHaveTextContent('Activa')
+      expect(data).not.toHaveTextContent('Activa')
+    })
+
+    it('el siguiente tema sale de la ruta activa y dice cuál es', async () => {
+      vi.mocked(fetchUserSettings).mockResolvedValue(inData)
+      renderApp('/')
+      const link = await screen.findByRole('link', { name: 'Empezar a estudiar' })
+      expect(link).toHaveAttribute('href', '/estudiar?tema=de-f0-t1')
+      expect(screen.getByText(/^Siguiente tema · Ingeniería de datos · Fase 0/)).toBeInTheDocument()
+    })
+
+    it('«Seguir estudiando» retoma la última sesión aunque sea de la otra ruta', async () => {
+      vi.mocked(fetchUserSettings).mockResolvedValue(inData)
+      vi.mocked(fetchLatestSession).mockResolvedValue({
+        id: 's1',
+        target: { topicId: 'f1-t5', projectPhaseId: null },
+        startedAt: new Date().toISOString(),
+        endedAt: new Date().toISOString(),
+        durationMinutes: 30,
+        mode: 'free',
+        notes: '',
+      })
+      renderApp('/')
+      expect(await screen.findByRole('link', { name: 'Seguir estudiando' })).toHaveAttribute(
+        'href',
+        '/estudiar?tema=f1-t5',
+      )
+      expect(
+        screen.getByText(/^Tu última sesión, hoy · Automatización para negocios · Fase 1/),
+      ).toBeInTheDocument()
+      // Y el siguiente de la activa, aparte.
+      expect(screen.getByRole('link', { name: 'Estudiar este tema' })).toHaveAttribute(
+        'href',
+        '/estudiar?tema=de-f0-t1',
+      )
+    })
+
+    it('los minutos de hoy son los de todas las rutas', async () => {
+      vi.mocked(fetchUserSettings).mockResolvedValue(inData)
+      vi.mocked(fetchDayTotals).mockResolvedValue([{ day: today, minutes: 70, sessions: 2 }])
+      renderApp('/')
+      expect(await screen.findByText('1 h 10 min')).toBeInTheDocument()
+    })
   })
 })

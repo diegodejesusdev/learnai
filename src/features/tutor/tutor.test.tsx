@@ -2,6 +2,7 @@ import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { TutorStreamEvent } from '@shared/tutorTypes'
+import { defaultSettings, fetchUserSettings } from '@/features/ajustes/settingsApi'
 import { fetchProgress } from '@/features/ruta/progressApi'
 import { emptySnapshot } from '@/features/ruta/progressModel'
 import { fetchRoadmap } from '@/features/ruta/roadmapApi'
@@ -60,6 +61,7 @@ function streamEvents(events: TutorStreamEvent[]) {
 beforeEach(() => {
   vi.mocked(fetchRoadmap).mockResolvedValue(roadmapFixture())
   vi.mocked(fetchProgress).mockResolvedValue(emptySnapshot)
+  vi.mocked(fetchUserSettings).mockResolvedValue(defaultSettings)
   vi.mocked(fetchConversations).mockResolvedValue([])
   vi.mocked(fetchMessages).mockResolvedValue([])
   vi.mocked(fetchQuizResults).mockResolvedValue([])
@@ -86,6 +88,56 @@ describe('elegir modo y tema', () => {
     await userEvent.click(screen.getByRole('radio', { name: 'Hoy' }))
     expect(screen.queryByRole('combobox', { name: 'Proyecto' })).not.toBeInTheDocument()
     expect(screen.getByRole('button', { name: '45 minutos' })).toBeInTheDocument()
+  })
+})
+
+describe('elegir ruta', () => {
+  const inData = { ...defaultSettings, active_track_id: 'ingenieria-datos' }
+
+  it('sin tema en la URL, abre con el siguiente de la ruta activa', async () => {
+    vi.mocked(fetchUserSettings).mockResolvedValue(inData)
+    renderApp('/tutor')
+    expect(await screen.findByLabelText('Ruta')).toHaveValue('ingenieria-datos')
+    expect(screen.getByLabelText('Tema')).toHaveValue('de-f0-t1')
+  })
+
+  it('el tema de la URL manda: la ruta es la suya, no la activa', async () => {
+    vi.mocked(fetchUserSettings).mockResolvedValue(inData)
+    renderApp('/tutor?tema=f1-t5')
+    expect(await screen.findByLabelText('Ruta')).toHaveValue('automatizacion')
+    // Y solo se ofrecen los temas de esa ruta.
+    expect(within(screen.getByLabelText('Tema')).getAllByRole('option')).toHaveLength(100)
+  })
+
+  it('cambiar de ruta propone su siguiente tema', async () => {
+    renderApp('/tutor?tema=f1-t5')
+    await userEvent.selectOptions(await screen.findByLabelText('Ruta'), 'ingenieria-datos')
+    await waitFor(() => expect(screen.getByLabelText('Tema')).toHaveValue('de-f0-t1'))
+    expect(
+      await screen.findByText('Pregúntale al tutor sobre «Roles del mundo de datos»'),
+    ).toBeInTheDocument()
+  })
+
+  it('en Proyecto, la ruta es la del proyecto', async () => {
+    renderApp('/tutor?proyecto=de-f1')
+    expect(await screen.findByLabelText('Ruta')).toHaveValue('ingenieria-datos')
+    const projects = screen.getByRole('combobox', { name: 'Proyecto' })
+    expect(projects).toHaveValue('de-f1')
+    expect(within(projects).getAllByRole('option')).toHaveLength(13)
+  })
+
+  it('los ejemplos para empezar son los de la ruta', async () => {
+    renderApp('/tutor?tema=de-f1-t4')
+    expect(
+      await screen.findByRole('button', { name: 'Dame un ejemplo con datos abiertos de Colombia' }),
+    ).toBeInTheDocument()
+    expect(screen.queryByText(/tienda de barrio/)).not.toBeInTheDocument()
+  })
+
+  it('«Hoy» no pide ruta: puede proponer de cualquiera', async () => {
+    renderApp('/tutor?modo=hoy')
+    await screen.findByRole('group', { name: 'Tiempo disponible' })
+    expect(screen.queryByLabelText('Ruta')).not.toBeInTheDocument()
   })
 })
 

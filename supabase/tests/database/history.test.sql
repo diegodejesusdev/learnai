@@ -4,8 +4,8 @@ create extension if not exists pgtap with schema extensions;
 
 select plan(16);
 
-insert into public.phases (id, sort_order, title, estimated_weeks, project_title)
-values ('test-f', 99, 'Fase de prueba', 1, 'Proyecto de prueba');
+insert into public.phases (id, track_id, sort_order, title, estimated_weeks, project_title)
+values ('test-f', 'automatizacion', 99, 'Fase de prueba', 1, 'Proyecto de prueba');
 insert into public.topics (id, phase_id, sort_order, title)
 values ('test-f-t1', 'test-f', 0, 'Tema uno'), ('test-f-t2', 'test-f', 1, 'Tema dos');
 

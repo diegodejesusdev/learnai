@@ -4,14 +4,13 @@ import { Card } from '@/components/ui/Card'
 import { StatusBadge } from '@/components/ui/StatusBadge'
 import { formatRelativeDay, toDayKey } from '@/lib/dates'
 import { statusOf } from '@/lib/progress'
-import { findPhaseIn, findTopicIn, phaseLabel } from '@/lib/roadmap'
-import type { Phase } from '@/types/curriculum'
+import { findPhaseIn, findTopicIn, trackOfTarget, trackPhaseLabel, type Track } from '@/lib/roadmap'
 import type { StatusMap } from '@/types/progress'
 import type { ContinueSuggestion } from './continueStudying'
 
 interface ContinueCardProps {
   suggestion: ContinueSuggestion
-  phases: readonly Phase[]
+  tracks: readonly Track[]
   topicStatuses: StatusMap
   /** Sin ninguna sesión todavía, el botón dice «Empezar a estudiar». */
   hasHistory: boolean
@@ -27,16 +26,19 @@ function contextOf(suggestion: ContinueSuggestion, where: string): string {
 }
 
 /** La tarjeta principal de Inicio: qué estudiar ahora y el botón «Seguir estudiando». */
-export function ContinueCard({ suggestion, phases, topicStatuses, hasHistory }: ContinueCardProps) {
+export function ContinueCard({ suggestion, tracks, topicStatuses, hasHistory }: ContinueCardProps) {
+  const track = trackOfTarget(tracks, suggestion.target)
+  const phases = track?.phases ?? []
   const { topicId, projectPhaseId } = suggestion.target
   const topic = topicId !== null ? findTopicIn(phases, topicId) : undefined
   const phase = topic?.phase ?? findPhaseIn(phases, projectPhaseId ?? undefined)
   const title = topic?.topic.title ?? phase?.project.title ?? 'Tu sesión'
-  const where = phase
-    ? topic
-      ? `${phaseLabel(phase)}: ${phase.title}`
-      : `Proyecto · ${phaseLabel(phase)}`
-    : ''
+  const where =
+    track && phase
+      ? topic
+        ? `${trackPhaseLabel(track, phase)}: ${phase.title}`
+        : `Proyecto · ${trackPhaseLabel(track, phase)}`
+      : ''
   const detailsUrl = topic ? `/ruta/tema/${topic.topic.id}` : phase ? `/ruta/${phase.id}` : '/ruta'
   const action =
     suggestion.kind === 'next' && !hasHistory ? 'Empezar a estudiar' : 'Seguir estudiando'

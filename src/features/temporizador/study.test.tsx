@@ -1,6 +1,7 @@
-import { screen, waitFor } from '@testing-library/react'
+import { screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
+import { defaultSettings, fetchUserSettings } from '@/features/ajustes/settingsApi'
 import { fetchProgress } from '@/features/ruta/progressApi'
 import { emptySnapshot } from '@/features/ruta/progressModel'
 import { fetchRoadmap } from '@/features/ruta/roadmapApi'
@@ -26,6 +27,7 @@ vi.mock('@/features/ruta/progressApi', () => ({
 beforeEach(() => {
   vi.mocked(fetchRoadmap).mockResolvedValue(roadmapFixture())
   vi.mocked(fetchProgress).mockResolvedValue(emptySnapshot)
+  vi.mocked(fetchUserSettings).mockResolvedValue(defaultSettings)
 })
 
 afterEach(() => {
@@ -72,6 +74,55 @@ describe('empezar una sesión', () => {
       pausedAt: null,
     })
     expect(await screen.findByRole('button', { name: 'Pausar' })).toBeInTheDocument()
+  })
+})
+
+describe('con dos rutas', () => {
+  const inData = { ...defaultSettings, active_track_id: 'ingenieria-datos' }
+
+  it('propone el siguiente tema de la ruta activa', async () => {
+    vi.mocked(fetchUserSettings).mockResolvedValue(inData)
+    renderApp('/estudiar')
+    expect(await screen.findByText('Roles del mundo de datos')).toBeInTheDocument()
+    expect(screen.getByText(/^Ingeniería de datos · Fase 0/)).toBeInTheDocument()
+  })
+
+  it('el buscador agrupa los resultados por ruta, con la activa primero', async () => {
+    vi.mocked(fetchUserSettings).mockResolvedValue(inData)
+    renderApp('/estudiar')
+    await userEvent.type(await screen.findByLabelText('Cambiar de tema'), 'api')
+    const groups = screen.getAllByRole('list', { name: /^Resultados en/ })
+    expect(groups.map((group) => group.getAttribute('aria-label'))).toEqual([
+      'Resultados en Ingeniería de datos',
+      'Resultados en Automatización para negocios',
+    ])
+    expect(
+      within(groups[0] as HTMLElement).getByRole('button', { name: /^APIs desde Python/ }),
+    ).toBeInTheDocument()
+  })
+
+  it('se puede empezar una sesión de la otra ruta', async () => {
+    renderApp('/estudiar')
+    await userEvent.type(await screen.findByLabelText('Cambiar de tema'), 'estrella')
+    await userEvent.click(screen.getByRole('button', { name: /^Modelo estrella/ }))
+    await userEvent.click(screen.getByRole('button', { name: 'Iniciar' }))
+    await waitFor(() => expect(insertActiveTimer).toHaveBeenCalled())
+    expect(vi.mocked(insertActiveTimer).mock.calls[0]?.[0]).toMatchObject({
+      topicId: null,
+      projectPhaseId: 'de-f1',
+    })
+    expect(await screen.findByText('Ingeniería de datos · Proyecto · Fase 1')).toBeInTheDocument()
+  })
+
+  it('el enlace de un tema de la otra ruta manda sobre la activa', async () => {
+    renderApp('/estudiar?tema=de-f1-t4')
+    expect(await screen.findByText('Funciones de ventana')).toBeInTheDocument()
+  })
+
+  it('la sesión manual también propone la ruta activa', async () => {
+    vi.mocked(fetchUserSettings).mockResolvedValue(inData)
+    renderApp('/estudiar/manual')
+    expect(await screen.findByText('Roles del mundo de datos')).toBeInTheDocument()
   })
 })
 

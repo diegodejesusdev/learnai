@@ -1,20 +1,25 @@
 import { CalendarClock, ClipboardCheck, GraduationCap, Lightbulb } from 'lucide-react'
+import { trackProfile } from '@shared/tutorTracks'
 import type { TutorMode } from '@shared/tutorTypes'
 import { Button } from '@/components/ui/Button'
 import { EmptyState } from '@/components/ui/EmptyState'
+import type { Track } from '@/lib/roadmap'
 
 interface EmptyChatProps {
   mode: TutorMode
   subject: string
+  /** La ruta del tema o del proyecto. */
+  track: Track
   onSend: (text: string) => Promise<boolean>
 }
 
 /** Conversación vacía: qué hace este modo y, en Explicar, preguntas para empezar. */
-export function EmptyChat({ mode, subject, onSend }: EmptyChatProps) {
+export function EmptyChat({ mode, subject, track, onSend }: EmptyChatProps) {
+  const { ui } = trackProfile(track)
   if (mode === 'explain') {
     const starters = [
       `Explícame «${subject}» paso a paso`,
-      'Dame un ejemplo con una tienda de barrio',
+      ui.starter,
       '¿Qué errores comunes se cometen con esto?',
     ]
     return (
@@ -48,7 +53,7 @@ export function EmptyChat({ mode, subject, onSend }: EmptyChatProps) {
       <EmptyState
         icon={ClipboardCheck}
         title={`Revisemos «${subject}»`}
-        description="Pega tu código, el JSON del flujo (n8n, Make) o el README. El tutor no abre enlaces."
+        description={`${ui.paste} El tutor no abre enlaces.`}
       />
     )
   }

@@ -1,14 +1,18 @@
 import { describe, expect, it } from 'vitest'
-import rootCurriculum from '../../curriculum.json'
-import appCurriculum from './curriculum.json'
-import { allTopics, findTopic, phases } from './curriculum'
+import { automationTrack, dataTrack, phases, tracks } from './curriculum'
 
-describe('curriculum.json', () => {
-  it('la copia en src/data es idéntica a la de la raíz', () => {
-    expect(appCurriculum).toEqual(rootCurriculum)
+const topicIds = (track: typeof automationTrack) =>
+  track.phases.flatMap((phase) => phase.topics.map((topic) => topic.id))
+
+describe('rutas en src/data/routes', () => {
+  it('automatización primero e ingeniería de datos después', () => {
+    expect(tracks.map((track) => [track.id, track.title])).toEqual([
+      ['automatizacion', 'Automatización para negocios'],
+      ['ingenieria-datos', 'Ingeniería de datos'],
+    ])
   })
 
-  it('tiene 9 fases en orden, 100 temas y 14 ítems de checklist', () => {
+  it('automatización: 9 fases en orden, 100 temas y 14 ítems', () => {
     expect(phases.map((phase) => phase.id)).toEqual([
       'f0',
       'f1',
@@ -20,20 +24,37 @@ describe('curriculum.json', () => {
       'f7',
       'f8',
     ])
-    expect(allTopics).toHaveLength(100)
-    expect(appCurriculum.final_checklist).toHaveLength(14)
+    expect(topicIds(automationTrack)).toHaveLength(100)
+    expect(automationTrack.checklist).toHaveLength(14)
   })
 
-  it('los ids de temas son únicos y empiezan por el id de su fase', () => {
-    const ids = allTopics.map(({ topic }) => topic.id)
-    expect(new Set(ids).size).toBe(ids.length)
-    for (const { topic, phase } of allTopics) {
-      expect(topic.id.startsWith(`${phase.id}-`)).toBe(true)
+  it('los ids de automatización son exactamente los de siempre: el progreso está ligado a ellos', () => {
+    const topicsPerPhase = [8, 11, 15, 12, 15, 12, 14, 7, 6]
+    expect(topicIds(automationTrack)).toEqual(
+      topicsPerPhase.flatMap((count, phase) =>
+        Array.from({ length: count }, (_, index) => `f${phase}-t${index + 1}`),
+      ),
+    )
+    expect(automationTrack.checklist.map((item) => item.id)).toEqual(
+      Array.from({ length: 14 }, (_, index) => `c${index + 1}`),
+    )
+  })
+
+  it('ingeniería de datos: 13 fases, 110 temas y 15 ítems, todos con ids «de-»', () => {
+    expect(dataTrack.phases).toHaveLength(13)
+    expect(topicIds(dataTrack)).toHaveLength(110)
+    expect(dataTrack.checklist).toHaveLength(15)
+    const ids = [
+      ...dataTrack.phases.map((phase) => phase.id),
+      ...topicIds(dataTrack),
+      ...dataTrack.checklist.map((item) => item.id),
+    ]
+    expect(ids.filter((id) => !id.startsWith('de-'))).toEqual([])
+  })
+
+  it('los ids de temas empiezan por el id de su fase', () => {
+    for (const phase of tracks.flatMap((track) => track.phases)) {
+      for (const topic of phase.topics) expect(topic.id.startsWith(`${phase.id}-`)).toBe(true)
     }
-  })
-
-  it('findTopic devuelve el tema con su fase', () => {
-    expect(findTopic('f1-t10')?.phase.id).toBe('f1')
-    expect(findTopic('no-existe')).toBeUndefined()
   })
 })

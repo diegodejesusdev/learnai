@@ -6,12 +6,12 @@ create extension if not exists pgtap with schema extensions;
 select plan(32);
 
 -- ── Datos de prueba (como postgres, sin RLS) ─────────────────────────────────
-insert into public.phases (id, sort_order, title, estimated_weeks, project_title)
-values ('test-f', 99, 'Fase de prueba', 1, 'Proyecto de prueba');
+insert into public.phases (id, track_id, sort_order, title, estimated_weeks, project_title)
+values ('test-f', 'automatizacion', 99, 'Fase de prueba', 1, 'Proyecto de prueba');
 insert into public.topics (id, phase_id, sort_order, title)
 values ('test-f-t1', 'test-f', 0, 'Tema de prueba');
-insert into public.checklist_items (id, sort_order, text)
-values ('test-c1', 99, 'Ítem de prueba');
+insert into public.checklist_items (id, track_id, sort_order, text)
+values ('test-c1', 'automatizacion', 99, 'Ítem de prueba');
 
 insert into auth.users (id, email, aud, role)
 values
@@ -103,7 +103,7 @@ update public.user_settings set weekly_goal_minutes = 1 where user_id = 'aaaaaaa
 -- ── Contenido: solo lectura ──────────────────────────────────────────────────
 select ok((select count(*) from public.phases where id = 'test-f') = 1, 'Un usuario autenticado lee las fases');
 select throws_ok(
-  $$ insert into public.phases (id, sort_order, title, estimated_weeks, project_title) values ('x', 1, 'x', 1, 'x') $$,
+  $$ insert into public.phases (id, track_id, sort_order, title, estimated_weeks, project_title) values ('x', 'automatizacion', 1, 'x', 1, 'x') $$,
   '42501', null,
   'Un usuario autenticado no puede crear fases'
 );

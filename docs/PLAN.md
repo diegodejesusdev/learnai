@@ -343,6 +343,34 @@ A partir de la fase 2, también `npx supabase test db`.
 
 ---
 
+## Fase 8: Varias rutas de estudio ✅ en local (23 nov 2026) · nube: base y tutor aplicados (24 nov 2026); faltan la app y el seed
+
+**Objetivo:** estudiar varias rutas en la misma app sin perder nada del progreso. Diseño: `docs/superpowers/specs/2026-11-23-varias-rutas-design.md`.
+
+**Decisiones de esta fase**
+- **Base:** tabla `tracks`, `track_id` en fases y checklist, y `user_settings.active_track_id` (migración `20261123220630_tracks.sql`). Solo agrega: no cambia los datos de ninguna fila del usuario ni ningún id.
+- **`curriculum_meta`** se conserva para las apps instaladas antes de este cambio.
+- **Caché del dispositivo:** cambia la clave de la consulta de la ruta, no `CACHE_VERSION`: así no se pierden los cambios en cola.
+- **Contenido:** un JSON por ruta en `src/data/routes/`. Desaparece la copia de la raíz.
+- **Todo junto:** racha, meta semanal, mapa de calor y semanas cuentan todas las rutas.
+
+**Entregables**
+- **Seed** de todas las rutas con revisión previa (`routeFiles.ts`, `curriculumRows.ts`, `seedRoutes.ts`): un id repetido o de otra ruta lo detiene sin escribir.
+- **Ruta:** pestañas en PC y menú en móvil (`Tabs`, `TrackSelector`), checklist por ruta.
+- **Inicio:** progreso de cada ruta y siguiente tema de la activa.
+- **Estudiar:** buscador agrupado por ruta.
+- **Historial:** minutos por ruta y filtro por ruta; CSV con `ruta`.
+- **Ajustes:** la exportación JSON incluye `rutas` y la ruta de cada registro (`formato: 2`).
+- **Tutor:** perfil por ruta (`_shared/tutorTracks.ts`) y «Hoy» con todas las rutas.
+- **Tests:** migración sobre una copia (`npm run db:test:migracion`), seed idempotente, siguiente tema por ruta y cola sin conexión al actualizar.
+
+**Cómo verificarla**
+- `npm test`, `npm run db:test` (104 comprobaciones) y `npm run db:test:migracion`.
+- **Orden en producción:** respaldo → `db push --remote` → `functions deploy tutor` → push → `npm run seed:cloud`. Si el seed va antes que la app, la versión anterior mezcla las fases de las dos rutas.
+- **PC y móvil:** Ajustes → «Exportar mis datos» antes y después; los números del resumen deben coincidir. Ruta muestra automatización igual que antes, y la segunda ruta con 13 fases y 110 temas.
+
+---
+
 ## Decisiones pendientes
 
 | Decisión | Cuándo |

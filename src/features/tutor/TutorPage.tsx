@@ -5,7 +5,7 @@ import { TutorWorkspace } from './TutorWorkspace'
 export function TutorPage() {
   return (
     <>
-      <PageHeader title="Tutor" description="Conoce la ruta, tus notas y tu progreso." />
+      <PageHeader title="Tutor" description="Conoce tus rutas, tus notas y tu progreso." />
       <RoadmapGate>{(data) => <TutorWorkspace {...data} />}</RoadmapGate>
     </>
   )

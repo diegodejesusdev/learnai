@@ -1,13 +1,9 @@
 import type { StudySession } from '@/features/historial/sessionsApi'
 import type { ActiveTimer } from '@/features/temporizador/timerModel'
 import { nextTopic, statusOf } from '@/lib/progress'
+import type { TargetIds } from '@/lib/roadmap'
 import type { Phase } from '@/types/curriculum'
 import type { StatusMap } from '@/types/progress'
-
-export interface TargetIds {
-  topicId: string | null
-  projectPhaseId: string | null
-}
 
 export interface ContinueSuggestion {
   /** timer: hay una sesión en curso · last: lo de la última sesión · next: el siguiente tema. */
@@ -28,6 +24,7 @@ export function studyUrl(target: TargetIds): string {
 interface ContinueInput {
   timer: ActiveTimer | null
   latest: StudySession | null
+  /** Las fases de la ruta activa: de ahí sale el siguiente tema. */
   phases: readonly Phase[]
   topicStatuses: StatusMap
   projectStatuses: StatusMap
@@ -35,7 +32,7 @@ interface ContinueInput {
 
 /**
  * Qué abre «Seguir estudiando»: la sesión en curso; si no hay, el tema o proyecto de la última
- * sesión (si aún no está hecho); si no, el siguiente tema sugerido de la ruta.
+ * sesión, de cualquier ruta (si aún no está hecho); si no, el siguiente tema de la ruta activa.
  */
 export function continueSuggestion(input: ContinueInput): ContinueSuggestion | null {
   const { timer, latest, phases, topicStatuses, projectStatuses } = input

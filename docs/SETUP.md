@@ -15,7 +15,7 @@ Ya está configurado; `.env.local` tiene las claves locales.
 
 ```bash
 npm run db:start   # Docker Desktop debe estar abierto. Aplica las migraciones pendientes.
-npm run seed       # Carga curriculum.json (se puede repetir sin duplicar)
+npm run seed       # Carga las rutas (se puede repetir sin duplicar)
 npm run dev        # http://localhost:5173
 ```
 
@@ -61,7 +61,7 @@ npx supabase migration list --remote             # local y nube deben coincidir
    SUPABASE_URL=https://<ref>.supabase.co
    SUPABASE_SERVICE_ROLE_KEY=<secret key>
    ```
-3. Corre `npm run seed:cloud`. Debe mostrar `phases: 9`, `topics: 100`, `checklist_items: 14`. Repítelo cada vez que edites `curriculum.json`.
+3. Corre `npm run seed:cloud`. Debe mostrar `tracks: 2`, `phases: 22`, `topics: 210`, `checklist_items: 29`. Repítelo cada vez que edites una ruta de `src/data/routes`.
 
 ### 2.4 URLs de redirección del login
 En **Authentication → URL Configuration**:

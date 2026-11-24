@@ -1,13 +1,17 @@
 # LearnAI
 
-App web personal para seguir una ruta de estudio sobre automatización para pequeños negocios (9 fases, 100 temas, 9 proyectos y una checklist final de 14 ítems, definidos en `curriculum.json`). La usa una sola persona, en PC y en móvil. Toda la interfaz está en español.
+App web personal para seguir varias rutas de estudio, definidas en `src/data/routes/` (un JSON por ruta):
+- **Automatización para negocios** (`curriculum.json`): 9 fases, 100 temas, 9 proyectos y una checklist final de 14 ítems.
+- **Ingeniería de datos** (`data-engineering.json`): 13 fases, 110 temas, 13 proyectos y una checklist final de 15 ítems. Sus ids empiezan por `de-`.
+
+La usa una sola persona, en PC y en móvil. Toda la interfaz está en español.
 
 Módulos:
-- **Inicio**: minutos de hoy, racha, meta semanal, último tema y botón «Seguir estudiando».
-- **Ruta**: fases, temas, estados, notas, proyecto por fase, checklist final y progreso.
+- **Inicio**: minutos de hoy, racha, meta semanal, último tema, botón «Seguir estudiando» y progreso de cada ruta.
+- **Ruta**: elegir ruta; fases, temas, estados, notas, proyecto por fase, checklist final y progreso de cada una.
 - **Temporizador**: sesiones ligadas a un tema o a un proyecto, en modo Pomodoro o libre, y registro manual.
-- **Historial**: mapa de calor, rachas, horas por semana y por fase, lista editable y exportación CSV.
-- **Tutor IA**: chat que conoce la ruta y el progreso. Modos: explicar, quiz, revisar proyecto y qué estudiar hoy.
+- **Historial**: mapa de calor, rachas, horas por semana, por ruta y por fase, filtro por ruta, lista editable y exportación CSV.
+- **Tutor IA**: chat que conoce las rutas y el progreso, y se adapta a la ruta del tema. Modos: explicar, quiz, revisar proyecto y qué estudiar hoy.
 
 Especificación completa: `docs/SPEC.md`. Plan por fases: `docs/PLAN.md`. Configuración fuera del código (Supabase en la nube, Google, Vercel): `docs/SETUP.md`.
 
@@ -31,11 +35,11 @@ Especificación completa: `docs/SPEC.md`. Plan por fases: `docs/PLAN.md`. Config
 
 ```
 LearnAI/
-├── curriculum.json            # Fuente de verdad del contenido de la ruta (se edita aquí)
 ├── CLAUDE.md
 ├── docs/                      # SPEC.md, PLAN.md
 ├── public/                    # favicon.svg (luego iconos de la PWA)
-├── scripts/                   # seed-curriculum.ts (npm run seed) + curriculumRows.ts (lógica pura, con test)
+├── scripts/                   # seed-curriculum.ts (npm run seed) + routeFiles.ts, curriculumRows.ts y seedRoutes.ts
+│                              #   (lógica con test), test-tracks-migration.ts (npm run db:test:migracion)
 ├── src/
 │   ├── main.tsx               # Monta providers + router
 │   ├── app/                   # routes.tsx, Providers (caché persistida), ThemeProvider, 404, error,
@@ -53,9 +57,9 @@ LearnAI/
 │   │   ├── ajustes/           # Incluye /ajustes/diseno (catálogo del sistema de diseño)
 │   │   └── acceso/            # Login, AuthProvider/useAuth, RequireAuth, authApi, mensajes de error
 │   ├── data/
-│   │   ├── curriculum.json    # Copia de /curriculum.json (un test verifica que sean idénticas)
-│   │   ├── curriculum.ts      # Acceso tipado: phases, allTopics, findPhase, findTopic
-│   ├── lib/                   # supabase.ts, env.ts, dates.ts, progress.ts, roadmap.ts, theme.ts…
+│   │   ├── routes/            # Fuente de verdad del contenido: un JSON por ruta (se edita aquí)
+│   │   ├── curriculum.ts      # Las rutas para los tests: tracks, automationTrack, dataTrack, phases
+│   ├── lib/                   # supabase.ts, env.ts, dates.ts, progress.ts, roadmap.ts (Track y rutas), theme.ts…
 │   ├── types/                 # database.ts (generado, no editar), curriculum.ts, progress.ts
 │   ├── styles/index.css       # Tailwind + tokens de color claro/oscuro
 │   └── test/setup.ts          # jest-dom + limpieza entre tests
@@ -90,6 +94,13 @@ LearnAI/
   - Si inserta filas, lleva un id del dispositivo (`newId()` de `lib/uuid.ts`) y la función SQL ignora un id repetido.
   - Lo que exige conexión (editar o borrar sesiones, exportar) usa `networkMode: 'always'`, para fallar enseguida en vez de quedar esperando.
 - **Operaciones de varios pasos en la base** (p. ej. guardar una sesión, borrar el temporizador y actualizar el tema): una función SQL `security invoker` en una migración, con sus pruebas pgTAP, que se llama con `supabase.rpc(...)`. Ver `finish_active_timer`.
+- **Rutas (`Track`):**
+  - `useRoadmap` trae todas (`Roadmap { tracks }`), con sus fases y su checklist. El progreso va por id de tema, fase o ítem, sin ruta: los ids no se repiten entre rutas.
+  - `RoadmapGate` entrega `activeTrack`: la última ruta vista en la página Ruta, guardada en `user_settings.active_track_id` (vacía = la primera).
+  - Los enlaces a una ruta usan `/ruta?ruta=<id>`. Verla la deja como activa (`useShownTrack`).
+  - «Fase 1» existe en varias rutas: fuera de la página de una ruta se usa `trackPhaseLabel`.
+  - La racha, la meta semanal, el mapa y las semanas cuentan todas las rutas juntas.
+- **Caché del dispositivo:** si cambia la forma de los datos de una consulta, cambia su clave (como `roadmapKey`). `CACHE_VERSION` no se toca: borraría también los cambios en cola que aún no se han subido (`src/app/upgradeFromV1.test.ts`).
 - **Temporizador:** el tiempo se calcula siempre desde la hora de inicio guardada (`timerModel.ts`). Nunca se cuentan segundos en memoria; `useNow` solo sirve para repintar.
 - **Sesiones y totales:**
   - Los totales (por día, semana y fase) los calculan las funciones SQL `study_*_totals`, en hora de Bogotá. No se suman sesiones en el navegador; solo el CSV las descarga todas.
@@ -129,18 +140,18 @@ LearnAI/
   - Todo cambio de esquema va en una migración nueva (`npx supabase migration new <nombre>`), nunca a mano en el panel.
   - Cada migración incluye RLS, `GRANT`s explícitos y, si aplica, pruebas en `supabase/tests/database/`.
   - Supabase local tiene `auto_expose_new_tables = false` para que falte un `GRANT` se note en local y no en producción.
-  - Los ids de `curriculum.json` no se renombran.
+  - Los ids de las rutas (`f1-t5`, `de-f1-t4`, `c1`…) no se renombran: el progreso está ligado a ellos.
 - **Mobile-first**: se diseña primero a 360 px de ancho. Áreas táctiles de al menos 44 px, safe areas (`env(safe-area-inset-*)`) y nada de scroll horizontal.
 - **Tema**: claro/oscuro según el sistema, con interruptor manual en Ajustes.
   - Los colores son tokens semánticos definidos en `src/styles/index.css`: `bg-bg`, `bg-surface`, `text-fg`, `text-fg-muted`, `bg-accent`, `bg-done-soft`…
   - No se usan colores sueltos de Tailwind (`bg-teal-600`) ni variantes `dark:` en los componentes.
   - Un color nuevo se agrega como token en los dos temas.
 - **Componentes de UI**: se reutilizan los de `src/components/ui` antes de crear uno nuevo. Todo componente nuevo del sistema se agrega también a `/ajustes/diseno`.
-- **Contenido de la ruta**:
-  - Se edita `/curriculum.json`, se copia a `src/data/curriculum.json` y se corre `npm run seed` (y `npm run seed:cloud` para producción).
-  - El seed hace upsert por id: se puede repetir sin duplicar. No borra ids que ya no estén en el JSON; los lista como aviso.
-  - El test `src/data/curriculum.test.ts` falla si las dos copias difieren.
-  - Ruta ya lee el contenido de Supabase; las otras secciones siguen con el archivo hasta su fase.
+- **Contenido de las rutas**:
+  - Se edita el JSON en `src/data/routes/` y se corre `npm run seed` (y `npm run seed:cloud` para producción). La app lo lee de Supabase.
+  - **Agregar una ruta** = agregar un JSON con su bloque `track` (`id`, `title`, `order`) y correr el seed. El tutor usa un perfil genérico; para afinarlo, se agrega uno en `_shared/tutorTracks.ts`.
+  - El seed hace upsert por id: se puede repetir sin duplicar. Antes de escribir revisa todas las rutas: un id repetido, o que en la base es de otra ruta, lo detiene. No borra ids que ya no estén en los JSON; los lista como aviso.
+  - El test `src/data/curriculum.test.ts` falla si cambia algún id de automatización.
 - **Git**: Claude hace commits solo cuando Diego lo pide, y no hace push sin permiso.
 
 ## Comandos
@@ -167,10 +178,11 @@ npm run db:start      # Levanta Supabase local: API :54321, Studio http://127.0.
 npm run db:stop
 npm run db:reset      # Recrea la base local con todas las migraciones (luego: npm run seed)
 npm run db:test       # Pruebas pgTAP de RLS y restricciones
+npm run db:test:migracion   # La migración de rutas sobre una copia con datos (no toca tu base)
 npm run db:types      # Regenera src/types/database.ts desde la base local
-npm run seed          # Carga curriculum.json en Supabase local (.env.local)
-npm run seed:cloud    # Carga curriculum.json en la nube (.env.cloud)
-npm run seed:sesiones -- --correo <correo>   # 16 sesiones de prueba en local (--borrar las quita)
+npm run seed          # Carga las rutas de src/data/routes en Supabase local (.env.local)
+npm run seed:cloud    # Carga las rutas en la nube (.env.cloud)
+npm run seed:sesiones -- --correo <correo>   # 17 sesiones de prueba en local (--borrar las quita)
 
 npx supabase migration new <nombre>
 npx supabase status                   # URL y claves locales

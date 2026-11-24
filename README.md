@@ -1,9 +1,9 @@
 # LearnAI
 
-App web personal (PWA) para seguir una ruta de estudio sobre automatización para pequeños negocios: 9 fases, 100 temas, 9 proyectos y una checklist final, definidos en [`curriculum.json`](curriculum.json). Funciona en PC y en móvil, se instala como app y sigue funcionando sin conexión.
+App web personal (PWA) para seguir varias rutas de estudio, definidas en [`src/data/routes`](src/data/routes): **Automatización para negocios** (9 fases, 100 temas) e **Ingeniería de datos** (13 fases, 110 temas), cada una con sus proyectos y su checklist final. Funciona en PC y en móvil, se instala como app y sigue funcionando sin conexión.
 
-- **Inicio:** minutos de hoy, racha, meta semanal y «Seguir estudiando».
-- **Ruta:** fases, temas, estados, notas, proyectos y checklist.
+- **Inicio:** minutos de hoy, racha, meta semanal, «Seguir estudiando» y el progreso de cada ruta.
+- **Ruta:** elegir ruta; fases, temas, estados, notas, proyectos y checklist.
 - **Estudiar:** temporizador Pomodoro o libre, y sesiones manuales.
 - **Historial:** mapa de calor, rachas, gráficas, lista editable y CSV.
 - **Tutor IA:** explica, hace quizzes, revisa proyectos y propone qué estudiar hoy.
@@ -28,7 +28,7 @@ React 19 + Vite 8 + TypeScript, Tailwind 4, React Router, TanStack Query (con ca
 npm install
 npm run db:start                 # Supabase local: crea la base y aplica las migraciones
 cp .env.example .env.local       # y completa con lo que muestra: npx supabase status
-npm run seed                     # carga curriculum.json en la base local
+npm run seed                     # carga las rutas en la base local
 npm run dev                      # http://localhost:5173
 ```
 
@@ -57,6 +57,7 @@ npm test               # Vitest
 npm run build          # build de producción en dist/ (con el service worker)
 npm run preview        # sirve dist/ en local
 npm run db:test        # pruebas de la base (RLS, funciones, seguridad)
+npm run db:test:migracion  # la migración de las rutas sobre una copia con datos
 npm run db:types       # regenera src/types/database.ts tras una migración
 npm run pwa:icons      # regenera los íconos de la app desde public/favicon.svg
 ```
@@ -83,19 +84,34 @@ El orden importa: **primero la base, después la función del tutor y al final e
 
 Los usuarios con la app abierta ven el aviso «Hay una versión nueva de LearnAI» con el botón «Actualizar».
 
-## Actualizar la ruta (curriculum.json)
+## Actualizar o agregar rutas
 
-El contenido de la ruta vive en `curriculum.json`, en la raíz. Para cambiarlo:
+Cada ruta es un archivo de [`src/data/routes`](src/data/routes). Para cambiar una:
 
-1. Edita `curriculum.json`. Puedes agregar temas, cambiar títulos, detalles u orden. **No renombres los ids** (`f1-t5`…): el progreso, las notas y las sesiones están ligados a ellos.
-2. Copia el archivo a la app: `cp curriculum.json src/data/curriculum.json`. Si te olvidas, `npm test` falla.
-3. Carga el cambio:
+1. Edita su JSON. Puedes agregar temas, cambiar títulos, detalles u orden. **No renombres los ids** (`f1-t5`, `de-f1-t4`…): el progreso, las notas y las sesiones están ligados a ellos.
+2. Carga el cambio:
    ```bash
    npm run seed          # base local
    npm run seed:cloud    # nube (usa .env.cloud con la clave secreta; nunca va al repo)
    ```
-   El seed hace *upsert* por id y se puede repetir sin duplicar. Si quitaste un id del JSON, no lo borra (tu progreso está ligado a él): lo lista como aviso.
-4. Haz commit y push para que la app publicada lleve la copia nueva.
+   El seed carga todas las rutas con *upsert* por id y se puede repetir sin duplicar. Si quitaste un id del JSON, no lo borra (tu progreso está ligado a él): lo lista como aviso.
+
+**Para agregar una ruta**, crea un JSON en esa carpeta con la misma forma y su bloque `track`, y corre el seed:
+
+```json
+{
+  "version": 1,
+  "track": { "id": "mi-ruta", "title": "Mi ruta", "order": 3 },
+  "title": "Ruta de aprendizaje: Mi ruta",
+  "goal": "Qué quiero lograr.",
+  "phases": [],
+  "final_checklist": []
+}
+```
+
+- Usa un prefijo propio en todos los ids (por ejemplo, `mr-f0`, `mr-f0-t1`, `mr-c1`): solo minúsculas, números y guiones.
+- Si un id ya lo usa otra ruta, el seed se detiene sin escribir nada.
+- El tutor usa un perfil genérico con el título y la meta. Para afinarlo, agrega un perfil en `supabase/functions/_shared/tutorTracks.ts` y despliega la función.
 
 ## Seguridad
 

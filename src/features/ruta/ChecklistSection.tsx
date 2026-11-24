@@ -4,17 +4,18 @@ import { Section } from '@/components/ui/Section'
 import { cn } from '@/lib/cn'
 import { formatShortDate } from '@/lib/dates'
 import { checklistDone, checklistDoneCount } from './progressModel'
-import type { RoadmapData } from './RoadmapGate'
+import type { TrackData } from './RoadmapGate'
 import { useSetChecklistItem } from './useProgress'
 
-export function ChecklistSection({ roadmap, progress }: RoadmapData) {
+/** La checklist final de una ruta: cada una tiene la suya. */
+export function ChecklistSection({ track, progress }: TrackData) {
   const setItem = useSetChecklistItem()
-  const items = roadmap.checklist
+  const items = track.checklist
 
   return (
     <Section
       title="Checklist final"
-      description={`${checklistDoneCount(progress)} de ${items.length} logros`}
+      description={`${checklistDoneCount(progress, items)} de ${items.length} logros`}
       className="scroll-mt-20"
     >
       <Card className="p-2 sm:p-2">

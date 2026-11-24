@@ -5,7 +5,7 @@ import { withSupabase } from '@supabase/server'
 import type { Database } from '../../../src/types/database.ts'
 import { startOfBogotaDay } from '../_shared/bogota.ts'
 import { quizQuestionTexts } from '../_shared/quiz.ts'
-import { buildTutorContext } from '../_shared/tutorContext.ts'
+import { buildTutorContext, contextTracks } from '../_shared/tutorContext.ts'
 import { dailyLimitFrom, dailyLimitMessage, TutorError } from '../_shared/tutorErrors.ts'
 import { buildSystemPrompt } from '../_shared/tutorPrompts.ts'
 import { parseTutorRequest } from '../_shared/tutorRequest.ts'
@@ -64,11 +64,10 @@ export default {
 
       const now = new Date()
       const context = await data.loadContextData(db, request, now)
-      const topic = context.phases
-        .flatMap((phase) => phase.topics)
-        .find((t) => t.id === request.topicId)
+      const phases = context.tracks.flatMap((track) => track.phases)
+      const topic = phases.flatMap((phase) => phase.topics).find((t) => t.id === request.topicId)
       if (request.topicId && !topic) return jsonError(400, 'bad_request', 'Ese tema no existe.')
-      if (request.phaseId && !context.phases.some((phase) => phase.id === request.phaseId)) {
+      if (request.phaseId && !phases.some((phase) => phase.id === request.phaseId)) {
         return jsonError(400, 'bad_request', 'Ese proyecto no existe.')
       }
 
@@ -79,9 +78,12 @@ export default {
       const avoidQuestions = history
         .filter((message) => message.role === 'assistant')
         .flatMap((message) => quizQuestionTexts(message.content))
-      const system = buildSystemPrompt(request.mode, buildTutorContext(context, now), {
-        avoidQuestions,
-      })
+      const system = buildSystemPrompt(
+        request.mode,
+        contextTracks(context),
+        buildTutorContext(context, now),
+        { avoidQuestions },
+      )
       const messages: ProviderMessage[] = [
         ...(request.mode === 'quiz' ? [] : trimToUserStart(history)),
         { role: 'user', content: request.message },

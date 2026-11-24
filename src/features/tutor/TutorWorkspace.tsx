@@ -5,8 +5,7 @@ import { LoadingState } from '@/components/ui/LoadingState'
 import { SegmentedControl } from '@/components/ui/SegmentedControl'
 import { topicStatuses } from '@/features/ruta/progressModel'
 import type { RoadmapData } from '@/features/ruta/RoadmapGate'
-import { nextTopic } from '@/lib/progress'
-import { findPhaseIn, findTopicIn } from '@/lib/roadmap'
+import { allPhases, findPhaseIn, findTopicIn, findTrack, trackOfTarget } from '@/lib/roadmap'
 import { useOnline } from '@/lib/offline'
 import { useKeyboardInset } from '@/lib/useKeyboardInset'
 import { ChatThread } from './ChatThread'
@@ -15,23 +14,35 @@ import { EmptyChat } from './EmptyChat'
 import { ModeComposer } from './ModeComposer'
 import { TutorTargetSelect } from './TutorTargetSelect'
 import { tutorModes } from './tutorModes'
+import { defaultTarget } from './tutorTarget'
 import { readTutorUrl, targetOf, writeTutorUrl, type TutorUrlState } from './tutorUrl'
 import { useConversations, useMessages } from './useTutor'
 import { useTutorChat } from './useTutorChat'
 
-export function TutorWorkspace({ roadmap, progress }: RoadmapData) {
-  const phases = roadmap.phases
+export function TutorWorkspace({ roadmap, progress, activeTrack }: RoadmapData) {
+  const { tracks } = roadmap
+  const phases = allPhases(tracks)
+  const statuses = topicStatuses(progress)
   const [params, setParams] = useSearchParams()
-  const suggestion = nextTopic(phases, topicStatuses(progress))
+  // Lo que falte en la URL se completa con la ruta del tema o proyecto que traiga.
+  const urlTrack = trackOfTarget(tracks, {
+    topicId: params.get('tema'),
+    projectPhaseId: params.get('proyecto'),
+  })
   const state = readTutorUrl(params, {
-    topicId: suggestion?.topic.id ?? phases[0]?.topics[0]?.id ?? '',
-    phaseId: suggestion?.phase.id ?? phases[0]?.id ?? '',
+    ...defaultTarget(urlTrack ?? activeTrack, statuses),
     isTopic: (id) => findTopicIn(phases, id) !== undefined,
     isPhase: (id) => findPhaseIn(phases, id) !== undefined,
   })
   const target = targetOf(state)
   const topic = findTopicIn(phases, state.topicId)
   const project = findPhaseIn(phases, state.phaseId)
+  const isProject = state.mode === 'project_review'
+  const track =
+    trackOfTarget(tracks, {
+      topicId: isProject ? null : state.topicId,
+      projectPhaseId: isProject ? state.phaseId : null,
+    }) ?? activeTrack
 
   const conversations = useConversations(target)
   const conversationId =
@@ -51,14 +62,13 @@ export function TutorWorkspace({ roadmap, progress }: RoadmapData) {
   useKeyboardInset()
   const online = useOnline()
 
-  const subject =
-    state.mode === 'project_review'
-      ? (project?.project.title ?? 'tu proyecto')
-      : (topic?.topic.title ?? 'el tema')
+  const subject = isProject
+    ? (project?.project.title ?? 'tu proyecto')
+    : (topic?.topic.title ?? 'el tema')
   const notesTarget =
     state.mode === 'explain' && topic
       ? { target: { topicId: topic.topic.id }, label: topic.topic.title }
-      : state.mode === 'project_review' && project
+      : isProject && project
         ? { target: { phaseId: project.id }, label: `Proyecto: ${project.project.title}` }
         : null
   const resolving =
@@ -79,17 +89,18 @@ export function TutorWorkspace({ roadmap, progress }: RoadmapData) {
       </div>
       {state.mode !== 'daily_plan' && (
         <TutorTargetSelect
-          kind={state.mode === 'project_review' ? 'project' : 'topic'}
-          phases={phases}
-          value={state.mode === 'project_review' ? state.phaseId : state.topicId}
+          kind={isProject ? 'project' : 'topic'}
+          tracks={tracks}
+          track={track}
+          value={isProject ? state.phaseId : state.topicId}
           disabled={chat.sending}
           onChange={(id) =>
-            update(
-              state.mode === 'project_review'
-                ? { phaseId: id, conversation: 'latest' }
-                : { topicId: id, conversation: 'latest' },
-            )
+            update({ ...(isProject ? { phaseId: id } : { topicId: id }), conversation: 'latest' })
           }
+          onTrackChange={(id) => {
+            const next = findTrack(tracks, id)
+            if (next) update({ ...defaultTarget(next, statuses), conversation: 'latest' })
+          }}
         />
       )}
       <ConversationBar
@@ -115,7 +126,7 @@ export function TutorWorkspace({ roadmap, progress }: RoadmapData) {
           pending={chat.pending}
           quizTopicId={state.mode === 'quiz' ? state.topicId : null}
           notesTarget={notesTarget}
-          empty={<EmptyChat mode={state.mode} subject={subject} onSend={chat.send} />}
+          empty={<EmptyChat mode={state.mode} subject={subject} track={track} onSend={chat.send} />}
         />
       )}
 
@@ -132,6 +143,7 @@ export function TutorWorkspace({ roadmap, progress }: RoadmapData) {
         <ModeComposer
           mode={state.mode}
           subject={subject}
+          track={track}
           sending={chat.sending}
           onSend={chat.send}
           onStop={chat.stop}

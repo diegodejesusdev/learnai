@@ -1,20 +1,17 @@
-import { lazy, Suspense } from 'react'
 import { Card } from '@/components/ui/Card'
 import { ErrorState } from '@/components/ui/ErrorState'
 import { LoadingState } from '@/components/ui/LoadingState'
 import { Section } from '@/components/ui/Section'
-import { formatDuration } from '@/lib/dates'
-import { phaseLabel } from '@/lib/roadmap'
-import type { Phase } from '@/types/curriculum'
-import { ChartDataTable } from './ChartParts'
+import { findTrack, phaseLabel, type Track } from '@/lib/roadmap'
+import { MinutesBars } from './MinutesBars'
+import { useSessionFilters } from './useSessionFilters'
 import { usePhaseTotals } from './useStudyStats'
 
-const PhaseMinutesChart = lazy(() =>
-  import('./PhaseMinutesChart').then((module) => ({ default: module.PhaseMinutesChart })),
-)
-
-export function PhaseSection({ phases }: { phases: readonly Phase[] }) {
+/** Minutos por fase de la ruta filtrada o, sin filtro, de cada ruta por separado. */
+export function PhaseSection({ tracks }: { tracks: readonly Track[] }) {
   const totals = usePhaseTotals()
+  const [filters] = useSessionFilters()
+  const filtered = findTrack(tracks, filters.trackId)
 
   let content
   if (totals.isError) {
@@ -28,29 +25,23 @@ export function PhaseSection({ phases }: { phases: readonly Phase[] }) {
     content = <LoadingState />
   } else {
     const byPhase = new Map(totals.data.map((total) => [total.phaseId, total]))
-    // Todas las fases, aunque no tengan tiempo: así se ve en cuáles falta estudiar.
-    const rows = phases.map((phase) => ({
-      label: phaseLabel(phase),
-      title: phase.title,
-      minutes: byPhase.get(phase.id)?.minutes ?? 0,
-      sessions: byPhase.get(phase.id)?.sessions ?? 0,
-    }))
-    content = (
-      <Card className="flex flex-col gap-2">
-        <Suspense fallback={<div style={{ height: rows.length * 36 }} />}>
-          <PhaseMinutesChart rows={rows} />
-        </Suspense>
-        <ChartDataTable
-          caption="Minutos por fase"
-          columns={['Fase', 'Tiempo', 'Sesiones']}
-          rows={rows.map((row) => [
-            `${row.label} · ${row.title}`,
-            formatDuration(row.minutes),
-            String(row.sessions),
-          ])}
+    content = (filtered ? [filtered] : tracks).map((track) => (
+      <Card key={track.id} className="flex flex-col gap-2">
+        {tracks.length > 1 && <h3 className="font-semibold">{track.title}</h3>}
+        <MinutesBars
+          caption={`Minutos por fase · ${track.title}`}
+          column="Fase"
+          // Todas las fases, aunque no tengan tiempo: así se ve en cuáles falta estudiar.
+          rows={track.phases.map((phase) => ({
+            label: phaseLabel(phase),
+            title: phase.title,
+            name: `${phaseLabel(phase)} · ${phase.title}`,
+            minutes: byPhase.get(phase.id)?.minutes ?? 0,
+            sessions: byPhase.get(phase.id)?.sessions ?? 0,
+          }))}
         />
       </Card>
-    )
+    ))
   }
 
   return (

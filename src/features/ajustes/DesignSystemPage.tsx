@@ -1,4 +1,5 @@
 import { BookOpen, Plus } from 'lucide-react'
+import { useState } from 'react'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
@@ -8,10 +9,34 @@ import { PageHeader } from '@/components/ui/PageHeader'
 import { ProgressBar } from '@/components/ui/ProgressBar'
 import { Section } from '@/components/ui/Section'
 import { StatusBadge } from '@/components/ui/StatusBadge'
+import { Tabs } from '@/components/ui/Tabs'
 import { TextField } from '@/components/ui/TextField'
 import { SaveIndicator } from '@/components/ui/SaveIndicator'
 import { toast } from '@/lib/toast'
 import { ColorSwatches } from './ColorSwatches'
+
+const sampleTabs = [
+  { value: 'una', label: 'Primera ruta' },
+  { value: 'otra', label: 'Segunda ruta' },
+] as const
+
+function TabsSample() {
+  const [tab, setTab] = useState<(typeof sampleTabs)[number]['value']>('una')
+  return (
+    <Card className="flex flex-col gap-3">
+      <Tabs
+        label="Pestañas de ejemplo"
+        options={sampleTabs}
+        value={tab}
+        onChange={setTab}
+        panelId="pestana-ejemplo"
+      />
+      <p id="pestana-ejemplo" role="tabpanel" className="text-sm text-fg-muted">
+        Contenido de «{sampleTabs.find((option) => option.value === tab)?.label}».
+      </p>
+    </Card>
+  )
+}
 
 /** Catálogo del sistema de diseño para revisarlo en claro y oscuro. */
 export function DesignSystemPage() {
@@ -54,6 +79,10 @@ export function DesignSystemPage() {
             <Badge>Pomodoro</Badge>
             <Badge tone="accent">Fase 1</Badge>
           </Card>
+        </Section>
+
+        <Section title="Pestañas" description="Para el PC; en el móvil, un menú desplegable.">
+          <TabsSample />
         </Section>
 
         <Section title="Progreso">

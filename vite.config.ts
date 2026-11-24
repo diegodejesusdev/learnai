@@ -18,7 +18,7 @@ export default defineConfig({
         id: '/',
         name: 'LearnAI',
         short_name: 'LearnAI',
-        description: 'Tu ruta de estudio en automatización para pequeños negocios.',
+        description: 'Tus rutas de estudio, con temporizador, historial y tutor.',
         lang: 'es-CO',
         dir: 'ltr',
         start_url: '/',

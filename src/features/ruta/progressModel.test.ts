@@ -82,6 +82,14 @@ describe('cambios optimistas', () => {
       done: false,
       done_at: null,
     })
-    expect(checklistDoneCount(withChecklistItem(snapshot, 'c2', true, NOW))).toBe(2)
+  })
+
+  it('la checklist de una ruta no cuenta los ítems de otra', () => {
+    const both = withChecklistItem(snapshot, 'de-c1', true, NOW)
+    expect(checklistDoneCount(both, [{ id: 'c1' }, { id: 'c2' }])).toBe(1)
+    expect(checklistDoneCount(both, [{ id: 'de-c1' }, { id: 'de-c2' }])).toBe(1)
+    expect(
+      checklistDoneCount(withChecklistItem(both, 'c2', true, NOW), [{ id: 'c1' }, { id: 'c2' }]),
+    ).toBe(2)
   })
 })

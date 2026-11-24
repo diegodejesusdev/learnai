@@ -92,7 +92,9 @@ describe('resumen', () => {
 
   it('los minutos por fase también se ven como tabla', async () => {
     renderApp('/historial')
-    const table = await screen.findByRole('table', { name: 'Minutos por fase' })
+    const table = await screen.findByRole('table', {
+      name: 'Minutos por fase · Automatización para negocios',
+    })
     expect(
       within(table)
         .getByText(/^Fase 1 · /)
@@ -139,7 +141,9 @@ describe('lista de sesiones', () => {
     expect(topicSelect).toBeDisabled()
 
     await userEvent.selectOptions(screen.getByLabelText('Fase'), 'f1')
-    await waitFor(() => expect(vi.mocked(fetchSessionPage).mock.lastCall?.[0].phase?.id).toBe('f1'))
+    await waitFor(() =>
+      expect(vi.mocked(fetchSessionPage).mock.lastCall?.[0].scope?.phaseIds).toEqual(['f1']),
+    )
     await userEvent.selectOptions(screen.getByLabelText('Tema'), 'tema:f1-t5')
     await waitFor(() =>
       expect(fetchSessionPage).toHaveBeenLastCalledWith(
@@ -175,6 +179,94 @@ describe('lista de sesiones', () => {
     expect(text).toContain('"Con ""comillas"", y comas"')
     expect(getToasts().at(-1)?.message).toBe('Exportaste 1 sesión.')
     click.mockRestore()
+  })
+})
+
+describe('varias rutas', () => {
+  beforeEach(() => {
+    vi.mocked(fetchPhaseTotals).mockResolvedValue([
+      { phaseId: 'f1', minutes: 60, sessions: 3 },
+      { phaseId: 'de-f0', minutes: 45, sessions: 2 },
+    ])
+  })
+
+  it('muestra los minutos por ruta, también como tabla', async () => {
+    renderApp('/historial')
+    const table = await screen.findByRole('table', { name: 'Minutos por ruta' })
+    const rows = within(table).getAllByRole('row').slice(1)
+    expect(rows.map((row) => row.textContent)).toEqual([
+      'Automatización para negocios1 h3',
+      'Ingeniería de datos45 min2',
+    ])
+  })
+
+  it('sin filtro, las fases van por ruta: «Fase 0» existe en las dos', async () => {
+    renderApp('/historial')
+    const data = await screen.findByRole('table', {
+      name: 'Minutos por fase · Ingeniería de datos',
+    })
+    expect(within(data).getAllByRole('row')).toHaveLength(14)
+    expect(
+      within(data)
+        .getByText(/^Fase 0 · /)
+        .closest('tr'),
+    ).toHaveTextContent('45 min2')
+    expect(
+      screen.getByRole('table', { name: 'Minutos por fase · Automatización para negocios' }),
+    ).toBeInTheDocument()
+  })
+
+  it('el filtro por ruta cambia las sesiones y las fases, no la racha ni la meta', async () => {
+    const { router } = renderApp('/historial')
+    await userEvent.selectOptions(await screen.findByLabelText('Ruta'), 'ingenieria-datos')
+    await waitFor(() =>
+      expect(vi.mocked(fetchSessionPage).mock.lastCall?.[0].scope?.phaseIds).toContain('de-f12'),
+    )
+    expect(
+      screen.queryByRole('table', { name: 'Minutos por fase · Automatización para negocios' }),
+    ).not.toBeInTheDocument()
+    expect(router.state.location.search).toBe('?ruta=ingenieria-datos')
+    // Las fases que se pueden elegir son solo las de esa ruta.
+    const options = within(screen.getByLabelText('Fase')).getAllByRole('option')
+    expect(options).toHaveLength(14)
+    // Lo que cuenta todo junto no cambia.
+    expect(statValue('Racha actual')).toBe('2 días')
+    expect(
+      screen.getByText((_, element) => element?.textContent === '50 min de 10 h'),
+    ).toBeInTheDocument()
+    const perTrack = screen.getByRole('table', { name: 'Minutos por ruta' })
+    expect(within(perTrack).getAllByRole('row')).toHaveLength(3)
+  })
+
+  it('cambiar de ruta limpia la fase y el tema elegidos', async () => {
+    const { router } = renderApp('/historial?fase=f1&tema=f1-t5&desde=2026-11-01')
+    await userEvent.selectOptions(await screen.findByLabelText('Ruta'), 'ingenieria-datos')
+    await waitFor(() =>
+      expect(router.state.location.search).toBe('?desde=2026-11-01&ruta=ingenieria-datos'),
+    )
+  })
+
+  it('«Quitar filtros» vuelve a mostrar todas las rutas', async () => {
+    renderApp('/historial?ruta=ingenieria-datos')
+    await userEvent.click(await screen.findByRole('button', { name: 'Quitar filtros' }))
+    expect(screen.getByLabelText('Ruta')).toHaveValue('')
+  })
+
+  it('cada sesión dice de qué ruta es', async () => {
+    vi.mocked(fetchSessionPage).mockResolvedValue([
+      session(today, '08:00', { target: { topicId: 'de-f1-t4', projectPhaseId: null } }),
+    ])
+    renderApp('/historial')
+    const list = await screen.findByRole('list', { name: 'Sesiones' })
+    expect(within(list).getByText(/Ingeniería de datos · Fase 1/)).toBeInTheDocument()
+  })
+
+  it('con una sola ruta no hay filtro ni gráfica por ruta', async () => {
+    vi.mocked(fetchRoadmap).mockResolvedValue({ tracks: roadmapFixture().tracks.slice(0, 1) })
+    renderApp('/historial')
+    await screen.findByRole('table', { name: 'Minutos por fase · Automatización para negocios' })
+    expect(screen.queryByLabelText('Ruta')).not.toBeInTheDocument()
+    expect(screen.queryByRole('table', { name: 'Minutos por ruta' })).not.toBeInTheDocument()
   })
 })
 

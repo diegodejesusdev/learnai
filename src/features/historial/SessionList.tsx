@@ -7,18 +7,18 @@ import { ErrorState } from '@/components/ui/ErrorState'
 import { LoadingState } from '@/components/ui/LoadingState'
 import { Spinner } from '@/components/ui/Spinner'
 import { cn } from '@/lib/cn'
-import type { Phase } from '@/types/curriculum'
+import type { Track } from '@/lib/roadmap'
 import { SessionRow } from './SessionRow'
 import type { SessionQuery } from './sessionsApi'
 import { useSessionList } from './useSessions'
 
 interface SessionListProps {
   query: SessionQuery
-  phases: readonly Phase[]
+  tracks: readonly Track[]
   filtered: boolean
 }
 
-export function SessionList({ query, phases, filtered }: SessionListProps) {
+export function SessionList({ query, tracks, filtered }: SessionListProps) {
   const list = useSessionList(query)
 
   if (list.isError && !list.data) {
@@ -49,7 +49,7 @@ export function SessionList({ query, phases, filtered }: SessionListProps) {
       <ul aria-label="Sesiones" className="divide-y divide-border">
         {sessions.map((session) => (
           <li key={session.id}>
-            <SessionRow session={session} phases={phases} />
+            <SessionRow session={session} tracks={tracks} />
           </li>
         ))}
       </ul>

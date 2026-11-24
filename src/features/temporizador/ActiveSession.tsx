@@ -1,10 +1,9 @@
 import { useState } from 'react'
 import { useProgress } from '@/features/ruta/useProgress'
 import { useRoadmap } from '@/features/ruta/useRoadmap'
-import { phaseLabel } from '@/lib/roadmap'
 import { FinishSessionForm } from './FinishSessionForm'
 import { RunningSession } from './RunningSession'
-import { targetTitle } from './studyTargets'
+import { studyTargets, targetKeyOf } from './studyTargets'
 import { pause, type ActiveTimer } from './timerModel'
 import { useTimerChange } from './useActiveTimer'
 
@@ -12,20 +11,11 @@ import { useTimerChange } from './useActiveTimer'
 export function ActiveSession({ timer }: { timer: ActiveTimer }) {
   const [finishing, setFinishing] = useState(false)
   const change = useTimerChange()
-  const phases = useRoadmap().data?.phases ?? []
+  const tracks = useRoadmap().data?.tracks ?? []
   const progress = useProgress().data
 
-  const title = targetTitle(phases, timer) ?? 'Sesión de estudio'
-  const phase = phases.find(
-    (candidate) =>
-      candidate.id === timer.projectPhaseId ||
-      candidate.topics.some((topic) => topic.id === timer.topicId),
-  )
-  const context = phase
-    ? timer.projectPhaseId
-      ? `Proyecto · ${phaseLabel(phase)}`
-      : `${phaseLabel(phase)} · ${phase.title}`
-    : ''
+  const target = studyTargets(tracks).find((candidate) => candidate.key === targetKeyOf(timer))
+  const title = target?.title ?? 'Sesión de estudio'
   const status = timer.topicId
     ? progress?.topics[timer.topicId]?.status
     : progress?.projects[timer.projectPhaseId ?? '']?.status
@@ -45,7 +35,7 @@ export function ActiveSession({ timer }: { timer: ActiveTimer }) {
     <RunningSession
       timer={timer}
       title={title}
-      context={context}
+      context={target?.context ?? ''}
       onFinish={() => {
         // Al terminar se pausa: el tiempo deja de correr mientras escribes las notas,
         // también si recargas o miras desde otro dispositivo.

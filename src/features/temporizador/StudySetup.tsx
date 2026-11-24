@@ -11,6 +11,7 @@ import { topicStatuses } from '@/features/ruta/progressModel'
 import type { RoadmapData } from '@/features/ruta/RoadmapGate'
 import { unlockAudio } from '@/lib/alerts'
 import { nextTopic } from '@/lib/progress'
+import { activeFirst } from '@/lib/roadmap'
 import { NotificationToggle } from './NotificationToggle'
 import { studyTargets, type StudyTarget } from './studyTargets'
 import { TargetPicker } from './TargetPicker'
@@ -22,7 +23,7 @@ const modeOptions: readonly SegmentedOption<TimerMode>[] = [
   { value: 'free', label: 'Libre', icon: Hourglass },
 ]
 
-/** Tema por defecto: el de la URL (?tema= o ?proyecto=), si no, el siguiente sugerido. */
+/** Tema por defecto: el de la URL (?tema= o ?proyecto=), si no, el siguiente de la ruta activa. */
 function defaultTargetKey(
   params: URLSearchParams,
   targets: readonly StudyTarget[],
@@ -35,10 +36,10 @@ function defaultTargetKey(
   return fallback ?? targets[0]?.key ?? ''
 }
 
-export function StudySetup({ roadmap, progress }: RoadmapData) {
+export function StudySetup({ roadmap, progress, activeTrack }: RoadmapData) {
   const [params] = useSearchParams()
-  const targets = studyTargets(roadmap.phases)
-  const suggestion = nextTopic(roadmap.phases, topicStatuses(progress))
+  const targets = studyTargets(activeFirst(roadmap.tracks, activeTrack.id))
+  const suggestion = nextTopic(activeTrack.phases, topicStatuses(progress))
   const [selectedKey, setSelectedKey] = useState(() =>
     defaultTargetKey(params, targets, suggestion && `tema:${suggestion.topic.id}`),
   )

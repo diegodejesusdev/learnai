@@ -4,7 +4,7 @@ import { ErrorState } from '@/components/ui/ErrorState'
 import { LoadingState } from '@/components/ui/LoadingState'
 import { Section } from '@/components/ui/Section'
 import { useUserSettings } from '@/features/ajustes/useUserSettings'
-import type { Phase } from '@/types/curriculum'
+import type { Track } from '@/lib/roadmap'
 import { DayDetail } from './DayDetail'
 import { Heatmap } from './Heatmap'
 import { HeatmapLegend } from './HeatmapLegend'
@@ -13,7 +13,7 @@ import { todayKey, useDayTotals } from './useStudyStats'
 
 const HEATMAP_MONTHS = 6
 
-export function HeatmapSection({ phases }: { phases: readonly Phase[] }) {
+export function HeatmapSection({ tracks }: { tracks: readonly Track[] }) {
   const days = useDayTotals()
   const settings = useUserSettings()
   const [params, setParams] = useSearchParams()
@@ -56,7 +56,7 @@ export function HeatmapSection({ phases }: { phases: readonly Phase[] }) {
           today={today}
           total={days.data.find((total) => total.day === selected)}
           minMinutes={minMinutes}
-          phases={phases}
+          tracks={tracks}
         />
       </>
     )

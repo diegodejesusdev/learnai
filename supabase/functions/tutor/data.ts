@@ -1,7 +1,12 @@
 import type { SupabaseClient } from '@supabase/supabase-js'
 import type { Database } from '../../../src/types/database.ts'
 import { bogotaMondayKey } from '../_shared/bogota.ts'
-import { MAX_SESSIONS, type ContextPhase, type TutorContextData } from '../_shared/tutorContext.ts'
+import {
+  MAX_SESSIONS,
+  type ContextPhase,
+  type ContextTrack,
+  type TutorContextData,
+} from '../_shared/tutorContext.ts'
 import { TutorError } from '../_shared/tutorErrors.ts'
 import type { TutorRequest } from '../_shared/tutorTypes.ts'
 
@@ -26,12 +31,12 @@ export async function loadContextData(
   now: Date,
 ): Promise<TutorContextData> {
   const dailyPlan = request.mode === 'daily_plan'
-  const [meta, phases, topics, statuses, topicNotes, projects, sessions, settings, week] =
+  const [tracks, phases, topics, statuses, topicNotes, projects, sessions, settings, week] =
     await Promise.all([
-      db.from('curriculum_meta').select('title, goal').maybeSingle(),
+      db.from('tracks').select('id, title, goal').order('sort_order'),
       db
         .from('phases')
-        .select('id, sort_order, title, summary, project_title, project_description')
+        .select('id, track_id, sort_order, title, summary, project_title, project_description')
         .order('sort_order'),
       db.from('topics').select('id, phase_id, title, details').order('sort_order'),
       db.from('topic_progress').select('topic_id, status'),
@@ -44,12 +49,14 @@ export async function loadContextData(
         .select('started_at, duration_minutes, topic_id, project_phase_id')
         .order('started_at', { ascending: false })
         .limit(MAX_SESSIONS),
-      dailyPlan ? db.from('user_settings').select('weekly_goal_minutes').maybeSingle() : null,
+      dailyPlan
+        ? db.from('user_settings').select('weekly_goal_minutes, active_track_id').maybeSingle()
+        : null,
       dailyPlan ? db.rpc('study_week_totals', { p_from: bogotaMondayKey(now) }) : null,
     ])
 
   const topicRows = rows(topics)
-  const contextPhases: ContextPhase[] = rows(phases).map((phase) => ({
+  const toPhase = (phase: NonNullable<typeof phases.data>[number]): ContextPhase => ({
     id: phase.id,
     order: phase.sort_order,
     title: phase.title,
@@ -59,15 +66,18 @@ export async function loadContextData(
     topics: topicRows
       .filter((topic) => topic.phase_id === phase.id)
       .map(({ id, title, details }) => ({ id, title, details })),
+  })
+  const phaseRows = rows(phases)
+  const contextTracks: ContextTrack[] = rows(tracks).map((track) => ({
+    ...track,
+    phases: phaseRows.filter((phase) => phase.track_id === track.id).map(toPhase),
   }))
   const projectRows = rows(projects)
   const project = projectRows.find((row) => row.phase_id === request.phaseId)
-  const metaRow = meta.data
 
   return {
-    curriculumTitle: metaRow?.title ?? 'Ruta de LearnAI',
-    goal: metaRow?.goal ?? '',
-    phases: contextPhases,
+    tracks: contextTracks,
+    activeTrackId: settings?.data?.active_track_id ?? null,
     topicStatuses: Object.fromEntries(rows(statuses).map((row) => [row.topic_id, row.status])),
     projectStatuses: Object.fromEntries(projectRows.map((row) => [row.phase_id, row.status])),
     topic: request.topicId ? { id: request.topicId, notes: topicNotes?.data?.notes ?? '' } : null,

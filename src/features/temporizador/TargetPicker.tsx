@@ -3,7 +3,8 @@ import { useId, useState } from 'react'
 import { Card } from '@/components/ui/Card'
 import { cn } from '@/lib/cn'
 import { fieldControlClasses } from '@/components/ui/styles'
-import { searchTargets, type StudyTarget } from './studyTargets'
+import { searchByTrack, type StudyTarget } from './studyTargets'
+import { TargetResults } from './TargetResults'
 
 interface TargetPickerProps {
   targets: readonly StudyTarget[]
@@ -11,11 +12,11 @@ interface TargetPickerProps {
   onSelect: (key: string) => void
 }
 
-/** Elegir tema o proyecto: el elegido arriba y un buscador por nombre debajo. */
+/** Elegir tema o proyecto: el elegido arriba y un buscador por nombre debajo, en todas las rutas. */
 export function TargetPicker({ targets, selected, onSelect }: TargetPickerProps) {
   const [query, setQuery] = useState('')
   const searchId = useId()
-  const results = searchTargets(targets, query)
+  const groups = searchByTrack(targets, query)
 
   return (
     <div className="flex flex-col gap-3">
@@ -32,7 +33,7 @@ export function TargetPicker({ targets, selected, onSelect }: TargetPickerProps)
           <input
             id={searchId}
             type="search"
-            placeholder="Buscar por nombre: webhooks, n8n, DIAN…"
+            placeholder="Buscar por nombre: webhooks, SQL, n8n…"
             autoComplete="off"
             value={query}
             onChange={(event) => setQuery(event.target.value)}
@@ -41,29 +42,17 @@ export function TargetPicker({ targets, selected, onSelect }: TargetPickerProps)
         </div>
       </div>
       {query.trim() !== '' &&
-        (results.length === 0 ? (
+        (groups.length === 0 ? (
           <p className="text-sm text-fg-muted">No hay temas ni proyectos con «{query.trim()}».</p>
         ) : (
-          <ul aria-label="Resultados de la búsqueda" className="flex flex-col gap-1">
-            {results.map((target) => (
-              <li key={target.key}>
-                <button
-                  type="button"
-                  onClick={() => {
-                    onSelect(target.key)
-                    setQuery('')
-                  }}
-                  className={cn(
-                    'flex min-h-11 w-full flex-col items-start rounded-xl border border-border bg-surface px-3 py-2 text-left hover:bg-surface-muted',
-                    target.key === selected?.key && 'border-accent',
-                  )}
-                >
-                  <span className="font-medium">{target.title}</span>
-                  <span className="text-xs text-fg-muted">{target.context}</span>
-                </button>
-              </li>
-            ))}
-          </ul>
+          <TargetResults
+            groups={groups}
+            selectedKey={selected?.key}
+            onSelect={(key) => {
+              onSelect(key)
+              setQuery('')
+            }}
+          />
         ))}
     </div>
   )

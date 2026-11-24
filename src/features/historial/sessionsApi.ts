@@ -19,15 +19,15 @@ export interface SessionQuery {
   before: string | null
   /** Un tema o proyecto concreto. */
   target: StudyTargetRef | null
-  /** Una fase completa: sus temas y su proyecto. */
-  phase: { id: string; topicIds: readonly string[] } | null
+  /** Una fase o una ruta completa: sus temas y sus proyectos. */
+  scope: { phaseIds: readonly string[]; topicIds: readonly string[] } | null
 }
 
 export const emptySessionQuery: SessionQuery = {
   from: null,
   before: null,
   target: null,
-  phase: null,
+  scope: null,
 }
 
 export const SESSION_PAGE_SIZE = 20
@@ -80,15 +80,17 @@ export async function fetchSessionPage(
     .order('started_at', { ascending: false })
     .order('id')
     .range(offset, offset + limit - 1)
-  const { from, before, target, phase } = query
+  const { from, before, target, scope } = query
   if (from) request = request.gte('started_at', from)
   if (before) request = request.lt('started_at', before)
   if (target !== null && target.topicId !== null) request = request.eq('topic_id', target.topicId)
   else if (target !== null) request = request.eq('project_phase_id', target.projectPhaseId)
-  else if (phase) {
-    // Los ids de la ruta son del tipo «f1-t5»: no llevan comas ni paréntesis.
-    const conditions = [`project_phase_id.eq.${phase.id}`]
-    if (phase.topicIds.length > 0) conditions.push(`topic_id.in.(${phase.topicIds.join(',')})`)
+  else if (scope) {
+    // Una ruta sin fases (seed a medias) no tiene sesiones.
+    if (scope.phaseIds.length === 0) return []
+    // Los ids de las rutas son del tipo «de-f1-t5»: no llevan comas ni paréntesis (lo revisa el seed).
+    const conditions = [`project_phase_id.in.(${scope.phaseIds.join(',')})`]
+    if (scope.topicIds.length > 0) conditions.push(`topic_id.in.(${scope.topicIds.join(',')})`)
     request = request.or(conditions.join(','))
   }
   const { data, error } = await request

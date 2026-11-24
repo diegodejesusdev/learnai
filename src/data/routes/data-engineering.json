@@ -1,0 +1,243 @@
+{
+  "version": 1,
+  "track": {
+    "id": "ingenieria-datos",
+    "title": "Ingeniería de datos",
+    "order": 2
+  },
+  "title": "Ruta de aprendizaje: Ingeniería de datos",
+  "goal": "Trabajar como ingeniero de datos junior en unas 26 semanas (10 h/semana), con un proyecto de portafolio que crece en cada fase.",
+  "phases": [
+    {
+      "id": "de-f0", "order": 0, "title": "Fundamentos y ciclo de vida de los datos",
+      "summary": "Qué hace un ingeniero de datos y cómo encaja cada herramienta en el ciclo de vida.",
+      "estimated_weeks": 1,
+      "topics": [
+        { "id": "de-f0-t1", "title": "Roles del mundo de datos", "details": "Ingeniero de datos, analytics engineer, analista, científico de datos e ingeniero de ML: quién hace qué." },
+        { "id": "de-f0-t2", "title": "Ciclo de vida de los datos", "details": "Generación, almacenamiento, ingesta, transformación y entrega." },
+        { "id": "de-f0-t3", "title": "Corrientes transversales", "details": "Seguridad, gestión de datos, DataOps, arquitectura, orquestación e ingeniería de software." },
+        { "id": "de-f0-t4", "title": "Batch o streaming", "details": "Cuándo basta procesar una vez al día y cuándo se necesita tiempo real." },
+        { "id": "de-f0-t5", "title": "ETL y ELT", "details": "Por qué hoy se carga crudo y se transforma dentro del warehouse." },
+        { "id": "de-f0-t6", "title": "Arquitecturas", "details": "Warehouse, data lake, lakehouse y arquitectura medallion (bronce, plata, oro)." },
+        { "id": "de-f0-t7", "title": "Modern data stack", "details": "Ingesta, almacenamiento, transformación, orquestación y BI." },
+        { "id": "de-f0-t8", "title": "Costos y usuario final", "details": "Los datos existen para que alguien tome una decisión." }
+      ],
+      "project": { "title": "Diseñar tu pipeline", "description": "Elige datos abiertos de Colombia que se actualicen seguido y dibuja el pipeline completo que construirás en la ruta." }
+    },
+    {
+      "id": "de-f1", "order": 1, "title": "SQL avanzado y modelado de datos",
+      "summary": "De hacer consultas a diseñar tablas para analítica.",
+      "estimated_weeks": 3,
+      "topics": [
+        { "id": "de-f1-t1", "title": "JOINs avanzados", "details": "Self join y anti join (NOT EXISTS)." },
+        { "id": "de-f1-t2", "title": "Agregaciones avanzadas", "details": "GROUP BY, HAVING, GROUPING SETS, ROLLUP y CUBE." },
+        { "id": "de-f1-t3", "title": "CTEs y recursividad", "details": "Consultas legibles y recursivas." },
+        { "id": "de-f1-t4", "title": "Funciones de ventana", "details": "ROW_NUMBER, RANK, LAG, LEAD, acumulados y promedios móviles." },
+        { "id": "de-f1-t5", "title": "Deduplicar", "details": "Quedarse con el registro más reciente." },
+        { "id": "de-f1-t6", "title": "Fechas y calendarios", "details": "Zonas horarias, días hábiles, semanas ISO." },
+        { "id": "de-f1-t7", "title": "NULLs y upserts", "details": "Trampas de NULL, MERGE e INSERT ... ON CONFLICT." },
+        { "id": "de-f1-t8", "title": "Rendimiento", "details": "EXPLAIN, índices, transacciones y niveles de aislamiento." },
+        { "id": "de-f1-t9", "title": "Normalización", "details": "1FN a 3FN para sistemas transaccionales." },
+        { "id": "de-f1-t10", "title": "Modelado dimensional de Kimball", "details": "Hechos, dimensiones, granularidad y esquema estrella." },
+        { "id": "de-f1-t11", "title": "Dimensiones lentamente cambiantes", "details": "SCD tipo 1 y tipo 2." },
+        { "id": "de-f1-t12", "title": "Otros enfoques de modelado", "details": "One Big Table, Data Vault, claves surrogadas y naturales." }
+      ],
+      "project": { "title": "Modelo estrella", "description": "Modela en esquema estrella tus datos, carga una muestra en PostgreSQL y escribe 10 consultas de negocio con funciones de ventana." }
+    },
+    {
+      "id": "de-f2", "order": 2, "title": "Python e ingeniería de software para datos",
+      "summary": "Python de producción: código que corre todos los días sin supervisión.",
+      "estimated_weeks": 2,
+      "topics": [
+        { "id": "de-f2-t1", "title": "Python sólido", "details": "Funciones, clases, dataclasses, generadores, errores y logging." },
+        { "id": "de-f2-t2", "title": "Tipado y validación", "details": "Type hints y Pydantic." },
+        { "id": "de-f2-t3", "title": "DataFrames", "details": "pandas, Polars y DuckDB desde Python." },
+        { "id": "de-f2-t4", "title": "Archivos", "details": "CSV, JSON, Parquet y Excel; lectura por partes." },
+        { "id": "de-f2-t5", "title": "APIs desde Python", "details": "httpx, paginación, reintentos con backoff y límites de uso." },
+        { "id": "de-f2-t6", "title": "Entornos y dependencias", "details": "uv o Poetry, pyproject.toml." },
+        { "id": "de-f2-t7", "title": "Calidad de código", "details": "Estructura de proyecto, Ruff y pytest con fixtures." },
+        { "id": "de-f2-t8", "title": "Git en equipo", "details": "Ramas, pull requests y revisión de código." },
+        { "id": "de-f2-t9", "title": "Terminal y Bash", "details": "Pipes, grep, cron y scripts." },
+        { "id": "de-f2-t10", "title": "Idempotencia e incrementalidad", "details": "Correr dos veces da el mismo resultado; reintentos seguros." }
+      ],
+      "project": { "title": "Paquete de ingesta", "description": "Paquete con CLI que descarga datos de una API, los valida con Pydantic, guarda Parquet y tiene pruebas. Correrlo dos veces no duplica datos." }
+    },
+    {
+      "id": "de-f3", "order": 3, "title": "Almacenamiento: bases, formatos y warehouses",
+      "summary": "Dónde y cómo guardar datos define costo y velocidad.",
+      "estimated_weeks": 2,
+      "topics": [
+        { "id": "de-f3-t1", "title": "OLTP y OLAP", "details": "Bases para operar y para analizar; no analizar sobre producción." },
+        { "id": "de-f3-t2", "title": "Filas y columnas", "details": "Almacenamiento columnar y compresión." },
+        { "id": "de-f3-t3", "title": "Formatos de archivo", "details": "CSV, JSON, Avro y Parquet." },
+        { "id": "de-f3-t4", "title": "Particionado y clustering", "details": "Leer menos datos dividiendo por fecha u otra columna." },
+        { "id": "de-f3-t5", "title": "Almacenamiento de objetos", "details": "S3, GCS, Azure Blob y MinIO local." },
+        { "id": "de-f3-t6", "title": "Separar almacenamiento y cómputo", "details": "La base de los warehouses modernos." },
+        { "id": "de-f3-t7", "title": "Warehouses en la nube", "details": "BigQuery, Snowflake, Redshift, Databricks SQL y cómo cobran." },
+        { "id": "de-f3-t8", "title": "DuckDB y ClickHouse", "details": "Warehouse local y base columnar de alto rendimiento." },
+        { "id": "de-f3-t9", "title": "NoSQL básico", "details": "MongoDB y Redis como fuentes." }
+      ],
+      "project": { "title": "Del CSV al warehouse", "description": "Convierte tus datos a Parquet particionado, súbelos a un bucket y consúltalos con DuckDB y con BigQuery." }
+    },
+    {
+      "id": "de-f4", "order": 4, "title": "Ingesta: batch, APIs y CDC",
+      "summary": "Traer datos de muchas fuentes sin perder ni duplicar.",
+      "estimated_weeks": 2,
+      "topics": [
+        { "id": "de-f4-t1", "title": "Tipos de fuente", "details": "Bases, APIs, archivos, eventos y apps SaaS." },
+        { "id": "de-f4-t2", "title": "Carga completa e incremental", "details": "Watermarks por fecha de actualización o ID." },
+        { "id": "de-f4-t3", "title": "Estrategias de escritura", "details": "Append, replace y merge." },
+        { "id": "de-f4-t4", "title": "Captura de cambios (CDC)", "details": "Leer el log de la base; Debezium." },
+        { "id": "de-f4-t5", "title": "Cambios de esquema", "details": "Columnas nuevas, eliminadas o renombradas." },
+        { "id": "de-f4-t6", "title": "Herramientas de ingesta", "details": "dlt, Airbyte y Fivetran." },
+        { "id": "de-f4-t7", "title": "Capa bronce y metadatos", "details": "Guardar crudo; fecha de carga, origen y lote." }
+      ],
+      "project": { "title": "Ingesta incremental y CDC", "description": "Pipeline con dlt que carga de forma incremental, y CDC con Debezium sobre PostgreSQL en Docker." }
+    },
+    {
+      "id": "de-f5", "order": 5, "title": "Transformación con dbt",
+      "summary": "SQL versionado, probado y documentado dentro del warehouse.",
+      "estimated_weeks": 2,
+      "topics": [
+        { "id": "de-f5-t1", "title": "Qué resuelve dbt y sus versiones", "details": "dbt Core 2.0 (Rust, Apache 2.0), distribución Fusion y dbt Core 1.x." },
+        { "id": "de-f5-t2", "title": "Estructura de proyecto", "details": "Sources, staging, intermediate y marts." },
+        { "id": "de-f5-t3", "title": "Modelos y materializaciones", "details": "ref(), source(), view, table, incremental y ephemeral." },
+        { "id": "de-f5-t4", "title": "Modelos incrementales", "details": "Append, merge y delete+insert." },
+        { "id": "de-f5-t5", "title": "Snapshots", "details": "Dimensiones SCD2." },
+        { "id": "de-f5-t6", "title": "Pruebas en dbt", "details": "Genéricas, propias y unit tests." },
+        { "id": "de-f5-t7", "title": "Jinja, macros y paquetes", "details": "dbt_utils y no repetir SQL." },
+        { "id": "de-f5-t8", "title": "Documentación y linaje", "details": "Docs, seeds, contratos y versiones de modelos." },
+        { "id": "de-f5-t9", "title": "Buenas prácticas dbt", "details": "Convenciones de nombres y SQLFluff." }
+      ],
+      "project": { "title": "Proyecto dbt", "description": "Capas staging y marts con 15+ pruebas, un snapshot SCD2 y documentación publicada." }
+    },
+    {
+      "id": "de-f6", "order": 6, "title": "Orquestación",
+      "summary": "Qué corre, cuándo, en qué orden y qué pasa si falla. Airflow 3 primero.",
+      "estimated_weeks": 2,
+      "topics": [
+        { "id": "de-f6-t1", "title": "Conceptos de orquestación", "details": "DAG, dependencias, schedule, reintentos, timeouts, SLA y alertas." },
+        { "id": "de-f6-t2", "title": "Backfills", "details": "Reprocesar fechas pasadas sin duplicar." },
+        { "id": "de-f6-t3", "title": "Airflow 3: TaskFlow", "details": "@dag, @task y mapeo dinámico." },
+        { "id": "de-f6-t4", "title": "Airflow 3: assets y eventos", "details": "Programación basada en datos." },
+        { "id": "de-f6-t5", "title": "Airflow 3: conexiones y providers", "details": "Secretos, operadores y dbt con Cosmos." },
+        { "id": "de-f6-t6", "title": "Pruebas y desarrollo local", "details": "Docker o Astro CLI." },
+        { "id": "de-f6-t7", "title": "Alternativas", "details": "Dagster (activos), Prefect (funciones) y Kestra (YAML)." },
+        { "id": "de-f6-t8", "title": "Buenas prácticas", "details": "Tareas pequeñas y sin procesamiento pesado en el orquestador." }
+      ],
+      "project": { "title": "Pipeline orquestado", "description": "dlt + dbt en Airflow 3 con reintentos, alertas a Telegram y backfill de 30 días sin duplicados." }
+    },
+    {
+      "id": "de-f7", "order": 7, "title": "Procesamiento a gran escala y lakehouse",
+      "summary": "Spark y formatos de tabla abiertos cuando los datos no caben en un equipo.",
+      "estimated_weeks": 3,
+      "topics": [
+        { "id": "de-f7-t1", "title": "Cuándo usar Spark", "details": "Frente a DuckDB o Polars en un solo equipo." },
+        { "id": "de-f7-t2", "title": "PySpark", "details": "Driver, executors, DataFrames, transformaciones, acciones y evaluación perezosa." },
+        { "id": "de-f7-t3", "title": "Rendimiento en Spark", "details": "Joins, broadcast, shuffles, particiones, skew y Spark UI." },
+        { "id": "de-f7-t4", "title": "Databricks y motores de consulta", "details": "Edición gratuita, Trino y Athena." },
+        { "id": "de-f7-t5", "title": "Formatos de tabla abiertos", "details": "ACID, evolución de esquema y time travel." },
+        { "id": "de-f7-t6", "title": "Apache Iceberg", "details": "Estándar de interoperabilidad; especificación v3." },
+        { "id": "de-f7-t7", "title": "Delta Lake", "details": "Ecosistema Databricks y UniForm." },
+        { "id": "de-f7-t8", "title": "Catálogos y mantenimiento", "details": "Glue, Unity Catalog, Polaris; compactación y snapshots." }
+      ],
+      "project": { "title": "Lakehouse medallion", "description": "Procesa un conjunto grande con PySpark en tablas Iceberg bronce, plata y oro; consulta oro desde DuckDB." }
+    },
+    {
+      "id": "de-f8", "order": 8, "title": "Streaming",
+      "summary": "Procesar datos mientras llegan; diferenciador después del núcleo.",
+      "estimated_weeks": 2,
+      "topics": [
+        { "id": "de-f8-t1", "title": "Cuándo vale la pena", "details": "Fraude, inventario en vivo, tableros operativos." },
+        { "id": "de-f8-t2", "title": "Conceptos de eventos", "details": "Productores, consumidores, tópicos, particiones, offsets y grupos." },
+        { "id": "de-f8-t3", "title": "Garantías de entrega", "details": "At most once, at least once, exactly once." },
+        { "id": "de-f8-t4", "title": "Apache Kafka", "details": "Retención, compactación, Kafka Connect y Redpanda." },
+        { "id": "de-f8-t5", "title": "Esquemas de eventos", "details": "Avro o Protobuf y Schema Registry." },
+        { "id": "de-f8-t6", "title": "Procesamiento de flujos", "details": "Ventanas, tiempo de evento, eventos tardíos y watermarks." },
+        { "id": "de-f8-t7", "title": "Motores de streaming", "details": "Spark Structured Streaming y Apache Flink." },
+        { "id": "de-f8-t8", "title": "CDC en tiempo real y servicios en la nube", "details": "Debezium a Kafka; Kinesis, Pub/Sub y Event Hubs." }
+      ],
+      "project": { "title": "Ventas en tiempo real", "description": "Productor Python envía ventas simuladas a Kafka; Spark o Flink calcula ventas por minuto en ventanas para un tablero." }
+    },
+    {
+      "id": "de-f9", "order": 9, "title": "Nube, infraestructura como código y DataOps",
+      "summary": "Dominar una nube y automatizar infraestructura y despliegues.",
+      "estimated_weeks": 3,
+      "topics": [
+        { "id": "de-f9-t1", "title": "Elegir y aprender una nube", "details": "AWS (más ofertas) o GCP (BigQuery sandbox); equivalencias de servicios." },
+        { "id": "de-f9-t2", "title": "Fundamentos de nube", "details": "IAM, regiones, redes básicas y alertas de presupuesto." },
+        { "id": "de-f9-t3", "title": "Docker a fondo", "details": "Imágenes, volúmenes, redes y docker compose." },
+        { "id": "de-f9-t4", "title": "Kubernetes básico", "details": "Pods, deployments y por qué Airflow o Spark corren ahí." },
+        { "id": "de-f9-t5", "title": "Terraform", "details": "Proveedores, recursos, variables, estado remoto y módulos." },
+        { "id": "de-f9-t6", "title": "CI/CD con GitHub Actions", "details": "Lint, pruebas y dbt build en cada pull request." },
+        { "id": "de-f9-t7", "title": "Entornos y secretos", "details": "Desarrollo y producción separados." },
+        { "id": "de-f9-t8", "title": "FinOps de datos", "details": "Leer la factura y reducir consultas costosas." }
+      ],
+      "project": { "title": "Infraestructura como código", "description": "Terraform para bucket, warehouse y cuentas de servicio, y GitHub Actions que prueba y despliega dbt." }
+    },
+    {
+      "id": "de-f10", "order": 10, "title": "Calidad, gobierno y observabilidad",
+      "summary": "Que los datos malos no lleguen a nadie sin que te enteres.",
+      "estimated_weeks": 1,
+      "topics": [
+        { "id": "de-f10-t1", "title": "Dimensiones de calidad", "details": "Completitud, unicidad, validez, consistencia, exactitud y frescura." },
+        { "id": "de-f10-t2", "title": "Pruebas vs observabilidad", "details": "Reglas conocidas frente a vigilancia continua." },
+        { "id": "de-f10-t3", "title": "Herramientas de calidad", "details": "Pruebas de dbt, Soda Core y GX Core." },
+        { "id": "de-f10-t4", "title": "Contratos de datos", "details": "Acuerdos de esquema, significado y frescura; contratos de dbt." },
+        { "id": "de-f10-t5", "title": "Linaje y catálogo", "details": "OpenLineage, DataHub u OpenMetadata." },
+        { "id": "de-f10-t6", "title": "Gobierno y seguridad", "details": "Roles, enmascarar datos personales, retención; Ley 1581." },
+        { "id": "de-f10-t7", "title": "Monitoreo e incidentes", "details": "Alertas, SLA de frescura y respuesta a datos malos." }
+      ],
+      "project": { "title": "Pipeline confiable", "description": "Pruebas en cada capa, contrato en modelos oro, alertas de frescura y linaje en DataHub u OpenMetadata." }
+    },
+    {
+      "id": "de-f11", "order": 11, "title": "Entregar los datos: BI, capa semántica, ML e IA",
+      "summary": "Tableros, datos para modelos y pipelines para IA generativa.",
+      "estimated_weeks": 2,
+      "topics": [
+        { "id": "de-f11-t1", "title": "Herramientas de BI", "details": "Power BI, Looker, Tableau, Metabase y Superset." },
+        { "id": "de-f11-t2", "title": "Tablas para tableros", "details": "Agregados, rendimiento y actualizaciones." },
+        { "id": "de-f11-t3", "title": "Capa semántica", "details": "Métricas definidas una vez: dbt Semantic Layer o Cube." },
+        { "id": "de-f11-t4", "title": "Reverse ETL", "details": "Del warehouse de vuelta al CRM o correo." },
+        { "id": "de-f11-t5", "title": "Datos para ML", "details": "Históricos sin fugas, feature stores (Feast) y versionado." },
+        { "id": "de-f11-t6", "title": "Pipelines de documentos para IA", "details": "Extraer, limpiar, chunking y embeddings." },
+        { "id": "de-f11-t7", "title": "Bases vectoriales", "details": "pgvector, Qdrant, Milvus o Pinecone y búsqueda híbrida." },
+        { "id": "de-f11-t8", "title": "Frescura y permisos en RAG", "details": "Reindexar lo que cambió y no exponer documentos confidenciales." },
+        { "id": "de-f11-t9", "title": "IA en el trabajo de datos", "details": "SQL generado con LLMs revisado y datos expuestos a agentes con MCP." }
+      ],
+      "project": { "title": "Tablero y base vectorial", "description": "Tablero con capa semántica sobre tablas oro y pipeline incremental de documentos públicos a una base vectorial." }
+    },
+    {
+      "id": "de-f12", "order": 12, "title": "Carrera: portafolio, certificación y entrevistas",
+      "summary": "Entrar por un puesto puente con un portafolio que demuestre pipelines reales.",
+      "estimated_weeks": 1,
+      "topics": [
+        { "id": "de-f12-t1", "title": "Portafolio", "details": "2 o 3 proyectos completos con README, diagrama y tablero público." },
+        { "id": "de-f12-t2", "title": "Certificaciones", "details": "Google Associate Data Practitioner, dbt, Databricks, AWS DEA-C01, Google PDE, DP-700. Elegir una." },
+        { "id": "de-f12-t3", "title": "Entrevista de SQL y Python", "details": "Ventanas, deduplicar, funciones limpias con pruebas." },
+        { "id": "de-f12-t4", "title": "Entrevista de modelado", "details": "Esquema estrella de un negocio en 30 minutos." },
+        { "id": "de-f12-t5", "title": "Diseño de sistemas de datos", "details": "Escala, fallas, costos y calidad." },
+        { "id": "de-f12-t6", "title": "Comportamiento e inglés técnico", "details": "Contar proyectos y errores; explicar en inglés para remoto." },
+        { "id": "de-f12-t7", "title": "Mercado y puestos puente", "details": "Analista de datos, analytics engineer o backend como entrada." }
+      ],
+      "project": { "title": "Listo para postular", "description": "Publica el proyecto final, agenda una certificación y haz 3 entrevistas de práctica." }
+    }
+  ],
+  "final_checklist": [
+    { "id": "de-c1", "text": "Escribo SQL con funciones de ventana y CTEs y leo un plan de ejecución." },
+    { "id": "de-c2", "text": "Diseño un esquema estrella con SCD tipo 2 para un negocio real." },
+    { "id": "de-c3", "text": "Tengo un paquete de Python con pruebas que carga datos de forma idempotente." },
+    { "id": "de-c4", "text": "Explico cuándo usar Parquet, un warehouse o un lakehouse, y cuánto cuesta cada uno." },
+    { "id": "de-c5", "text": "Tengo una ingesta incremental con dlt y un ejemplo de CDC con Debezium." },
+    { "id": "de-c6", "text": "Tengo un proyecto dbt con capas, pruebas, snapshot y documentación." },
+    { "id": "de-c7", "text": "Orquesto el pipeline completo en Airflow 3 con reintentos, alertas y backfill." },
+    { "id": "de-c8", "text": "Proceso un conjunto grande con PySpark y lo guardo en tablas Iceberg." },
+    { "id": "de-c9", "text": "Tengo un pipeline de streaming funcionando con Kafka o Redpanda." },
+    { "id": "de-c10", "text": "Despliego la infraestructura con Terraform y tengo CI/CD con GitHub Actions." },
+    { "id": "de-c11", "text": "Mi pipeline tiene pruebas de calidad, contratos, alertas de frescura y linaje." },
+    { "id": "de-c12", "text": "Publiqué un tablero y una base vectorial alimentada por el pipeline." },
+    { "id": "de-c13", "text": "Tengo 2 o 3 proyectos con README completo en GitHub." },
+    { "id": "de-c14", "text": "Tengo una certificación agendada o aprobada." },
+    { "id": "de-c15", "text": "Hice 3 entrevistas de práctica, incluida una de diseño de sistemas de datos." }
+  ]
+}

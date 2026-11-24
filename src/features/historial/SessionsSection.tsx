@@ -1,38 +1,27 @@
-import { useSearchParams } from 'react-router'
 import { Card } from '@/components/ui/Card'
 import { Section } from '@/components/ui/Section'
-import type { Phase } from '@/types/curriculum'
+import type { Track } from '@/lib/roadmap'
 import { ExportCsvButton } from './ExportCsvButton'
 import { SessionFiltersForm } from './SessionFiltersForm'
 import { SessionList } from './SessionList'
-import {
-  hasFilters,
-  readSessionFilters,
-  toSessionQuery,
-  writeSessionFilters,
-  type SessionFilters,
-} from './sessionFilters'
+import { hasFilters, toSessionQuery } from './sessionFilters'
+import { useSessionFilters } from './useSessionFilters'
 
-export function SessionsSection({ phases }: { phases: readonly Phase[] }) {
-  const [params, setParams] = useSearchParams()
-  const filters = readSessionFilters(params)
-
-  const changeFilters = (next: SessionFilters) => {
-    void setParams(writeSessionFilters(params, next), { replace: true, preventScrollReset: true })
-  }
+export function SessionsSection({ tracks }: { tracks: readonly Track[] }) {
+  const [filters, setFilters] = useSessionFilters()
 
   return (
     <Section
       title="Sesiones"
       description="De la más reciente a la más antigua. Toca una para editarla o borrarla."
-      action={<ExportCsvButton phases={phases} />}
+      action={<ExportCsvButton tracks={tracks} />}
     >
       <Card>
-        <SessionFiltersForm filters={filters} phases={phases} onChange={changeFilters} />
+        <SessionFiltersForm filters={filters} tracks={tracks} onChange={setFilters} />
       </Card>
       <SessionList
-        query={toSessionQuery(filters, phases)}
-        phases={phases}
+        query={toSessionQuery(filters, tracks)}
+        tracks={tracks}
         filtered={hasFilters(filters)}
       />
     </Section>

@@ -24,11 +24,17 @@ const demoQuiz: Quiz = {
 /** Algunas líneas del contexto que armó la función, para comprobar que llegan bien. */
 function contextLines(system: string): string[] {
   const start = system.indexOf('# Contexto del estudiante')
-  return system
+  const context = system
     .slice(start === -1 ? system.length : start)
     .split('\n')
-    .filter((line) => /^(Tema:|Estado del tema:|Proyecto:|Temas hechos:|Esta semana|- )/.test(line))
-    .map((line) => `> ${line.replace(/^- /, 'Sesión: ')}`)
+    .filter((line) =>
+      /^(Ruta del|Tema:|Estado del tema:|Proyecto:|## Progreso|Temas hechos:|Esta semana|- )/.test(
+        line,
+      ),
+    )
+    .map((line) => `> ${line.replace(/^- /, 'Sesión: ').replace(/^## /, '')}`)
+  // La primera línea del prompt dice a qué ruta se adaptó.
+  return [`> ${system.split('\n')[0] ?? ''}`, ...context.map((line) => `>\n${line}`)]
 }
 
 function demoAnswer(question: string, system: string): string {

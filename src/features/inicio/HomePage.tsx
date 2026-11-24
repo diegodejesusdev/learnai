@@ -13,14 +13,14 @@ import { nextTopic } from '@/lib/progress'
 import { ContinueCard } from './ContinueCard'
 import { continueSuggestion } from './continueStudying'
 import { HomeStats } from './HomeStats'
-import { TotalProgressCard } from './TotalProgressCard'
+import { TrackProgressCard } from './TrackProgressCard'
 
 interface HomeContentProps extends RoadmapData {
   latest: ReturnType<typeof useLatestSession>
   summary: ReturnType<typeof useStudySummary>
 }
 
-function HomeContent({ roadmap, progress, latest, summary }: HomeContentProps) {
+function HomeContent({ roadmap, progress, activeTrack, latest, summary }: HomeContentProps) {
   const timer = useActiveTimer()
   const statuses = topicStatuses(progress)
 
@@ -32,14 +32,14 @@ function HomeContent({ roadmap, progress, latest, summary }: HomeContentProps) {
     ? continueSuggestion({
         timer: timer.data ?? null,
         latest: latest.data ?? null,
-        phases: roadmap.phases,
+        phases: activeTrack.phases,
         topicStatuses: statuses,
         projectStatuses: projectStatuses(progress),
       })
     : null
-  // El siguiente tema de la ruta, si no es ya lo que propone «Seguir estudiando».
+  // El siguiente tema de la ruta activa, si no es ya lo que propone «Seguir estudiando».
   // Con todo hecho y nada que retomar, NextTopicCard muestra la felicitación.
-  const next = nextTopic(roadmap.phases, statuses)
+  const next = nextTopic(activeTrack.phases, statuses)
   const showNext = ready && (next ? suggestion?.target.topicId !== next.topic.id : !suggestion)
 
   if (!ready) return <LoadingState />
@@ -49,7 +49,7 @@ function HomeContent({ roadmap, progress, latest, summary }: HomeContentProps) {
       {suggestion && (
         <ContinueCard
           suggestion={suggestion}
-          phases={roadmap.phases}
+          tracks={roadmap.tracks}
           topicStatuses={statuses}
           hasHistory={Boolean(latest.data)}
         />
@@ -59,8 +59,15 @@ function HomeContent({ roadmap, progress, latest, summary }: HomeContentProps) {
         ¿Qué estudio hoy?
       </ButtonLink>
       <HomeStats summary={summary} />
-      {showNext && <NextTopicCard roadmap={roadmap} progress={progress} />}
-      <TotalProgressCard roadmap={roadmap} progress={progress} />
+      {showNext && <NextTopicCard track={activeTrack} progress={progress} showTrack />}
+      {roadmap.tracks.map((track) => (
+        <TrackProgressCard
+          key={track.id}
+          track={track}
+          progress={progress}
+          active={roadmap.tracks.length > 1 && track.id === activeTrack.id}
+        />
+      ))}
     </>
   )
 }

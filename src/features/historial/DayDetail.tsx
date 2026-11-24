@@ -3,7 +3,7 @@ import { Card } from '@/components/ui/Card'
 import { Spinner } from '@/components/ui/Spinner'
 import { formatDayKey, formatDuration } from '@/lib/dates'
 import type { DayTotal } from '@/lib/studyStats'
-import type { Phase } from '@/types/curriculum'
+import type { Track } from '@/lib/roadmap'
 import { SessionRow } from './SessionRow'
 import { useDaySessions } from './useSessions'
 
@@ -12,7 +12,7 @@ interface DayDetailProps {
   today: string
   total: DayTotal | undefined
   minMinutes: number
-  phases: readonly Phase[]
+  tracks: readonly Track[]
 }
 
 function dayTitle(day: string, today: string): string {
@@ -22,7 +22,7 @@ function dayTitle(day: string, today: string): string {
 }
 
 /** El día elegido en el mapa de calor: sus minutos, si cuenta para la racha y sus sesiones. */
-export function DayDetail({ day, today, total, minMinutes, phases }: DayDetailProps) {
+export function DayDetail({ day, today, total, minMinutes, tracks }: DayDetailProps) {
   const minutes = total?.minutes ?? 0
   const sessions = useDaySessions(day, minutes > 0)
 
@@ -55,7 +55,7 @@ export function DayDetail({ day, today, total, minMinutes, phases }: DayDetailPr
           <ul aria-label="Sesiones del día" className="-mx-2 divide-y divide-border">
             {sessions.data.map((session) => (
               <li key={session.id}>
-                <SessionRow session={session} phases={phases} showDate={false} />
+                <SessionRow session={session} tracks={tracks} showDate={false} />
               </li>
             ))}
           </ul>

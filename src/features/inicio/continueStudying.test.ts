@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { phases } from '@/data/curriculum'
+import { dataTrack, phases } from '@/data/curriculum'
 import type { StudySession } from '@/features/historial/sessionsApi'
 import { createTimer } from '@/features/temporizador/timerModel'
 import { continueSuggestion } from './continueStudying'
@@ -56,6 +56,17 @@ describe('Seguir estudiando', () => {
       latest,
     })
     expect(suggestion).toMatchObject({ kind: 'next', to: '/estudiar?tema=f0-t1' })
+  })
+
+  it('el siguiente tema es el de la ruta activa, no el de la última sesión', () => {
+    const suggestion = continueSuggestion({
+      ...base,
+      phases: dataTrack.phases,
+      topicStatuses: { 'f1-t5': 'hecho' },
+      timer: null,
+      latest,
+    })
+    expect(suggestion).toMatchObject({ kind: 'next', to: '/estudiar?tema=de-f0-t1' })
   })
 
   it('sin sesiones, también el siguiente tema; con todo hecho, nada', () => {

@@ -12,6 +12,7 @@ const rows: ExportRows = {
     pomodoro_break_min: 5,
     streak_min_minutes: 15,
     theme: 'system',
+    active_track_id: 'ingenieria-datos',
     updated_at: '2026-11-20T10:00:00Z',
   },
   topicProgress: [
@@ -33,7 +34,7 @@ const rows: ExportRows = {
     },
   ],
   projectProgress: [],
-  checklist: [],
+  checklist: [{ user_id: USER, item_id: 'de-c1', done: true, done_at: '2026-11-20T10:00:00Z' }],
   sessions: [
     {
       id: 's1',
@@ -108,7 +109,34 @@ const rows: ExportRows = {
       created_at: '',
     },
   ],
-  quizResults: [],
+  quizResults: [
+    {
+      id: 'q1',
+      user_id: USER,
+      message_id: 'm2',
+      topic_id: 'f1-t5',
+      score: 4,
+      total: 5,
+      answers: [0, 1, 2, 3, 0],
+      created_at: '',
+      updated_at: '',
+    },
+  ],
+  tracks: [
+    { id: 'automatizacion', sort_order: 1, title: 'Automatización para negocios', goal: 'Vender' },
+    { id: 'ingenieria-datos', sort_order: 2, title: 'Ingeniería de datos', goal: 'Empleo' },
+  ],
+  phases: [
+    { id: 'f0', track_id: 'automatizacion' },
+    { id: 'f1', track_id: 'automatizacion' },
+    { id: 'de-f1', track_id: 'ingenieria-datos' },
+  ],
+  topics: [
+    { id: 'f0-t1', phase_id: 'f0' },
+    { id: 'f1-t5', phase_id: 'f1' },
+    { id: 'de-f1-t4', phase_id: 'de-f1' },
+  ],
+  checklistItems: [{ id: 'de-c1', track_id: 'ingenieria-datos' }],
 }
 
 describe('exportar mis datos', () => {
@@ -125,9 +153,9 @@ describe('exportar mis datos', () => {
       temas_hechos: 1,
       conversaciones_con_el_tutor: 2,
       mensajes_con_el_tutor: 2,
-      quizzes: 0,
+      quizzes: 1,
     })
-    expect(data).toMatchObject({ app: 'LearnAI', formato: 1, cuenta: 'diego@prueba.local' })
+    expect(data).toMatchObject({ app: 'LearnAI', formato: 2, cuenta: 'diego@prueba.local' })
   })
 
   it('pone los mensajes dentro de su conversación', () => {
@@ -139,6 +167,57 @@ describe('exportar mis datos', () => {
   it('conserva notas y sesiones, sin el user_id', () => {
     expect(data.progreso.temas[0]).toMatchObject({ topic_id: 'f1-t5', notes: 'Firmas HMAC' })
     expect(JSON.stringify(data)).not.toContain(USER)
+  })
+
+  it('cada registro lleva su ruta', () => {
+    expect(data.progreso.temas.map((topic) => topic.ruta)).toEqual([
+      'automatizacion',
+      'automatizacion',
+    ])
+    expect(data.progreso.checklist[0]?.ruta).toBe('ingenieria-datos')
+    // Una sesión de tema y otra de proyecto.
+    expect(data.sesiones.map((session) => session.ruta)).toEqual([
+      'automatizacion',
+      'automatizacion',
+    ])
+    expect(data.tutor.quizzes[0]?.ruta).toBe('automatizacion')
+  })
+
+  it('«¿Qué estudio hoy?» no va ligada a ninguna ruta', () => {
+    expect(data.tutor.conversaciones.map((conversation) => conversation.ruta)).toEqual([
+      'automatizacion',
+      null,
+    ])
+  })
+
+  it('resume cada ruta, también la que aún no tiene sesiones', () => {
+    expect(data.rutas).toEqual([
+      {
+        id: 'automatizacion',
+        titulo: 'Automatización para negocios',
+        meta: 'Vender',
+        temas_hechos: 1,
+        sesiones: 2,
+        minutos_estudiados: 75,
+      },
+      {
+        id: 'ingenieria-datos',
+        titulo: 'Ingeniería de datos',
+        meta: 'Empleo',
+        temas_hechos: 0,
+        sesiones: 0,
+        minutos_estudiados: 0,
+      },
+    ])
+  })
+
+  it('un registro de un tema que ya no existe se conserva, sin ruta', () => {
+    const orphan = buildExport(
+      { ...rows, topics: [], phases: [] },
+      { email: 'diego@prueba.local', now: new Date('2026-11-20T15:00:00Z') },
+    )
+    expect(orphan.progreso.temas).toHaveLength(2)
+    expect(orphan.progreso.temas[0]).toMatchObject({ notes: 'Firmas HMAC', ruta: null })
   })
 
   it('el archivo lleva la fecha', () => {

@@ -51,8 +51,12 @@ export function projectStatuses(snapshot: ProgressSnapshot): StatusMap {
   return statusesOf(snapshot.projects)
 }
 
-export function checklistDoneCount(snapshot: ProgressSnapshot): number {
-  return Object.values(snapshot.checklist).filter((item) => item?.done).length
+/** Cuántos de esos ítems (los de una ruta) están logrados. */
+export function checklistDoneCount(
+  snapshot: ProgressSnapshot,
+  items: readonly { id: string }[],
+): number {
+  return items.filter((item) => snapshot.checklist[item.id]?.done).length
 }
 
 function completedAt(status: ProgressStatus, previous: string | null, now: string): string | null {

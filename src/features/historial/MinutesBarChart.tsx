@@ -1,20 +1,28 @@
 import { Bar, BarChart, LabelList, ResponsiveContainer, Tooltip, XAxis, YAxis } from 'recharts'
 import { formatDuration } from '@/lib/dates'
 import { ChartTooltipBox } from './ChartParts'
-import { axisTick } from './chartScale'
+import { axisTick, MINUTES_ROW_HEIGHT } from './chartScale'
 
-export interface PhaseChartRow {
-  /** 'Fase 1'. */
+export interface MinutesBarRow {
+  /** En el eje: «Fase 1» o el nombre de la ruta. */
   label: string
+  /** En el tooltip. */
   title: string
   minutes: number
 }
 
-const ROW_HEIGHT = 36
+interface MinutesBarChartProps {
+  rows: readonly MinutesBarRow[]
+  /** Ancho del eje; si la etiqueta no cabe, se parte en dos líneas. */
+  labelWidth?: number
+}
 
-/** Barras horizontales de minutos por fase, con el tiempo al final de cada barra. */
-export function PhaseMinutesChart({ rows }: { rows: readonly PhaseChartRow[] }) {
-  const height = rows.length * ROW_HEIGHT
+// 68: «Fase 12» en una sola línea (Recharts mide el texto con el tamaño de letra de la página).
+const PHASE_LABEL_WIDTH = 68
+
+/** Barras horizontales de minutos (por fase o por ruta), con el tiempo al final de cada barra. */
+export function MinutesBarChart({ rows, labelWidth = PHASE_LABEL_WIDTH }: MinutesBarChartProps) {
+  const height = rows.length * MINUTES_ROW_HEIGHT
   return (
     <ResponsiveContainer width="100%" height={height} initialDimension={{ width: 320, height }}>
       <BarChart
@@ -27,7 +35,7 @@ export function PhaseMinutesChart({ rows }: { rows: readonly PhaseChartRow[] }) 
         <YAxis
           type="category"
           dataKey="label"
-          width={52}
+          width={labelWidth}
           tickLine={false}
           axisLine={false}
           tick={axisTick}

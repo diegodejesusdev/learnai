@@ -7,7 +7,7 @@ import { PageHeader } from '@/components/ui/PageHeader'
 import { ProgressBar } from '@/components/ui/ProgressBar'
 import { Section } from '@/components/ui/Section'
 import { countByFilter, matchesFilter, phaseProgress, statusOf } from '@/lib/progress'
-import { findPhaseIn, phaseLabel } from '@/lib/roadmap'
+import { findPhaseIn, trackOfTarget, trackPhaseLabel, type Track } from '@/lib/roadmap'
 import type { Phase } from '@/types/curriculum'
 import type { ProgressSnapshot } from './progressApi'
 import { projectProgressOf, topicStatuses } from './progressModel'
@@ -17,7 +17,13 @@ import { StatusFilterChips } from './StatusFilterChips'
 import { TopicRow } from './TopicRow'
 import { useStatusFilter } from './useStatusFilter'
 
-function PhaseView({ phase, progress }: { phase: Phase; progress: ProgressSnapshot }) {
+interface PhaseViewProps {
+  track: Track
+  phase: Phase
+  progress: ProgressSnapshot
+}
+
+function PhaseView({ track, phase, progress }: PhaseViewProps) {
   const [filter, setFilter] = useStatusFilter()
   const statuses = topicStatuses(progress)
   const topics = phase.topics.map((topic) => ({ topic, status: statusOf(statuses, topic.id) }))
@@ -28,9 +34,9 @@ function PhaseView({ phase, progress }: { phase: Phase; progress: ProgressSnapsh
     <>
       <PageHeader
         title={phase.title}
-        eyebrow={phaseLabel(phase)}
+        eyebrow={trackPhaseLabel(track, phase)}
         description={phase.summary}
-        back={{ to: '/ruta', label: 'Ruta' }}
+        back={{ to: `/ruta?ruta=${track.id}`, label: 'Ruta' }}
       />
       <div className="flex flex-col gap-8">
         <Card>
@@ -75,12 +81,14 @@ function PhaseView({ phase, progress }: { phase: Phase; progress: ProgressSnapsh
 }
 
 export function PhasePage() {
-  const { phaseId } = useParams()
+  const { phaseId = '' } = useParams()
   return (
     <RoadmapGate>
       {({ roadmap, progress }) => {
-        const phase = findPhaseIn(roadmap.phases, phaseId)
-        return phase ? <PhaseView phase={phase} progress={progress} /> : <NotFoundPage />
+        const track = trackOfTarget(roadmap.tracks, { topicId: null, projectPhaseId: phaseId })
+        const phase = findPhaseIn(track?.phases ?? [], phaseId)
+        if (!track || !phase) return <NotFoundPage />
+        return <PhaseView track={track} phase={phase} progress={progress} />
       }}
     </RoadmapGate>
   )

@@ -1,4 +1,4 @@
-// Carga curriculum.json en phases, topics, checklist_items y curriculum_meta.
+// Carga todas las rutas de src/data/routes/ en tracks, phases, topics y checklist_items.
 // Usa upsert por id: se puede correr las veces que quieras sin duplicar.
 //
 //   npm run seed         → Supabase local (lee .env.local)
@@ -7,12 +7,9 @@
 // Necesita SUPABASE_SERVICE_ROLE_KEY (o la "secret key"), que salta RLS.
 // Esa clave nunca va con prefijo VITE_ ni en Vercel.
 import { createClient } from '@supabase/supabase-js'
-import curriculumJson from '../curriculum.json' with { type: 'json' }
-import type { Curriculum } from '../src/types/curriculum.ts'
 import type { Database } from '../src/types/database.ts'
-import { orphanIds, toCurriculumRows, validateCurriculum } from './curriculumRows.ts'
-
-const curriculum: Curriculum = curriculumJson
+import { loadRoutes, ROUTES_DIR } from './routeFiles.ts'
+import { seedRoutes, type ContentTable, type SeedRow, type SeedStore } from './seedRoutes.ts'
 
 const url = process.env.SUPABASE_URL ?? process.env.VITE_SUPABASE_URL
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -23,61 +20,44 @@ if (!url || !serviceKey) {
   process.exit(1)
 }
 
-const errors = validateCurriculum(curriculum)
-if (errors.length > 0) {
-  console.error('curriculum.json tiene errores; no se cargó nada:\n- ' + errors.join('\n- '))
-  process.exit(1)
-}
-
 const supabase = createClient<Database>(url, serviceKey, {
   auth: { persistSession: false, autoRefreshToken: false },
 })
-const rows = toCurriculumRows(curriculum)
 
-function check(table: string, result: { error: { message: string } | null }, count: number): void {
-  if (result.error) throw new Error(`Error en ${table}: ${result.error.message}`)
-  console.log(`✓ ${table}: ${count}`)
+/** Supabase devuelve como máximo 1000 filas por consulta: se piden por tandas. */
+const PAGE = 1000
+
+const store: SeedStore = {
+  async read(table) {
+    const rows: SeedRow[] = []
+    for (let from = 0; ; from += PAGE) {
+      const { data, error } = await supabase
+        .from(table)
+        .select('*')
+        .order('id')
+        .range(from, from + PAGE - 1)
+      if (error) throw new Error(`Error leyendo ${table}: ${error.message}`)
+      rows.push(...(data as SeedRow[]))
+      if (data.length < PAGE) return rows
+    }
+  },
+  async upsert(table: ContentTable, rows) {
+    const { error } = await supabase.from(table).upsert(rows as never, { onConflict: 'id' })
+    if (error) throw new Error(`Error en ${table}: ${error.message}`)
+  },
 }
 
-async function warnOrphans(table: 'phases' | 'topics' | 'checklist_items', jsonIds: string[]) {
-  const { data, error } = await supabase.from(table).select('id')
-  if (error) throw new Error(`Error leyendo ${table}: ${error.message}`)
-  const orphans = orphanIds(
-    data.map((row) => row.id),
-    jsonIds,
-  )
-  if (orphans.length > 0) {
-    console.warn(
-      `⚠ ${table}: en la base hay ids que ya no están en curriculum.json: ${orphans.join(', ')}.\n` +
-        '  No se borran automáticamente para no perder tu progreso ligado a ellos.',
+try {
+  const routes = await loadRoutes(ROUTES_DIR)
+  console.log(`Cargando ${routes.length} rutas en ${url}:`)
+  for (const route of routes) {
+    const topics = route.phases.reduce((sum, phase) => sum + phase.topics.length, 0)
+    console.log(
+      `  ${route.track.title} (versión ${route.version}): ${route.phases.length} fases, ` +
+        `${topics} temas, ${route.final_checklist.length} ítems`,
     )
   }
-}
-
-console.log(`Cargando «${curriculum.title}» (versión ${curriculum.version}) en ${url}`)
-try {
-  // El orden importa: los temas apuntan a las fases.
-  const upsertById = { onConflict: 'id' }
-  check('curriculum_meta', await supabase.from('curriculum_meta').upsert(rows.meta, upsertById), 1)
-  check('phases', await supabase.from('phases').upsert(rows.phases, upsertById), rows.phases.length)
-  check('topics', await supabase.from('topics').upsert(rows.topics, upsertById), rows.topics.length)
-  check(
-    'checklist_items',
-    await supabase.from('checklist_items').upsert(rows.checklist, upsertById),
-    rows.checklist.length,
-  )
-  await warnOrphans(
-    'phases',
-    rows.phases.map((row) => row.id),
-  )
-  await warnOrphans(
-    'topics',
-    rows.topics.map((row) => row.id),
-  )
-  await warnOrphans(
-    'checklist_items',
-    rows.checklist.map((row) => row.id),
-  )
+  await seedRoutes(store, routes, console)
   console.log('Listo.')
 } catch (error) {
   console.error(error instanceof Error ? error.message : error)

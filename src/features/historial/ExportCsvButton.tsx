@@ -4,13 +4,13 @@ import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
 import { downloadTextFile } from '@/lib/download'
 import { toast } from '@/lib/toast'
-import type { Phase } from '@/types/curriculum'
+import type { Track } from '@/lib/roadmap'
 import { sessionsCsv } from './sessionCsv'
 import { fetchAllSessions } from './sessionsApi'
 import { todayKey } from './useStudyStats'
 
 /** Descarga todas las sesiones (sin filtros) en un CSV para Google Sheets, Excel o pandas. */
-export function ExportCsvButton({ phases }: { phases: readonly Phase[] }) {
+export function ExportCsvButton({ tracks }: { tracks: readonly Track[] }) {
   const exportCsv = useMutation({
     mutationFn: fetchAllSessions,
     onSuccess: (sessions) => {
@@ -20,7 +20,7 @@ export function ExportCsvButton({ phases }: { phases: readonly Phase[] }) {
       }
       downloadTextFile(
         `learnai-sesiones-${todayKey()}.csv`,
-        sessionsCsv(sessions, phases),
+        sessionsCsv(sessions, tracks),
         'text/csv;charset=utf-8',
       )
       toast.success(

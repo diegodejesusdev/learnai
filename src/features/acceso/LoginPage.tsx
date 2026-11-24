@@ -58,7 +58,7 @@ export function LoginPage() {
         <div className="flex flex-col items-center gap-2 text-center">
           <Logo className="size-14" />
           <h1 className="text-2xl font-semibold tracking-tight">Entrar a LearnAI</h1>
-          <p className="text-sm text-fg-muted">Tu ruta de automatización para negocios</p>
+          <p className="text-sm text-fg-muted">Tus rutas de estudio</p>
         </div>
         <Card className="flex w-full flex-col gap-5">
           {urlError && <Alert>{urlError}</Alert>}

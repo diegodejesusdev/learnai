@@ -11,13 +11,13 @@ export function ActiveTimerBanner() {
   const { pathname } = useLocation()
   const { data: timer } = useActiveTimer()
   const now = useNow(Boolean(timer && timer.pausedAt === null))
-  const phases = useRoadmap().data?.phases ?? []
+  const tracks = useRoadmap().data?.tracks ?? []
 
   if (!timer || pathname.startsWith('/estudiar')) return null
 
   const view = timerView(timer, now)
   const Icon = view.paused ? Pause : timer.mode === 'pomodoro' ? Timer : Hourglass
-  const title = targetTitle(phases, timer) ?? 'Sesión de estudio'
+  const title = targetTitle(tracks, timer) ?? 'Sesión de estudio'
 
   return (
     <div className="sticky top-[calc(3.5rem+env(safe-area-inset-top))] z-10 border-b border-border bg-accent-soft lg:top-0">
