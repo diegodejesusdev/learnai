@@ -26,6 +26,7 @@ function trackById(id: string): Track {
 
 export const automationTrack = trackById('automatizacion')
 export const dataTrack = trackById('ingenieria-datos')
+export const cloudTrack = trackById('cloud')
 
 /** Fases de automatización, la ruta que usa la mayoría de los tests. */
 export const phases: readonly Phase[] = automationTrack.phases

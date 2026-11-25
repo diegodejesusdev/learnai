@@ -187,6 +187,7 @@ describe('varias rutas', () => {
     vi.mocked(fetchPhaseTotals).mockResolvedValue([
       { phaseId: 'f1', minutes: 60, sessions: 3 },
       { phaseId: 'de-f0', minutes: 45, sessions: 2 },
+      { phaseId: 'cl-f13', minutes: 20, sessions: 1 },
     ])
   })
 
@@ -197,10 +198,11 @@ describe('varias rutas', () => {
     expect(rows.map((row) => row.textContent)).toEqual([
       'Automatización para negocios1 h3',
       'Ingeniería de datos45 min2',
+      'Cloud20 min1',
     ])
   })
 
-  it('sin filtro, las fases van por ruta: «Fase 0» existe en las dos', async () => {
+  it('sin filtro, las fases van por ruta: «Fase 0» existe en todas', async () => {
     renderApp('/historial')
     const data = await screen.findByRole('table', {
       name: 'Minutos por fase · Ingeniería de datos',
@@ -214,6 +216,13 @@ describe('varias rutas', () => {
     expect(
       screen.getByRole('table', { name: 'Minutos por fase · Automatización para negocios' }),
     ).toBeInTheDocument()
+    const cloud = screen.getByRole('table', { name: 'Minutos por fase · Cloud' })
+    expect(within(cloud).getAllByRole('row')).toHaveLength(15)
+    expect(
+      within(cloud)
+        .getByText(/^Fase 13 · /)
+        .closest('tr'),
+    ).toHaveTextContent('20 min1')
   })
 
   it('el filtro por ruta cambia las sesiones y las fases, no la racha ni la meta', async () => {
@@ -235,7 +244,33 @@ describe('varias rutas', () => {
       screen.getByText((_, element) => element?.textContent === '50 min de 10 h'),
     ).toBeInTheDocument()
     const perTrack = screen.getByRole('table', { name: 'Minutos por ruta' })
-    expect(within(perTrack).getAllByRole('row')).toHaveLength(3)
+    expect(within(perTrack).getAllByRole('row')).toHaveLength(4)
+  })
+
+  it('el filtro deja solo Cloud: sus 14 fases, sus 122 temas y sus proyectos', async () => {
+    renderApp('/historial')
+    const filter = await screen.findByLabelText('Ruta')
+    expect(
+      within(filter)
+        .getAllByRole('option')
+        .map((option) => option.textContent),
+    ).toEqual(['Todas las rutas', 'Automatización para negocios', 'Ingeniería de datos', 'Cloud'])
+    await userEvent.selectOptions(filter, 'cloud')
+    await waitFor(() =>
+      expect(vi.mocked(fetchSessionPage).mock.lastCall?.[0].scope?.phaseIds).toContain('cl-f13'),
+    )
+    const scope = vi.mocked(fetchSessionPage).mock.lastCall?.[0].scope
+    expect(scope?.phaseIds).toHaveLength(14)
+    expect(scope?.topicIds).toHaveLength(122)
+    expect(
+      [...(scope?.phaseIds ?? []), ...(scope?.topicIds ?? [])].filter(
+        (id) => !id.startsWith('cl-'),
+      ),
+    ).toEqual([])
+    expect(screen.getByRole('table', { name: 'Minutos por fase · Cloud' })).toBeInTheDocument()
+    expect(
+      screen.queryByRole('table', { name: 'Minutos por fase · Ingeniería de datos' }),
+    ).not.toBeInTheDocument()
   })
 
   it('cambiar de ruta limpia la fase y el tema elegidos', async () => {
@@ -255,10 +290,12 @@ describe('varias rutas', () => {
   it('cada sesión dice de qué ruta es', async () => {
     vi.mocked(fetchSessionPage).mockResolvedValue([
       session(today, '08:00', { target: { topicId: 'de-f1-t4', projectPhaseId: null } }),
+      session(today, '10:00', { target: { topicId: null, projectPhaseId: 'cl-f7' } }),
     ])
     renderApp('/historial')
     const list = await screen.findByRole('list', { name: 'Sesiones' })
     expect(within(list).getByText(/Ingeniería de datos · Fase 1/)).toBeInTheDocument()
+    expect(within(list).getByText(/Proyecto · Cloud · Fase 7/)).toBeInTheDocument()
   })
 
   it('con una sola ruta no hay filtro ni gráfica por ruta', async () => {

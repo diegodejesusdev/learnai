@@ -1,0 +1,263 @@
+{
+  "version": 1,
+  "track": {
+    "id": "cloud",
+    "title": "Cloud",
+    "order": 3
+  },
+  "title": "Ruta de aprendizaje: Cloud",
+  "goal": "Diseñar, desplegar y operar aplicaciones y datos en la nube en unas 24 semanas (10 h/semana), con AWS como nube principal y equivalencias en Azure y Google Cloud.",
+  "phases": [
+    {
+      "id": "cl-f0", "order": 0, "title": "Fundamentos de la nube",
+      "summary": "Qué es la nube, quién es responsable de qué y cómo se cobra.",
+      "estimated_weeks": 1,
+      "topics": [
+        { "id": "cl-f0-t1", "title": "Qué es la nube", "details": "Elasticidad, pago por uso, autoservicio y alcance global." },
+        { "id": "cl-f0-t2", "title": "Modelos de servicio", "details": "IaaS, PaaS, SaaS y serverless." },
+        { "id": "cl-f0-t3", "title": "Modelos de despliegue", "details": "Pública, privada, híbrida y multinube." },
+        { "id": "cl-f0-t4", "title": "Responsabilidad compartida", "details": "El proveedor asegura la infraestructura; tú tus datos, accesos y configuración." },
+        { "id": "cl-f0-t5", "title": "Infraestructura global", "details": "Regiones, zonas de disponibilidad, ubicaciones de borde y dónde guardar datos." },
+        { "id": "cl-f0-t6", "title": "Cómo cobra la nube", "details": "Por tiempo, por GB guardado y por GB transferido." },
+        { "id": "cl-f0-t7", "title": "Plan gratis de AWS", "details": "US$100 al registrarse y hasta US$100 más; hasta 6 meses o hasta agotar créditos." },
+        { "id": "cl-f0-t8", "title": "Herramientas de costos", "details": "Budgets, alertas de facturación y Cost Explorer." },
+        { "id": "cl-f0-t9", "title": "Comparar proveedores", "details": "AWS, Azure, Google Cloud y Oracle Cloud." }
+      ],
+      "project": { "title": "Cuenta segura", "description": "Crea tu cuenta de AWS, activa MFA en el usuario raíz y configura un presupuesto con alerta a US$5." }
+    },
+    {
+      "id": "cl-f1", "order": 1, "title": "Linux y redes",
+      "summary": "La base que más se nota cuando algo falla.",
+      "estimated_weeks": 2,
+      "topics": [
+        { "id": "cl-f1-t1", "title": "Archivos, permisos y usuarios", "details": "chmod, chown y sistema de archivos." },
+        { "id": "cl-f1-t2", "title": "Procesos, servicios y logs", "details": "systemd y journalctl." },
+        { "id": "cl-f1-t3", "title": "Paquetes y configuración", "details": "apt, dnf y variables de entorno." },
+        { "id": "cl-f1-t4", "title": "Bash", "details": "Scripts, pipes, grep, awk, sed y cron." },
+        { "id": "cl-f1-t5", "title": "SSH", "details": "Llaves, configuración y conexión segura." },
+        { "id": "cl-f1-t6", "title": "Diagnóstico de servidor", "details": "top, df, free, ss y curl." },
+        { "id": "cl-f1-t7", "title": "TCP/IP y puertos", "details": "Qué pasa al abrir una página; TCP y UDP." },
+        { "id": "cl-f1-t8", "title": "IP, subredes y CIDR", "details": "Ej. 10.0.1.0/24 = 256 direcciones." },
+        { "id": "cl-f1-t9", "title": "DNS", "details": "Registros A, CNAME, MX, TXT y resolución." },
+        { "id": "cl-f1-t10", "title": "HTTP, TLS y balanceo", "details": "HTTPS, certificados, NAT, firewalls, proxies y balanceadores." },
+        { "id": "cl-f1-t11", "title": "Herramientas de red", "details": "ping, traceroute, dig y nslookup." }
+      ],
+      "project": { "title": "Servidor web propio", "description": "Instala Nginx, sirve tu dominio con HTTPS, programa un respaldo con cron y documenta cada problema." }
+    },
+    {
+      "id": "cl-f2", "order": 2, "title": "Cuentas, IAM y acceso",
+      "summary": "Quién puede hacer qué; el origen de la mayoría de incidentes.",
+      "estimated_weeks": 1,
+      "topics": [
+        { "id": "cl-f2-t1", "title": "Usuario raíz", "details": "MFA y no usarlo en el día a día." },
+        { "id": "cl-f2-t2", "title": "Usuarios, grupos y roles", "details": "Credenciales temporales en vez de llaves fijas." },
+        { "id": "cl-f2-t3", "title": "Políticas IAM", "details": "Effect, Action, Resource, Condition y mínimo privilegio." },
+        { "id": "cl-f2-t4", "title": "Tipos de políticas", "details": "Administradas, propias, inline y permission boundaries." },
+        { "id": "cl-f2-t5", "title": "IAM Identity Center", "details": "Inicio de sesión con credenciales de corta duración." },
+        { "id": "cl-f2-t6", "title": "Organizations y SCP", "details": "Varias cuentas; unirse en plan gratis pasa a pago." },
+        { "id": "cl-f2-t7", "title": "AWS CLI y perfiles", "details": "Credenciales temporales con roles." },
+        { "id": "cl-f2-t8", "title": "CloudTrail", "details": "Registro de quién hizo qué." },
+        { "id": "cl-f2-t9", "title": "Identidad en otras nubes", "details": "Microsoft Entra ID y RBAC; Cloud IAM y cuentas de servicio." }
+      ],
+      "project": { "title": "Accesos de mínimo privilegio", "description": "Usuarios de lectura y administrador en Identity Center, CLI con perfiles y una política que solo lee un bucket." }
+    },
+    {
+      "id": "cl-f3", "order": 3, "title": "Cómputo: VMs, contenedores y serverless",
+      "summary": "Tres formas de correr código y cuándo usar cada una.",
+      "estimated_weeks": 2,
+      "topics": [
+        { "id": "cl-f3-t1", "title": "EC2", "details": "Tipos de instancia, AMIs, llaves, EBS y user data." },
+        { "id": "cl-f3-t2", "title": "Modelos de precio de EC2", "details": "Bajo demanda, Savings Plans, reservadas y Spot." },
+        { "id": "cl-f3-t3", "title": "Balanceo y autoescalado", "details": "ALB, NLB y grupos de autoescalado." },
+        { "id": "cl-f3-t4", "title": "Session Manager", "details": "Conectarse sin abrir SSH." },
+        { "id": "cl-f3-t5", "title": "Contenedores en AWS", "details": "ECR, ECS con Fargate, App Runner o Elastic Beanstalk." },
+        { "id": "cl-f3-t6", "title": "AWS Lambda", "details": "Disparadores, límites, arranque en frío, capas y variables." },
+        { "id": "cl-f3-t7", "title": "API Gateway", "details": "Exponer funciones como API." },
+        { "id": "cl-f3-t8", "title": "Elegir cómputo", "details": "Cuándo VM, contenedor o serverless; equivalencias en Azure y GCP." }
+      ],
+      "project": { "title": "Una API, tres despliegues", "description": "Despliega la misma API en EC2 con ALB, en ECS Fargate y en Lambda; compara costo, esfuerzo y latencia." }
+    },
+    {
+      "id": "cl-f4", "order": 4, "title": "Almacenamiento y bases de datos",
+      "summary": "Cada tipo de dato con su servicio, y respaldos que sí funcionan.",
+      "estimated_weeks": 2,
+      "topics": [
+        { "id": "cl-f4-t1", "title": "S3", "details": "Buckets, clases de almacenamiento, ciclo de vida y versionado." },
+        { "id": "cl-f4-t2", "title": "Seguridad en S3", "details": "Bloqueo de acceso público, políticas, cifrado y URLs prefirmadas." },
+        { "id": "cl-f4-t3", "title": "Sitios estáticos y CDN", "details": "S3 con CloudFront." },
+        { "id": "cl-f4-t4", "title": "EBS y EFS", "details": "Discos, snapshots y archivos compartidos." },
+        { "id": "cl-f4-t5", "title": "RDS y Aurora", "details": "Multi-AZ, réplicas de lectura y respaldos automáticos." },
+        { "id": "cl-f4-t6", "title": "DynamoDB", "details": "Claves de partición y ordenamiento, índices y diseño por consultas." },
+        { "id": "cl-f4-t7", "title": "ElastiCache", "details": "Redis o Valkey para caché." },
+        { "id": "cl-f4-t8", "title": "Elegir base de datos", "details": "Relacional, documento, clave-valor o caché." },
+        { "id": "cl-f4-t9", "title": "Respaldos, RPO y RTO", "details": "Snapshots, recuperación a un punto en el tiempo y AWS DMS." }
+      ],
+      "project": { "title": "App con datos", "description": "API con RDS y archivos en S3; programa respaldos, borra una tabla y restaura a un punto anterior." }
+    },
+    {
+      "id": "cl-f5", "order": 5, "title": "Redes en la nube",
+      "summary": "Qué se ve desde internet y qué no.",
+      "estimated_weeks": 2,
+      "topics": [
+        { "id": "cl-f5-t1", "title": "VPC y subredes", "details": "CIDR, subredes públicas y privadas en varias zonas." },
+        { "id": "cl-f5-t2", "title": "Rutas e internet", "details": "Tablas de rutas, Internet Gateway y NAT Gateway (y su costo)." },
+        { "id": "cl-f5-t3", "title": "Security Groups y NACLs", "details": "Con estado por recurso y sin estado por subred." },
+        { "id": "cl-f5-t4", "title": "VPC Endpoints", "details": "Llegar a servicios sin pasar por internet." },
+        { "id": "cl-f5-t5", "title": "Conectar redes", "details": "Peering, Transit Gateway, VPN y Direct Connect." },
+        { "id": "cl-f5-t6", "title": "Route 53", "details": "Dominios, health checks y políticas de enrutamiento." },
+        { "id": "cl-f5-t7", "title": "CloudFront y certificados", "details": "CDN, caché y AWS Certificate Manager." },
+        { "id": "cl-f5-t8", "title": "Diagnóstico de red", "details": "VPC Flow Logs y Reachability Analyzer." }
+      ],
+      "project": { "title": "VPC de tres capas", "description": "Diseña y dibuja una VPC de tres capas en dos zonas, mueve tu app y comprueba que la base no es alcanzable desde internet." }
+    },
+    {
+      "id": "cl-f6", "order": 6, "title": "Infraestructura como código",
+      "summary": "Desde aquí, nada se crea a mano en la consola.",
+      "estimated_weeks": 2,
+      "topics": [
+        { "id": "cl-f6-t1", "title": "Por qué IaC", "details": "Reproducible, revisable y fácil de destruir." },
+        { "id": "cl-f6-t2", "title": "Terraform y OpenTofu", "details": "OpenTofu MPL 2.0 en Linux Foundation; Terraform BSL de IBM; mismo lenguaje." },
+        { "id": "cl-f6-t3", "title": "Conceptos de Terraform", "details": "Providers, resources, data sources, variables, outputs y locals." },
+        { "id": "cl-f6-t4", "title": "Estado remoto", "details": "S3 con bloqueo; nunca editar a mano." },
+        { "id": "cl-f6-t5", "title": "Módulos y entornos", "details": "Módulos propios y del registry; dev y prod." },
+        { "id": "cl-f6-t6", "title": "Ciclo de trabajo", "details": "fmt, validate, plan, apply y destroy." },
+        { "id": "cl-f6-t7", "title": "Importar y drift", "details": "Recursos existentes y cambios fuera del código." },
+        { "id": "cl-f6-t8", "title": "CloudFormation y CDK", "details": "Herramientas nativas de AWS, para leerlas." },
+        { "id": "cl-f6-t9", "title": "Calidad de IaC", "details": "tflint, Checkov o Trivy." }
+      ],
+      "project": { "title": "Todo en código", "description": "Rehaz VPC, base y app con Terraform u OpenTofu, estado remoto, módulos y dos entornos; destruye y recrea con un comando." }
+    },
+    {
+      "id": "cl-f7", "order": 7, "title": "Contenedores y Kubernetes",
+      "summary": "El estándar para muchos contenedores; aprenderlo en local antes de pagar.",
+      "estimated_weeks": 3,
+      "topics": [
+        { "id": "cl-f7-t1", "title": "Dockerfile eficiente", "details": "Imágenes pequeñas, multi-stage y usuario sin privilegios." },
+        { "id": "cl-f7-t2", "title": "Docker compose y escaneo", "details": "Entornos locales y Trivy." },
+        { "id": "cl-f7-t3", "title": "Arquitectura de Kubernetes", "details": "Plano de control, nodos y kubectl." },
+        { "id": "cl-f7-t4", "title": "Objetos básicos", "details": "Pods, Deployments, Services y Namespaces." },
+        { "id": "cl-f7-t5", "title": "Configuración", "details": "ConfigMaps y Secrets." },
+        { "id": "cl-f7-t6", "title": "Salud y escala", "details": "Probes, requests, limits y HPA." },
+        { "id": "cl-f7-t7", "title": "Tráfico y almacenamiento", "details": "Ingress o Gateway API y volúmenes persistentes." },
+        { "id": "cl-f7-t8", "title": "Helm y Kustomize", "details": "Empaquetado y varios entornos." },
+        { "id": "cl-f7-t9", "title": "Kubernetes local", "details": "kind o minikube." },
+        { "id": "cl-f7-t10", "title": "Amazon EKS", "details": "Grupos administrados, Karpenter o Auto Mode; AKS y GKE." }
+      ],
+      "project": { "title": "App en Kubernetes", "description": "Helm chart con Ingress, probes y autoescalado en kind y luego en EKS con Terraform; mide el costo y destruye." }
+    },
+    {
+      "id": "cl-f8", "order": 8, "title": "DevOps y CI/CD",
+      "summary": "Cada cambio se prueba y se despliega solo.",
+      "estimated_weeks": 2,
+      "topics": [
+        { "id": "cl-f8-t1", "title": "Integración continua", "details": "Lint, pruebas e imágenes en cada pull request." },
+        { "id": "cl-f8-t2", "title": "GitHub Actions", "details": "Workflows, jobs, matrices, caché, secretos y entornos con aprobación." },
+        { "id": "cl-f8-t3", "title": "OIDC hacia AWS", "details": "Credenciales temporales sin llaves guardadas." },
+        { "id": "cl-f8-t4", "title": "Pipeline de infraestructura", "details": "terraform plan en el pull request y apply al aprobar." },
+        { "id": "cl-f8-t5", "title": "Estrategias de despliegue", "details": "Rolling, blue/green, canary y reversión." },
+        { "id": "cl-f8-t6", "title": "GitOps con Argo CD", "details": "El repositorio como fuente de verdad." },
+        { "id": "cl-f8-t7", "title": "Versionado y promoción", "details": "Imágenes versionadas y paso de dev a prod." },
+        { "id": "cl-f8-t8", "title": "Seguridad en el pipeline", "details": "Escaneo de dependencias, imágenes e infraestructura." },
+        { "id": "cl-f8-t9", "title": "Otras herramientas", "details": "GitLab CI, Azure DevOps y CodePipeline." }
+      ],
+      "project": { "title": "Despliegue automático", "description": "Pipeline que prueba, construye, sube a ECR, aplica Terraform y despliega con OIDC y aprobación manual a producción." }
+    },
+    {
+      "id": "cl-f9", "order": 9, "title": "Observabilidad y confiabilidad",
+      "summary": "Saber qué pasa antes que los usuarios y recuperarse bien.",
+      "estimated_weeks": 1,
+      "topics": [
+        { "id": "cl-f9-t1", "title": "Métricas, logs y trazas", "details": "Los tres pilares de la observabilidad." },
+        { "id": "cl-f9-t2", "title": "CloudWatch", "details": "Métricas, Logs Insights, alarmas y tableros." },
+        { "id": "cl-f9-t3", "title": "Trazas distribuidas", "details": "OpenTelemetry y X-Ray." },
+        { "id": "cl-f9-t4", "title": "Stack abierto", "details": "Prometheus, Grafana y Loki." },
+        { "id": "cl-f9-t5", "title": "Alertas útiles", "details": "Por síntomas del usuario, sin cansancio de alertas." },
+        { "id": "cl-f9-t6", "title": "SLI, SLO y presupuesto de errores", "details": "Medir la disponibilidad prometida." },
+        { "id": "cl-f9-t7", "title": "Alta disponibilidad y desastres", "details": "Varias zonas, estrategias de DR, AWS Backup, RPO y RTO." },
+        { "id": "cl-f9-t8", "title": "Gestión de incidentes", "details": "Runbooks y postmortems sin culpables." }
+      ],
+      "project": { "title": "Sistema observable", "description": "Tablero de latencia, errores y tráfico, alarma, trazas con OpenTelemetry, runbook y postmortem de una caída provocada." }
+    },
+    {
+      "id": "cl-f10", "order": 10, "title": "Seguridad en la nube",
+      "summary": "La mayoría de brechas son configuraciones tuyas, no del proveedor.",
+      "estimated_weeks": 2,
+      "topics": [
+        { "id": "cl-f10-t1", "title": "Cifrado y KMS", "details": "En reposo y en tránsito." },
+        { "id": "cl-f10-t2", "title": "Secretos", "details": "Secrets Manager y Parameter Store con rotación." },
+        { "id": "cl-f10-t3", "title": "Detección", "details": "GuardDuty, Security Hub, AWS Config e Inspector." },
+        { "id": "cl-f10-t4", "title": "Protección de aplicaciones", "details": "AWS WAF y AWS Shield." },
+        { "id": "cl-f10-t5", "title": "Seguridad de red", "details": "Subredes privadas, Security Groups mínimos y sin SSH abierto." },
+        { "id": "cl-f10-t6", "title": "Gobierno multicuenta", "details": "Organizations, SCP y cuenta de auditoría." },
+        { "id": "cl-f10-t7", "title": "Contenedores y cadena de suministro", "details": "Imágenes firmadas y escaneadas." },
+        { "id": "cl-f10-t8", "title": "Cumplimiento y datos personales", "details": "Ley 1581 y elección de región." },
+        { "id": "cl-f10-t9", "title": "Respuesta a incidentes", "details": "Qué hacer si se filtra una llave de acceso." }
+      ],
+      "project": { "title": "Cuenta endurecida", "description": "Corrige hallazgos críticos de Security Hub, mueve secretos a Secrets Manager, cifra con KMS y escribe el procedimiento ante una llave filtrada." }
+    },
+    {
+      "id": "cl-f11", "order": 11, "title": "Arquitectura, eventos y costos",
+      "summary": "Diseñar sistemas completos y saber cuánto cuestan.",
+      "estimated_weeks": 2,
+      "topics": [
+        { "id": "cl-f11-t1", "title": "AWS Well-Architected", "details": "Seis pilares: operación, seguridad, confiabilidad, rendimiento, costos y sostenibilidad." },
+        { "id": "cl-f11-t2", "title": "Monolito, microservicios y serverless", "details": "Cuándo conviene cada uno." },
+        { "id": "cl-f11-t3", "title": "Mensajería", "details": "SQS, SNS y EventBridge." },
+        { "id": "cl-f11-t4", "title": "Step Functions", "details": "Flujos de varios pasos." },
+        { "id": "cl-f11-t5", "title": "Caché en capas", "details": "CloudFront, ElastiCache y en la app." },
+        { "id": "cl-f11-t6", "title": "Patrones comunes", "details": "API + base, procesar archivos de S3, tareas programadas, webhooks con cola." },
+        { "id": "cl-f11-t7", "title": "Diagramas de arquitectura", "details": "Documentar y explicar en entrevistas." },
+        { "id": "cl-f11-t8", "title": "FinOps", "details": "Tags, rightsizing, Savings Plans, Spot y apagado programado." },
+        { "id": "cl-f11-t9", "title": "Costos ocultos y estimación", "details": "Transferencia, NAT, IPs públicas, logs y snapshots; Pricing Calculator." }
+      ],
+      "project": { "title": "Flujo orientado a eventos", "description": "S3 dispara Lambda, guarda en DynamoDB, notifica y usa cola de reintentos; revísalo contra los seis pilares." }
+    },
+    {
+      "id": "cl-f12", "order": 12, "title": "Datos, IA y multinube",
+      "summary": "El mapa para moverse entre proveedores y usar IA en la nube.",
+      "estimated_weeks": 1,
+      "topics": [
+        { "id": "cl-f12-t1", "title": "Datos en AWS", "details": "Athena, Glue, Redshift y Kinesis." },
+        { "id": "cl-f12-t2", "title": "IA en AWS", "details": "Bedrock, bases de conocimiento, AgentCore y SageMaker AI." },
+        { "id": "cl-f12-t3", "title": "IA en otras nubes", "details": "Microsoft Foundry y Gemini Enterprise Agent Platform (antes Vertex AI)." },
+        { "id": "cl-f12-t4", "title": "Costos y límites de IA", "details": "Precio por token, cuotas por región y dónde se procesan los datos." },
+        { "id": "cl-f12-t5", "title": "Multinube", "details": "Por qué las empresas usan varias nubes y su complejidad." },
+        { "id": "cl-f12-t6", "title": "Equivalencias entre nubes", "details": "Identidad, cómputo, contenedores, almacenamiento, bases, redes, monitoreo e IA." },
+        { "id": "cl-f12-t7", "title": "Herramientas portables", "details": "Terraform u OpenTofu, Kubernetes y OpenTelemetry." }
+      ],
+      "project": { "title": "IA y segunda nube", "description": "Asistente con Bedrock sobre documentos en S3, y la misma API desplegada en Azure Container Apps o Cloud Run con Terraform." }
+    },
+    {
+      "id": "cl-f13", "order": 13, "title": "Carrera y certificaciones",
+      "summary": "Certificación más proyectos reales para pasar filtros y entrevistas.",
+      "estimated_weeks": 1,
+      "topics": [
+        { "id": "cl-f13-t1", "title": "Roles de cloud", "details": "Cloud engineer, DevOps, platform engineer, SRE y arquitecto." },
+        { "id": "cl-f13-t2", "title": "Puente desde backend o datos", "details": "Cómo usar tu perfil actual para entrar a cloud." },
+        { "id": "cl-f13-t3", "title": "Certificaciones de AWS", "details": "CLF-C02, AIF-C01, SAA-C03, Developer, CloudOps (SOA-C03), SAP-C03. Verificar versión vigente." },
+        { "id": "cl-f13-t4", "title": "Otras certificaciones", "details": "CKA o CKAD, Terraform Associate, AZ-900/AZ-104 o Google ACE." },
+        { "id": "cl-f13-t5", "title": "Portafolio cloud", "details": "Repo con Terraform, pipeline, diagrama, costos y postmortem." },
+        { "id": "cl-f13-t6", "title": "Entrevistas de cloud", "details": "Diseño de alta disponibilidad, elección de servicios, rendimiento y seguridad." },
+        { "id": "cl-f13-t7", "title": "Inglés técnico", "details": "Material y vacantes remotas en inglés." }
+      ],
+      "project": { "title": "Certificado y portafolio", "description": "Aprueba Solutions Architect Associate, publica el repositorio con diagrama y haz dos entrevistas de práctica de diseño." }
+    }
+  ],
+  "final_checklist": [
+    { "id": "cl-c1", "text": "Mi cuenta tiene MFA, presupuesto con alertas y no uso el usuario raíz." },
+    { "id": "cl-c2", "text": "Administro un servidor Linux por SSH y diagnostico problemas de red con dig, curl y traceroute." },
+    { "id": "cl-c3", "text": "Escribo políticas IAM de mínimo privilegio y uso roles en vez de llaves fijas." },
+    { "id": "cl-c4", "text": "Despliego una API en EC2, en contenedores y como Lambda, y sé cuándo usar cada uno." },
+    { "id": "cl-c5", "text": "Uso S3 y RDS con respaldos, y restauré una base a un punto anterior." },
+    { "id": "cl-c6", "text": "Diseño una VPC de tres capas en dos zonas y la explico con un diagrama." },
+    { "id": "cl-c7", "text": "Toda mi infraestructura está en Terraform u OpenTofu con estado remoto y módulos." },
+    { "id": "cl-c8", "text": "Despliego una app en Kubernetes con Helm, probes y autoescalado." },
+    { "id": "cl-c9", "text": "Tengo un pipeline de CI/CD con OIDC que prueba, construye y despliega solo." },
+    { "id": "cl-c10", "text": "Tengo tableros, alarmas y trazas, y escribí un postmortem." },
+    { "id": "cl-c11", "text": "Los secretos están en Secrets Manager, los datos cifrados con KMS y pasé la revisión de Security Hub." },
+    { "id": "cl-c12", "text": "Construí un flujo orientado a eventos y lo revisé contra los seis pilares de Well-Architected." },
+    { "id": "cl-c13", "text": "Integré un servicio de IA de la nube y desplegué la misma app en una segunda nube." },
+    { "id": "cl-c14", "text": "Aprobé o agendé Solutions Architect Associate." },
+    { "id": "cl-c15", "text": "Hice 2 entrevistas de práctica de diseño de sistemas." }
+  ]
+}

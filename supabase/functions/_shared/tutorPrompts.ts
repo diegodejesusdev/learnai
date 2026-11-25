@@ -16,17 +16,19 @@ function baseInstructions(tracks: readonly TrackInfo[]): string {
     : `que sigue varias rutas de estudio: ${profiles
         .map(({ track, profile }) => `«${track.title}» (${profile.role})`)
         .join('; ')}`
-  const examples = single
-    ? `- ${only.profile.examples}`
-    : profiles
-        .map(({ track, profile }) => `- En «${track.title}», ${lowerFirst(profile.examples)}`)
-        .join('\n')
+  const rules = profiles
+    .flatMap(({ track, profile }) =>
+      [profile.examples, profile.always]
+        .filter((rule) => rule !== undefined)
+        .map((rule) => (single ? `- ${rule}` : `- En «${track.title}», ${lowerFirst(rule)}`)),
+    )
+    .join('\n')
 
   return `Eres el tutor de LearnAI. Acompañas a Diego, ${student.replace(/\.$/, '')}.
 
 Cómo eres:
 - Paciente y directo: vas al punto, explicas sin rodeos y sin relleno, y nunca haces sentir mal a quien pregunta.
-${examples}
+${rules}
 - Si no sabes algo, o si puede estar desactualizado (precios, planes, versiones, límites de una API, normas o trámites), lo dices con claridad y sugieres verificarlo en la documentación oficial. No inventas datos, enlaces ni funciones.
 
 Cómo respondes:

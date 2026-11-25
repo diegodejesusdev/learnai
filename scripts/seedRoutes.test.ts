@@ -33,13 +33,13 @@ function memoryStore(failOn?: ContentTable) {
 const quiet = { info: () => {}, warn: () => {} }
 
 describe('seedRoutes', () => {
-  it('carga las dos rutas', async () => {
+  it('carga las tres rutas', async () => {
     const { store, count } = memoryStore()
     await seedRoutes(store, routes, quiet)
-    expect(count('tracks')).toBe(2)
-    expect(count('phases')).toBe(22)
-    expect(count('topics')).toBe(210)
-    expect(count('checklist_items')).toBe(29)
+    expect(count('tracks')).toBe(3)
+    expect(count('phases')).toBe(36)
+    expect(count('topics')).toBe(332)
+    expect(count('checklist_items')).toBe(44)
   })
 
   it('es idempotente: correrlo otra vez deja lo mismo', async () => {
@@ -56,6 +56,19 @@ describe('seedRoutes', () => {
     const before = structuredClone([...(tables.get('topics')?.values() ?? [])])
     await seedRoutes(store, routes, quiet)
     expect([...(tables.get('topics')?.values() ?? [])].slice(0, 100)).toEqual(before)
+  })
+
+  it('agregar Cloud no cambia nada de las otras dos', async () => {
+    const { store, tables } = memoryStore()
+    await seedRoutes(store, [auto, data], quiet)
+    const before = structuredClone(tables)
+    await seedRoutes(store, routes, quiet)
+    for (const [table, rows] of before) {
+      for (const [id, row] of rows) expect(tables.get(table)?.get(id)).toEqual(row)
+    }
+    const added = [...(tables.get('topics')?.keys() ?? [])].slice(before.get('topics')?.size)
+    expect(added).toHaveLength(122)
+    expect(added.filter((id) => !id.startsWith('cl-'))).toEqual([])
   })
 
   it('escribe primero las rutas y las fases, y solo tablas de contenido', async () => {
@@ -107,7 +120,7 @@ describe('seedRoutes', () => {
     await seedRoutes(store, automation, { ...quiet, warn: (text) => warnings.push(text) })
     expect(warnings.join('\n')).toContain('tracks: en la base hay ids que ya no están')
     expect(warnings.join('\n')).toContain('ingenieria-datos')
-    expect(count('topics')).toBe(210)
+    expect(count('topics')).toBe(332)
   })
 
   it('si una tabla falla, se detiene con el error', async () => {

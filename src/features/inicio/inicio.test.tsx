@@ -78,7 +78,7 @@ describe('Inicio', () => {
     )
   })
 
-  describe('con dos rutas', () => {
+  describe('con varias rutas', () => {
     const NOW = '2026-11-20T15:00:00.000Z'
     const inData = { ...defaultSettings, active_track_id: 'ingenieria-datos' }
 
@@ -100,6 +100,22 @@ describe('Inicio', () => {
       // Con texto, no solo con color: cuál es la activa.
       expect(automation).toHaveTextContent('Activa')
       expect(data).not.toHaveTextContent('Activa')
+      const cloud = screen.getByRole('link', { name: /Cloud/ })
+      expect(cloud).toHaveTextContent('0 de 122 temas hechos')
+      expect(cloud).toHaveAttribute('href', '/ruta?ruta=cloud')
+      expect(cloud).not.toHaveTextContent('Activa')
+    })
+
+    it('con Cloud activa, propone su siguiente tema', async () => {
+      vi.mocked(fetchUserSettings).mockResolvedValue({
+        ...defaultSettings,
+        active_track_id: 'cloud',
+      })
+      renderApp('/')
+      const link = await screen.findByRole('link', { name: 'Empezar a estudiar' })
+      expect(link).toHaveAttribute('href', '/estudiar?tema=cl-f0-t1')
+      expect(screen.getByText(/^Siguiente tema · Cloud · Fase 0/)).toBeInTheDocument()
+      expect(screen.getByRole('link', { name: /122 temas hechos/ })).toHaveTextContent('Activa')
     })
 
     it('el siguiente tema sale de la ruta activa y dice cuál es', async () => {

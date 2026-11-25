@@ -77,7 +77,7 @@ describe('empezar una sesión', () => {
   })
 })
 
-describe('con dos rutas', () => {
+describe('con varias rutas', () => {
   const inData = { ...defaultSettings, active_track_id: 'ingenieria-datos' }
 
   it('propone el siguiente tema de la ruta activa', async () => {
@@ -95,6 +95,7 @@ describe('con dos rutas', () => {
     expect(groups.map((group) => group.getAttribute('aria-label'))).toEqual([
       'Resultados en Ingeniería de datos',
       'Resultados en Automatización para negocios',
+      'Resultados en Cloud',
     ])
     expect(
       within(groups[0] as HTMLElement).getByRole('button', { name: /^APIs desde Python/ }),
@@ -112,6 +113,19 @@ describe('con dos rutas', () => {
       projectPhaseId: 'de-f1',
     })
     expect(await screen.findByText('Ingeniería de datos · Proyecto · Fase 1')).toBeInTheDocument()
+  })
+
+  it('un tema de Cloud se encuentra y se puede empezar', async () => {
+    renderApp('/estudiar')
+    await userEvent.type(await screen.findByLabelText('Cambiar de tema'), 'cidr')
+    const cloud = await screen.findByRole('list', { name: 'Resultados en Cloud' })
+    await userEvent.click(within(cloud).getByRole('button', { name: /^IP, subredes y CIDR/ }))
+    await userEvent.click(screen.getByRole('button', { name: 'Iniciar' }))
+    await waitFor(() => expect(insertActiveTimer).toHaveBeenCalled())
+    expect(vi.mocked(insertActiveTimer).mock.calls[0]?.[0]).toMatchObject({
+      topicId: 'cl-f1-t8',
+      projectPhaseId: null,
+    })
   })
 
   it('el enlace de un tema de la otra ruta manda sobre la activa', async () => {

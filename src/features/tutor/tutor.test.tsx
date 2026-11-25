@@ -138,6 +138,21 @@ describe('elegir ruta', () => {
     expect(screen.queryByText(/tienda de barrio/)).not.toBeInTheDocument()
   })
 
+  it('Cloud: sus 122 temas, sus 14 proyectos y sus ejemplos', async () => {
+    renderApp('/tutor?tema=cl-f2-t3')
+    const track = await screen.findByLabelText('Ruta')
+    expect(track).toHaveValue('cloud')
+    expect(within(track).getAllByRole('option')).toHaveLength(3)
+    expect(within(screen.getByLabelText('Tema')).getAllByRole('option')).toHaveLength(122)
+    expect(
+      await screen.findByRole('button', { name: 'Compáralo en AWS, Azure y Google Cloud' }),
+    ).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('radio', { name: 'Proyecto' }))
+    const projects = await screen.findByRole('combobox', { name: 'Proyecto' })
+    expect(within(projects).getAllByRole('option')).toHaveLength(14)
+    expect(screen.getByPlaceholderText(/Terraform, YAML, políticas IAM/)).toBeInTheDocument()
+  })
+
   it('«Hoy» no pide ruta: puede proponer de cualquiera', async () => {
     renderApp('/tutor?modo=hoy')
     await screen.findByRole('group', { name: 'Tiempo disponible' })
@@ -392,5 +407,7 @@ describe('panel del PC', () => {
       '/ruta/tema/f0-t2',
     )
     expect(panel.getByRole('link', { name: 'Roles del mundo de datos' })).toBeInTheDocument()
+    expect(panel.getByText('0 de 122 temas')).toBeInTheDocument()
+    expect(panel.getByRole('link', { name: 'Qué es la nube' })).toBeInTheDocument()
   })
 })

@@ -44,7 +44,7 @@ export function PhaseSection({ tracks }: { tracks: readonly Track[] }) {
     ))
     if (shown.length > 1) {
       content = (
-        <div className="flex flex-col gap-5 wide:grid wide:grid-cols-2 wide:gap-x-14">
+        <div className="flex flex-col gap-5 wide:grid wide:grid-cols-[repeat(auto-fit,minmax(18rem,1fr))] wide:gap-x-14">
           {content}
         </div>
       )

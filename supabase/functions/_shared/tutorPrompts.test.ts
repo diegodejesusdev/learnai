@@ -3,6 +3,7 @@ import { buildSystemPrompt } from './tutorPrompts.ts'
 
 const automation = { id: 'automatizacion', title: 'Automatización para negocios', goal: 'Vender' }
 const data = { id: 'ingenieria-datos', title: 'Ingeniería de datos', goal: 'Empleo' }
+const cloud = { id: 'cloud', title: 'Cloud', goal: 'Operar en la nube' }
 
 describe('prompt de sistema', () => {
   it('lleva las instrucciones base, las del modo y el contexto al final', () => {
@@ -14,7 +15,7 @@ describe('prompt de sistema', () => {
   })
 
   it('pide verificar lo que puede estar desactualizado, en cualquier ruta', () => {
-    for (const tracks of [[automation], [data], [automation, data]]) {
+    for (const tracks of [[automation], [data], [cloud], [automation, data, cloud]]) {
       expect(buildSystemPrompt('explain', tracks, 'ctx')).toContain('documentación oficial')
     }
   })
@@ -60,10 +61,37 @@ describe('se adapta a la ruta', () => {
     expect(prompt).toContain('Ley 1581')
   })
 
-  it('«Hoy» conoce las dos rutas y puede proponer de cualquiera', () => {
-    const prompt = buildSystemPrompt('daily_plan', [automation, data], 'ctx')
+  it('cloud, en todos los modos: AWS, equivalencias, costos y borrar recursos', () => {
+    for (const mode of ['explain', 'quiz', 'project_review', 'daily_plan'] as const) {
+      const prompt = buildSystemPrompt(mode, [cloud], 'ctx')
+      expect(prompt).toContain('AWS como nube principal')
+      expect(prompt).toContain('equivalencias en Azure y Google Cloud')
+      expect(prompt).toContain('Recuerdas SIEMPRE los costos')
+      expect(prompt).toContain('cómo borrar')
+      expect(prompt).not.toMatch(/tienda de barrio|pequeños negocios|datos abiertos/)
+    }
+  })
+
+  it('el recordatorio de costos es solo de cloud', () => {
+    for (const tracks of [[automation], [data], [automation, data]]) {
+      expect(buildSystemPrompt('explain', tracks, 'ctx')).not.toMatch(/Recuerdas SIEMPRE|AWS/i)
+    }
+  })
+
+  it('la revisión de un proyecto de cloud mira permisos, exposición y lo que sigue cobrando', () => {
+    const prompt = buildSystemPrompt('project_review', [cloud], 'ctx')
+    expect(prompt).toMatch(/permisos más amplios/)
+    expect(prompt).toMatch(/recursos sin borrar/)
+    expect(prompt).toContain('Ley 1581')
+  })
+
+  it('«Hoy» conoce las tres rutas y puede proponer de cualquiera', () => {
+    const prompt = buildSystemPrompt('daily_plan', [automation, data, cloud], 'ctx')
     expect(prompt).toContain('«Automatización para negocios»')
     expect(prompt).toContain('«Ingeniería de datos»')
+    // Lo de Cloud queda atado a Cloud: no cambia cómo habla de las otras dos.
+    expect(prompt).toContain('- En «Cloud», trabajas con AWS como nube principal')
+    expect(prompt).toContain('- En «Cloud», recuerdas SIEMPRE los costos')
     expect(prompt).toContain('Puedes proponer temas de cualquiera de sus rutas')
     expect(prompt).toContain('Di siempre de qué ruta es cada bloque')
   })

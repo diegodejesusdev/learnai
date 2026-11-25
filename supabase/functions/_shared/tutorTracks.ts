@@ -12,6 +12,8 @@ export interface TrackProfile {
   role: string
   /** Qué ejemplos usa. */
   examples: string
+  /** Lo que recuerda en todas sus respuestas, en cualquier modo. */
+  always?: string
   /** Explicar: con qué ejemplo. */
   explainWith: string
   /** Quiz: dónde se aplican las preguntas. */
@@ -52,6 +54,24 @@ const profiles: Partial<Record<string, TrackProfile>> = {
       starter: 'Dame un ejemplo con datos abiertos de Colombia',
       paste: 'Pega tu código (SQL, Python, dbt…) o el README.',
       quizFocus: 'Enfoque opcional: ventanas, particiones…',
+    },
+  },
+  cloud: {
+    role: 'estudia cómo diseñar, desplegar y operar aplicaciones y datos en la nube, con AWS como nube principal',
+    examples:
+      'Trabajas con AWS como nube principal. Al presentar un servicio o un concepto de AWS das sus equivalencias en Azure y Google Cloud, con la diferencia que importe; si no hay un equivalente directo, lo dices. Usas ejemplos de una API, un sitio o un flujo de datos de una empresa en Colombia. Muestras Terraform (vale también para OpenTofu), AWS CLI, políticas IAM o YAML cuando aclara. Los montos van en dólares (US$), como los cobra la nube.',
+    always:
+      'Recuerdas SIEMPRE los costos y la limpieza: qué se cobra (por tiempo, por GB guardado o por GB transferido), si hay una opción gratis o local, qué sigue cobrando aunque no se use (NAT Gateway, balanceadores, IP públicas, discos, snapshots, bases de datos) y cómo borrar lo creado (terraform destroy o los pasos en la consola o la CLI) y comprobar que no quedó nada. Si algo crea recursos, propones tener antes una alerta de presupuesto. Va corto y antes de la pregunta o del cierre; si nada crea recursos, basta una línea. En un quiz va dentro de las preguntas o de las explicaciones, y en un plan de estudio, como los últimos minutos del bloque.',
+    explainWith: 'un ejemplo en AWS, sus equivalencias en Azure y Google Cloud',
+    applyIn:
+      'en un caso real en AWS; si el tema lo permite, una sobre su costo o sobre borrar recursos y otra sobre su equivalente en Azure o Google Cloud',
+    pointTo: 'con el recurso, la política, la línea de Terraform o el paso exacto cuando se pueda',
+    risks:
+      'permisos más amplios de lo necesario, recursos públicos o SSH abierto, llaves fijas o secretos en el código, datos sin cifrar o sin respaldo, una sola zona de disponibilidad, datos personales (Ley 1581 de 2012) y su región, costos que siguen corriendo y recursos sin borrar',
+    ui: {
+      starter: 'Compáralo en AWS, Azure y Google Cloud',
+      paste: 'Pega tu código (Terraform, YAML, políticas IAM…) o el README.',
+      quizFocus: 'Enfoque opcional: IAM, costos…',
     },
   },
 }

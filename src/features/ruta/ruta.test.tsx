@@ -2,7 +2,7 @@ import { onlineManager } from '@tanstack/react-query'
 import { act, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
-import { automationTrack, dataTrack, phases } from '@/data/curriculum'
+import { automationTrack, cloudTrack, dataTrack, phases } from '@/data/curriculum'
 import {
   defaultSettings,
   fetchUserSettings,
@@ -119,15 +119,18 @@ describe('página Ruta', () => {
 describe('elegir ruta', () => {
   const inData = { ...defaultSettings, active_track_id: 'ingenieria-datos' }
 
-  it('abre en automatización, con las dos rutas para elegir', async () => {
+  it('abre en automatización, con las tres rutas para elegir', async () => {
     renderApp('/ruta')
     const tabs = await screen.findAllByRole('tab')
     expect(tabs.map((tab) => tab.textContent)).toEqual([
       'Automatización para negocios',
       'Ingeniería de datos',
+      'Cloud',
     ])
     expect(tabs[0]).toHaveAttribute('aria-selected', 'true')
-    expect(screen.getByRole('combobox', { name: 'Ruta' })).toHaveValue('automatizacion')
+    const menu = screen.getByRole('combobox', { name: 'Ruta' })
+    expect(menu).toHaveValue('automatizacion')
+    expect(within(menu).getAllByRole('option')).toHaveLength(3)
   })
 
   it('la pestaña cambia de ruta y la recuerda en la cuenta', async () => {
@@ -144,6 +147,28 @@ describe('elegir ruta', () => {
     expect(vi.mocked(saveUserSettings).mock.calls[0]?.[0]).toEqual({
       active_track_id: 'ingenieria-datos',
     })
+  })
+
+  it('Cloud muestra sus 14 fases, sus 122 temas y su checklist de 15', async () => {
+    renderApp('/ruta')
+    await userEvent.click(await screen.findByRole('tab', { name: 'Cloud' }))
+    expect(await screen.findByText('Progreso total · 0 de 122 temas')).toBeInTheDocument()
+    expect(screen.getByText('Proyectos:').parentElement).toHaveTextContent('Proyectos: 0/14')
+    expect(screen.getByText('14 fases')).toBeInTheDocument()
+    expect(screen.getByText(cloudTrack.goal)).toBeInTheDocument()
+    expect(screen.getByText('0 de 15 logros')).toBeInTheDocument()
+    const boxes = screen.getAllByRole('checkbox')
+    expect(boxes).toHaveLength(15)
+    // Marcar un logro de Cloud guarda el suyo y no toca la checklist de las otras rutas.
+    await userEvent.click(
+      screen.getByRole('checkbox', { name: /^Mi cuenta tiene MFA, presupuesto con alertas/ }),
+    )
+    expect(saveChecklistItem).toHaveBeenCalledWith('cl-c1', true)
+    expect(await screen.findByText('1 de 15 logros')).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('tab', { name: 'Automatización para negocios' }))
+    expect(await screen.findByText('1 de 14 logros')).toBeInTheDocument()
+    await userEvent.click(screen.getByRole('tab', { name: 'Ingeniería de datos' }))
+    expect(await screen.findByText('0 de 15 logros')).toBeInTheDocument()
   })
 
   it('el menú desplegable del móvil hace lo mismo', async () => {
@@ -168,6 +193,11 @@ describe('elegir ruta', () => {
     const data = screen.getByRole('tab', { name: 'Ingeniería de datos' })
     await waitFor(() => expect(data).toHaveAttribute('aria-selected', 'true'))
     expect(data).toHaveFocus()
+    // Con tres: la última, y de ahí se vuelve a la primera.
+    await userEvent.keyboard('{End}')
+    expect(screen.getByRole('tab', { name: 'Cloud' })).toHaveFocus()
+    await userEvent.keyboard('{ArrowRight}')
+    expect(first).toHaveFocus()
   })
 
   it('abre en la última elegida, sin volver a guardarla', async () => {

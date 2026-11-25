@@ -28,7 +28,7 @@ export function TargetSearch({ targets, selected, onSelect }: TargetSearchProps)
           <input
             id={searchId}
             type="search"
-            placeholder="Buscar por nombre: webhooks, SQL, n8n…"
+            placeholder="Buscar por nombre: webhooks, SQL, VPC…"
             autoComplete="off"
             value={query}
             onChange={(event) => setQuery(event.target.value)}

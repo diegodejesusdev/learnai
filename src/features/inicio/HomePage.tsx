@@ -75,7 +75,7 @@ function HomeContent({ roadmap, progress, activeTrack, latest, summary }: HomeCo
         </Link>
       </div>
       <Section title="Tus rutas">
-        <div className="divide-y divide-border border-y border-border wide:grid wide:grid-cols-2 wide:items-end wide:gap-x-12 wide:divide-y-0 3xl:gap-x-16">
+        <div className="divide-y divide-border border-y border-border wide:grid wide:grid-cols-[repeat(auto-fit,minmax(18rem,1fr))] wide:items-end wide:gap-x-12 wide:divide-y-0 3xl:gap-x-16">
           {roadmap.tracks.map((track) => (
             <TrackProgressCard
               key={track.id}

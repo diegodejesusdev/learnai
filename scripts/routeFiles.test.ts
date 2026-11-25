@@ -32,7 +32,11 @@ describe('loadRoutes', () => {
 
   it('carga todas las rutas de la carpeta, por orden', async () => {
     const routes = await loadRoutes(ROUTES_DIR)
-    expect(routes.map((route) => route.track.id)).toEqual(['automatizacion', 'ingenieria-datos'])
+    expect(routes.map((route) => route.track.id)).toEqual([
+      'automatizacion',
+      'ingenieria-datos',
+      'cloud',
+    ])
   })
 
   it('agregar una ruta es agregar un archivo', async () => {

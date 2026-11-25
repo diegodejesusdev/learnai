@@ -8,6 +8,7 @@ LearnAI es una app web personal para estudiar varias rutas (`src/data/routes/`, 
 |---|---|---|
 | Automatización para negocios (`automatizacion`) | 9 fases (f0–f8), 100 temas, 14 ítems | ~10 h/semana durante ~20 semanas |
 | Ingeniería de datos (`ingenieria-datos`) | 13 fases (de-f0–de-f12), 110 temas, 15 ítems | ~10 h/semana durante ~26 semanas |
+| Cloud (`cloud`) | 14 fases (cl-f0–cl-f13), 122 temas, 15 ítems | ~10 h/semana durante ~24 semanas |
 
 La racha y la meta semanal cuentan todas las rutas juntas.
 
@@ -302,6 +303,7 @@ Todos los días y semanas se calculan en hora de Bogotá. Una sesión cuenta en 
 - **Se adapta a la ruta** (`_shared/tutorTracks.ts`): quién es el estudiante, qué ejemplos usar y qué riesgos mirar en un proyecto.
   - Automatización: pequeños negocios colombianos, con montos en pesos.
   - Ingeniería de datos: datos de Colombia, con SQL o Python cuando aclara; idempotencia, calidad y costos.
+  - Cloud: AWS como nube principal, con equivalencias en Azure y Google Cloud y montos en dólares. En todos los modos recuerda los costos, lo que sigue cobrando y cómo borrar los recursos (`always`); va antes de la pregunta final, dentro del quiz o como los últimos minutos de un plan.
   - Otra ruta: un perfil genérico con su título y su meta.
 - **«¿Qué estudio hoy?»** conoce todas las rutas: propone primero los temas en curso de cualquiera, luego el siguiente de la activa, y dice de qué ruta es cada bloque.
 - Si no sabe algo o puede estar desactualizado (precios, planes, versiones, límites, normas), lo dice y sugiere verificarlo en la documentación oficial.

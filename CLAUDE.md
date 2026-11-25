@@ -3,6 +3,7 @@
 App web personal para seguir varias rutas de estudio, definidas en `src/data/routes/` (un JSON por ruta):
 - **Automatización para negocios** (`curriculum.json`): 9 fases, 100 temas, 9 proyectos y una checklist final de 14 ítems.
 - **Ingeniería de datos** (`data-engineering.json`): 13 fases, 110 temas, 13 proyectos y una checklist final de 15 ítems. Sus ids empiezan por `de-`.
+- **Cloud** (`cloud.json`): 14 fases, 122 temas, 14 proyectos y una checklist final de 15 ítems. Sus ids empiezan por `cl-`.
 
 La usa una sola persona, en PC y en móvil. Toda la interfaz está en español.
 
@@ -58,7 +59,7 @@ LearnAI/
 │   │   └── acceso/            # Login, AuthProvider/useAuth, RequireAuth, authApi, mensajes de error
 │   ├── data/
 │   │   ├── routes/            # Fuente de verdad del contenido: un JSON por ruta (se edita aquí)
-│   │   ├── curriculum.ts      # Las rutas para los tests: tracks, automationTrack, dataTrack, phases
+│   │   ├── curriculum.ts      # Las rutas para los tests: tracks, automationTrack, dataTrack, cloudTrack, phases
 │   ├── lib/                   # supabase.ts, env.ts, dates.ts, progress.ts, roadmap.ts (Track y rutas), theme.ts…
 │   ├── types/                 # database.ts (generado, no editar), curriculum.ts, progress.ts
 │   ├── styles/index.css       # Tailwind + tokens de color claro/oscuro
@@ -140,7 +141,7 @@ LearnAI/
   - Todo cambio de esquema va en una migración nueva (`npx supabase migration new <nombre>`), nunca a mano en el panel.
   - Cada migración incluye RLS, `GRANT`s explícitos y, si aplica, pruebas en `supabase/tests/database/`.
   - Supabase local tiene `auto_expose_new_tables = false` para que falte un `GRANT` se note en local y no en producción.
-  - Los ids de las rutas (`f1-t5`, `de-f1-t4`, `c1`…) no se renombran: el progreso está ligado a ellos.
+  - Los ids de las rutas (`f1-t5`, `de-f1-t4`, `cl-f1-t8`, `c1`…) no se renombran: el progreso está ligado a ellos.
 - **Mobile-first**: se diseña primero a 360 px de ancho. Áreas táctiles de al menos 44 px, safe areas (`env(safe-area-inset-*)`) y nada de scroll horizontal.
 - **Tema**: claro/oscuro según el sistema, con interruptor manual en Ajustes.
   - Los colores son tokens semánticos definidos en `src/styles/index.css`: `bg-bg`, `bg-surface`, `text-fg`, `text-fg-muted`, `bg-accent`, `bg-done-soft`…
@@ -157,9 +158,9 @@ LearnAI/
 - **Componentes de UI**: se reutilizan los de `src/components/ui` antes de crear uno nuevo. Todo componente nuevo del sistema se agrega también a `/ajustes/diseno`.
 - **Contenido de las rutas**:
   - Se edita el JSON en `src/data/routes/` y se corre `npm run seed` (y `npm run seed:cloud` para producción). La app lo lee de Supabase.
-  - **Agregar una ruta** = agregar un JSON con su bloque `track` (`id`, `title`, `order`) y correr el seed. El tutor usa un perfil genérico; para afinarlo, se agrega uno en `_shared/tutorTracks.ts`.
+  - **Agregar una ruta** = agregar un JSON con su bloque `track` (`id`, `title`, `order`) y correr el seed. El tutor usa un perfil genérico; para afinarlo, se agrega uno en `_shared/tutorTracks.ts` (`always` = lo que recuerda en todas sus respuestas, como los costos en Cloud).
   - El seed hace upsert por id: se puede repetir sin duplicar. Antes de escribir revisa todas las rutas: un id repetido, o que en la base es de otra ruta, lo detiene. No borra ids que ya no estén en los JSON; los lista como aviso.
-  - El test `src/data/curriculum.test.ts` falla si cambia algún id de automatización.
+  - El test `src/data/curriculum.test.ts` falla si cambia algún id de una ruta.
 - **Git**: Claude hace commits solo cuando Diego lo pide, y no hace push sin permiso.
 
 ## Comandos

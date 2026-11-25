@@ -1,6 +1,6 @@
 # LearnAI
 
-App web personal (PWA) para seguir varias rutas de estudio, definidas en [`src/data/routes`](src/data/routes): **Automatización para negocios** (9 fases, 100 temas) e **Ingeniería de datos** (13 fases, 110 temas), cada una con sus proyectos y su checklist final. Funciona en PC y en móvil, se instala como app y sigue funcionando sin conexión.
+App web personal (PWA) para seguir varias rutas de estudio, definidas en [`src/data/routes`](src/data/routes): **Automatización para negocios** (9 fases, 100 temas), **Ingeniería de datos** (13 fases, 110 temas) y **Cloud** (14 fases, 122 temas), cada una con sus proyectos y su checklist final. Funciona en PC y en móvil, se instala como app y sigue funcionando sin conexión.
 
 - **Inicio:** minutos de hoy, racha, meta semanal, «Seguir estudiando» y el progreso de cada ruta.
 - **Ruta:** elegir ruta; fases, temas, estados, notas, proyectos y checklist.
@@ -101,7 +101,7 @@ Cada ruta es un archivo de [`src/data/routes`](src/data/routes). Para cambiar un
 ```json
 {
   "version": 1,
-  "track": { "id": "mi-ruta", "title": "Mi ruta", "order": 3 },
+  "track": { "id": "mi-ruta", "title": "Mi ruta", "order": 4 },
   "title": "Ruta de aprendizaje: Mi ruta",
   "goal": "Qué quiero lograr.",
   "phases": [],

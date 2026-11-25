@@ -302,7 +302,7 @@ async function run(backup: string | undefined): Promise<void> {
   )
 
   const quiet = { info: () => {}, warn: (text: string) => console.log(text) }
-  console.log('\nTras el seed de las dos rutas:')
+  console.log(`\nTras el seed de las ${routes.length} rutas:`)
   await seedRoutes(store, routes, quiet)
   checkSame(userBefore, snapshot(USER_TABLES), 'que antes')
   const counts = () =>
@@ -312,7 +312,14 @@ async function run(backup: string | undefined): Promise<void> {
          (select count(*) from public.checklist_items c where c.track_id = t.id), ', ' order by t.sort_order)
        from public.tracks t;`,
     )
-  check(counts() === 'automatizacion 9/100/14, ingenieria-datos 13/110/15', `Rutas: ${counts()}`)
+  // Lo que dicen los archivos: agregar una ruta no obliga a tocar esta prueba.
+  const expected = routes
+    .map(({ track, phases, final_checklist: checklist }) => {
+      const topics = phases.reduce((sum, phase) => sum + phase.topics.length, 0)
+      return `${track.id} ${phases.length}/${topics}/${checklist.length}`
+    })
+    .join(', ')
+  check(counts() === expected, `Rutas: ${counts()}`)
 
   console.log('\nTras repetir el seed:')
   const seeded = snapshot({ ...CONTENT_TABLES, tracks: 'id' })

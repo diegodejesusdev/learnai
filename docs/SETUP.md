@@ -61,7 +61,7 @@ npx supabase migration list --remote             # local y nube deben coincidir
    SUPABASE_URL=https://<ref>.supabase.co
    SUPABASE_SERVICE_ROLE_KEY=<secret key>
    ```
-3. Corre `npm run seed:cloud`. Debe mostrar `tracks: 2`, `phases: 22`, `topics: 210`, `checklist_items: 29`. Repítelo cada vez que edites una ruta de `src/data/routes`.
+3. Corre `npm run seed:cloud`. Debe mostrar `tracks: 3`, `phases: 36`, `topics: 332`, `checklist_items: 44`. Repítelo cada vez que edites una ruta de `src/data/routes`.
 
 ### 2.4 URLs de redirección del login
 En **Authentication → URL Configuration**:

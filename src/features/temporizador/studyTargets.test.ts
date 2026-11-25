@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { automationTrack, dataTrack, tracks } from '@/data/curriculum'
+import { automationTrack, cloudTrack, dataTrack, tracks } from '@/data/curriculum'
 import { activeFirst } from '@/lib/roadmap'
 import {
   searchByTrack,
@@ -18,9 +18,9 @@ describe('studyTargets', () => {
     expect(targets.filter((target) => target.kind === 'project')).toHaveLength(9)
   })
 
-  it('con las dos rutas, los 210 temas y los 22 proyectos', () => {
-    expect(all.filter((target) => target.kind === 'topic')).toHaveLength(210)
-    expect(all.filter((target) => target.kind === 'project')).toHaveLength(22)
+  it('con las tres rutas, los 332 temas y los 36 proyectos', () => {
+    expect(all.filter((target) => target.kind === 'topic')).toHaveLength(332)
+    expect(all.filter((target) => target.kind === 'project')).toHaveLength(36)
   })
 
   it('cada uno dice de qué ruta es', () => {
@@ -81,13 +81,18 @@ describe('buscador por nombre', () => {
 })
 
 describe('buscador agrupado por ruta', () => {
-  it('muestra las dos rutas, cada una con su título', () => {
+  it('muestra las tres rutas, cada una con su título', () => {
     const groups = searchByTrack(all, 'api')
     expect(groups.map((group) => group.title)).toEqual([
       'Automatización para negocios',
       'Ingeniería de datos',
+      'Cloud',
     ])
     expect(groups[1]?.results.map((target) => target.title)).toContain('APIs desde Python')
+    expect(groups[2]?.results.map((target) => target.title)).toEqual([
+      'API Gateway',
+      'Una API, tres despliegues',
+    ])
   })
 
   it('la ruta activa va primero', () => {
@@ -95,17 +100,21 @@ describe('buscador agrupado por ruta', () => {
     expect(searchByTrack(ordered, 'api').map((group) => group.trackId)).toEqual([
       'ingenieria-datos',
       'automatizacion',
+      'cloud',
     ])
+    const cloudFirst = studyTargets(activeFirst(tracks, cloudTrack.id))
+    expect(searchByTrack(cloudFirst, 'api')[0]?.trackId).toBe('cloud')
   })
 
   it('el límite es por ruta: una no tapa a la otra', () => {
     const groups = searchByTrack(all, 'fase', 2)
-    expect(groups.map((group) => group.results.length)).toEqual([2, 2])
+    expect(groups.map((group) => group.results.length)).toEqual([2, 2, 2])
   })
 
   it('una ruta sin resultados no aparece', () => {
     expect(searchByTrack(all, 'kafka').map((group) => group.trackId)).toEqual(['ingenieria-datos'])
     expect(searchByTrack(all, 'n8n').map((group) => group.trackId)).toEqual(['automatizacion'])
+    expect(searchByTrack(all, 'iam').map((group) => group.trackId)).toEqual(['cloud'])
     expect(searchByTrack(all, '  ')).toEqual([])
   })
 })

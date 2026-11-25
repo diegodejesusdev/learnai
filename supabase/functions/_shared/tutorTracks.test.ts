@@ -18,10 +18,21 @@ describe('perfil del tutor por ruta', () => {
     expect(JSON.stringify(profile)).not.toMatch(/tienda de barrio|n8n|panadería/)
   })
 
+  it('cloud: AWS primero, con equivalencias, costos y recursos por borrar', () => {
+    const profile = trackProfile(track('cloud'))
+    expect(profile.role).toContain('AWS')
+    expect(profile.examples).toContain('AWS como nube principal')
+    expect(profile.examples).toMatch(/Azure y Google Cloud/)
+    expect(profile.always).toMatch(/costos/)
+    expect(profile.always).toMatch(/borrar/)
+    expect(profile.risks).toMatch(/recursos sin borrar/)
+    expect(JSON.stringify(profile)).not.toMatch(/tienda de barrio|n8n|panadería|dbt/)
+  })
+
   it('una ruta nueva usa un perfil genérico con su título y su meta', () => {
     const profile = trackProfile({ id: 'diseno', title: 'Diseño web', goal: 'Hacer un portafolio' })
     expect(profile.role).toContain('«Diseño web»')
     expect(profile.role).toContain('Hacer un portafolio')
-    expect(JSON.stringify(profile)).not.toMatch(/tienda de barrio|ingeniería de datos/)
+    expect(JSON.stringify(profile)).not.toMatch(/tienda de barrio|ingeniería de datos|AWS/)
   })
 })
