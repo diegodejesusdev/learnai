@@ -1,3 +1,4 @@
+import { BookOpen } from 'lucide-react'
 import { Link } from 'react-router'
 import type { TutorMode } from '@shared/tutorTypes'
 import { ButtonLink } from '@/components/ui/ButtonLink'
@@ -25,7 +26,13 @@ function Notes({ text }: { text: string }) {
   )
 }
 
-function TopicContext({ topic, progress }: { topic: Topic; progress: ProgressSnapshot }) {
+interface TopicContextProps {
+  topic: Topic
+  hasLesson: boolean
+  progress: ProgressSnapshot
+}
+
+function TopicContext({ topic, hasLesson, progress }: TopicContextProps) {
   const { status, notes } = topicProgressOf(progress, topic.id)
   return (
     <>
@@ -34,6 +41,15 @@ function TopicContext({ topic, progress }: { topic: Topic; progress: ProgressSna
         <StatusBadge status={status} />
         <TopicMinutes topicId={topic.id} />
       </div>
+      {hasLesson && (
+        <Link
+          to={`/ruta/tema/${topic.id}/leccion`}
+          className="flex min-h-11 w-fit items-center gap-2 text-sm font-semibold underline decoration-control underline-offset-4 hover:decoration-fg"
+        >
+          <BookOpen className="size-4 shrink-0" />
+          La lección de este tema
+        </Link>
+      )}
       <Notes text={notes} />
       <div className="flex flex-wrap gap-2">
         <ButtonLink to={`/estudiar?tema=${topic.id}`} variant="secondary">
@@ -93,11 +109,13 @@ interface TutorPanelProps {
   tracks: readonly Track[]
   progress: ProgressSnapshot
   topic: TopicWithPhase | undefined
+  /** El tema tiene lección: el servidor se la da al tutor. */
+  hasLesson: boolean
   project: Phase | undefined
 }
 
 /** En el PC, al lado del chat: lo que el tutor ya sabe de lo que estás viendo, con accesos. */
-export function TutorPanel({ mode, tracks, progress, topic, project }: TutorPanelProps) {
+export function TutorPanel({ mode, tracks, progress, topic, hasLesson, project }: TutorPanelProps) {
   return (
     <aside
       aria-label="Contexto del tutor"
@@ -108,7 +126,7 @@ export function TutorPanel({ mode, tracks, progress, topic, project }: TutorPane
         ? tracks.map((track) => <PlanContext key={track.id} track={track} progress={progress} />)
         : mode === 'project_review'
           ? project && <ProjectContext phase={project} progress={progress} />
-          : topic && <TopicContext topic={topic.topic} progress={progress} />}
+          : topic && <TopicContext topic={topic.topic} hasLesson={hasLesson} progress={progress} />}
     </aside>
   )
 }

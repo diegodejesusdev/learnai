@@ -31,7 +31,7 @@ export function renderApp(path: string, auth: AuthContextValue = signedIn) {
     defaultOptions: { queries: { retry: false }, mutations: { retry: false } },
   })
   const router = createMemoryRouter(routes, { initialEntries: [path] })
-  render(
+  const { unmount } = render(
     <QueryClientProvider client={queryClient}>
       <ThemeProvider>
         <AuthContext value={auth}>
@@ -40,5 +40,5 @@ export function renderApp(path: string, auth: AuthContextValue = signedIn) {
       </ThemeProvider>
     </QueryClientProvider>,
   )
-  return { router, queryClient }
+  return { router, queryClient, unmount }
 }

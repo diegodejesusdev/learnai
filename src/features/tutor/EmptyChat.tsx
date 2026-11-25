@@ -10,11 +10,13 @@ interface EmptyChatProps {
   subject: string
   /** La ruta del tema o del proyecto. */
   track: Track
+  /** El tema tiene lección: el servidor se la da al tutor. */
+  hasLesson: boolean
   onSend: (text: string) => Promise<boolean>
 }
 
 /** Conversación vacía: qué hace este modo y, en Explicar, preguntas para empezar. */
-export function EmptyChat({ mode, subject, track, onSend }: EmptyChatProps) {
+export function EmptyChat({ mode, subject, track, hasLesson, onSend }: EmptyChatProps) {
   const { ui } = trackProfile(track)
   if (mode === 'explain') {
     const starters = [
@@ -26,7 +28,11 @@ export function EmptyChat({ mode, subject, track, onSend }: EmptyChatProps) {
       <EmptyState
         icon={Lightbulb}
         title={`Pregúntale al tutor sobre «${subject}»`}
-        description="Conoce tus notas, el estado del tema y tus últimas sesiones."
+        description={
+          hasLesson
+            ? 'Tiene a mano la lección de este tema, tus notas y tu progreso.'
+            : 'Conoce tus notas, el estado del tema y tus últimas sesiones.'
+        }
         action={
           <div className="flex flex-col items-start gap-2">
             {starters.map((starter) => (
@@ -49,7 +55,7 @@ export function EmptyChat({ mode, subject, track, onSend }: EmptyChatProps) {
       <EmptyState
         icon={GraduationCap}
         title={`Pon a prueba lo que sabes de «${subject}»`}
-        description="5 preguntas de opción múltiple. Al terminar ves tu puntaje y queda guardado."
+        description={`5 preguntas ${hasLesson ? 'sacadas de la lección' : 'de opción múltiple'}. Al terminar ves tu puntaje y queda guardado.`}
       />
     )
   }

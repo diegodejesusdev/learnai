@@ -4,9 +4,10 @@ App web personal (PWA) para seguir varias rutas de estudio, definidas en [`src/d
 
 - **Inicio:** minutos de hoy, racha, meta semanal, «Seguir estudiando» y el progreso de cada ruta.
 - **Ruta:** elegir ruta; fases, temas, estados, notas, proyectos y checklist.
+- **Lecciones:** cada tema puede tener una, para leerla en el móvil o el PC, también sin conexión.
 - **Estudiar:** temporizador Pomodoro o libre, y sesiones manuales.
 - **Historial:** mapa de calor, rachas, gráficas, lista editable y CSV.
-- **Tutor IA:** explica, hace quizzes, revisa proyectos y propone qué estudiar hoy.
+- **Tutor IA:** conoce la lección del tema; explica, hace quizzes, revisa proyectos y propone qué estudiar hoy.
 
 Producción: https://learnai-tan.vercel.app
 
@@ -28,7 +29,7 @@ React 19 + Vite 8 + TypeScript, Tailwind 4, React Router, TanStack Query (con ca
 npm install
 npm run db:start                 # Supabase local: crea la base y aplica las migraciones
 cp .env.example .env.local       # y completa con lo que muestra: npx supabase status
-npm run seed                     # carga las rutas en la base local
+npm run seed                     # carga las rutas y las lecciones en la base local
 npm run dev                      # http://localhost:5173
 ```
 
@@ -94,7 +95,7 @@ Cada ruta es un archivo de [`src/data/routes`](src/data/routes). Para cambiar un
    npm run seed          # base local
    npm run seed:cloud    # nube (usa .env.cloud con la clave secreta; nunca va al repo)
    ```
-   El seed carga todas las rutas con *upsert* por id y se puede repetir sin duplicar. Si quitaste un id del JSON, no lo borra (tu progreso está ligado a él): lo lista como aviso.
+   El seed carga todas las rutas y las lecciones con *upsert* por id y se puede repetir sin duplicar. Si quitaste un id del JSON, no lo borra (tu progreso está ligado a él): lo lista como aviso.
 
 **Para agregar una ruta**, crea un JSON en esa carpeta con la misma forma y su bloque `track`, y corre el seed:
 
@@ -112,6 +113,37 @@ Cada ruta es un archivo de [`src/data/routes`](src/data/routes). Para cambiar un
 - Usa un prefijo propio en todos los ids (por ejemplo, `mr-f0`, `mr-f0-t1`, `mr-c1`): solo minúsculas, números y guiones.
 - Si un id ya lo usa otra ruta, el seed se detiene sin escribir nada.
 - El tutor usa un perfil genérico con el título y la meta. Para afinarlo, agrega un perfil en `supabase/functions/_shared/tutorTracks.ts` y despliega la función.
+
+## Agregar o cambiar lecciones
+
+Una lección es un archivo `content/<ruta>/<fase>/<id-del-tema>.md`. No hay que tocar código:
+
+1. Copia los archivos a su carpeta. Por ejemplo, los de la fase 1 de Cloud, a `content/cloud/cl-f1/`.
+2. Cárgalos:
+   ```bash
+   npm run seed          # base local
+   npm run seed:cloud    # nube: aparecen en la app al volver a abrirla
+   ```
+3. Guárdalos en git cuando quieras (la app los lee de Supabase, no del repo).
+
+Cada archivo empieza con su frontmatter y sigue con las secciones de siempre (Objetivo, Lo esencial, Explicación, Ejemplo práctico, Errores comunes, Práctica, Repaso, Respuestas y Para profundizar):
+
+```markdown
+---
+id: cl-f1-t1
+track: cloud
+phase: cl-f1
+title: Archivos, permisos y usuarios
+minutes: 25
+updated: 2026-11-30
+---
+
+## Objetivo
+```
+
+- El archivo se llama como el `id`, y ese tema debe existir. Si no existe, si la ruta o la fase no son las suyas, o si el frontmatter está mal, el seed se detiene **sin cargar nada** y dice qué archivo corregir.
+- Para corregir una lección, edita el archivo y repite el seed.
+- Si quitas un archivo, la lección no se borra de la base: el seed lo avisa.
 
 ## Seguridad
 

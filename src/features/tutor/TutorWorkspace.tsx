@@ -3,6 +3,7 @@ import { Alert } from '@/components/ui/Alert'
 import { ErrorState } from '@/components/ui/ErrorState'
 import { LoadingState } from '@/components/ui/LoadingState'
 import { SegmentedControl } from '@/components/ui/SegmentedControl'
+import { useLessonAvailability } from '@/features/leccion/useLesson'
 import { topicStatuses } from '@/features/ruta/progressModel'
 import type { RoadmapData } from '@/features/ruta/RoadmapGate'
 import { allPhases, findPhaseIn, findTopicIn, findTrack, trackOfTarget } from '@/lib/roadmap'
@@ -41,6 +42,7 @@ export function TutorWorkspace({ roadmap, progress, activeTrack }: RoadmapData) 
   const topic = findTopicIn(phases, state.topicId)
   const project = findPhaseIn(phases, state.phaseId)
   const isProject = state.mode === 'project_review'
+  const hasLesson = useLessonAvailability(state.topicId).status === 'available'
   const track =
     trackOfTarget(tracks, {
       topicId: isProject ? null : state.topicId,
@@ -124,6 +126,7 @@ export function TutorWorkspace({ roadmap, progress, activeTrack }: RoadmapData) 
             tracks={tracks}
             progress={progress}
             topic={topic}
+            hasLesson={hasLesson}
             project={project}
           />
         )}
@@ -146,7 +149,13 @@ export function TutorWorkspace({ roadmap, progress, activeTrack }: RoadmapData) 
             quizTopicId={state.mode === 'quiz' ? state.topicId : null}
             notesTarget={notesTarget}
             empty={
-              <EmptyChat mode={state.mode} subject={subject} track={track} onSend={chat.send} />
+              <EmptyChat
+                mode={state.mode}
+                subject={subject}
+                track={track}
+                hasLesson={hasLesson}
+                onSend={chat.send}
+              />
             }
           />
         )}

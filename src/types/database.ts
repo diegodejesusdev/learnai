@@ -163,6 +163,69 @@ export type Database = {
         }
         Relationships: []
       }
+      lesson_progress: {
+        Row: {
+          read_at: string | null
+          scroll_pct: number
+          topic_id: string
+          user_id: string
+        }
+        ComputedFields: never
+        Insert: {
+          read_at?: string | null
+          scroll_pct?: number
+          topic_id: string
+          user_id?: string
+        }
+        Update: {
+          read_at?: string | null
+          scroll_pct?: number
+          topic_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'lesson_progress_topic_id_fkey'
+            columns: ['topic_id']
+            isOneToOne: false
+            referencedRelation: 'topics'
+            referencedColumns: ['id']
+          },
+        ]
+      }
+      lessons: {
+        Row: {
+          content_hash: string
+          content_md: string
+          minutes: number
+          topic_id: string
+          updated: string
+        }
+        ComputedFields: never
+        Insert: {
+          content_hash: string
+          content_md: string
+          minutes: number
+          topic_id: string
+          updated: string
+        }
+        Update: {
+          content_hash?: string
+          content_md?: string
+          minutes?: number
+          topic_id?: string
+          updated?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: 'lessons_topic_id_fkey'
+            columns: ['topic_id']
+            isOneToOne: true
+            referencedRelation: 'topics'
+            referencedColumns: ['id']
+          },
+        ]
+      }
       phases: {
         Row: {
           estimated_weeks: number
@@ -618,6 +681,10 @@ export type Database = {
           p_topic_id?: string
         }
         Returns: string
+      }
+      save_lesson_progress: {
+        Args: { p_read_at?: string; p_scroll_pct: number; p_topic_id: string }
+        Returns: undefined
       }
       study_day_totals: {
         Args: { p_from?: string; p_to?: string }

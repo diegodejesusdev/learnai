@@ -5,6 +5,9 @@ import { EmptyState } from '@/components/ui/EmptyState'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { ProgressBar } from '@/components/ui/ProgressBar'
 import { Section } from '@/components/ui/Section'
+import { DownloadPhase } from '@/features/leccion/DownloadPhase'
+import { isLessonRead } from '@/features/leccion/lessonModel'
+import { useLessonProgress } from '@/features/leccion/useLessonProgress'
 import { countByFilter, matchesFilter, phaseProgress, statusOf } from '@/lib/progress'
 import { findPhaseIn, trackOfTarget, trackPhaseLabel, type Track } from '@/lib/roadmap'
 import type { Phase } from '@/types/curriculum'
@@ -24,6 +27,7 @@ interface PhaseViewProps {
 
 function PhaseView({ track, phase, progress }: PhaseViewProps) {
   const [filter, setFilter] = useStatusFilter()
+  const { data: lessons } = useLessonProgress()
   const statuses = topicStatuses(progress)
   const topics = phase.topics.map((topic) => ({ topic, status: statusOf(statuses, topic.id) }))
   const visible = topics.filter(({ status }) => matchesFilter(status, filter))
@@ -57,11 +61,16 @@ function PhaseView({ track, phase, progress }: PhaseViewProps) {
             <ul className="divide-y divide-border border-y border-border">
               {visible.map(({ topic, status }) => (
                 <li key={topic.id}>
-                  <TopicRow topic={topic} status={status} />
+                  <TopicRow
+                    topic={topic}
+                    status={status}
+                    lessonRead={isLessonRead(lessons, topic.id)}
+                  />
                 </li>
               ))}
             </ul>
           )}
+          <DownloadPhase phase={phase} />
         </Section>
         <Section title="Proyecto de la fase" className="self-start">
           {/* key: el formulario se reinicia si cambias de fase */}

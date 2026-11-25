@@ -27,7 +27,7 @@ La racha y la meta semanal cuentan todas las rutas juntas.
 | Login | Enlace mágico por correo (el mismo correo trae un código de respaldo) y Google, con Supabase Auth. Los registros públicos se desactivan después de crear la cuenta. |
 | Aislamiento | Toda fila de datos de usuario lleva `user_id` y RLS, aunque haya un solo usuario. |
 | Clave de IA | Nunca va en el navegador. El tutor se llama desde una Edge Function. |
-| Sin conexión | La caché de TanStack Query se guarda en el dispositivo (`localStorage`, 7 días). La ruta, las notas, el progreso y el historial se ven sin internet; el tutor no se guarda. Los cambios sin conexión (estados, notas, proyecto, checklist, ajustes, sesiones manuales y terminar el temporizador) quedan en una **cola**: mutaciones en pausa que se guardan con la caché, sobreviven a cerrar la app y se envían en orden al volver la conexión. **Sin duplicar:** cada sesión lleva un id generado en el dispositivo (el temporizador lo crea al empezar); la base ignora un segundo envío con el mismo id. Editar o borrar sesiones, el tutor y exportar necesitan conexión y lo dicen. Un indicador en la cabecera (móvil) y en la barra lateral muestra «Sin conexión · N sin subir», «Sincronizando…» y «Sincronizado». |
+| Sin conexión | La caché de TanStack Query se guarda en el dispositivo (`localStorage`, 7 días). La ruta, las notas, el progreso y el historial se ven sin internet; el tutor no se guarda. El texto de las lecciones va aparte, en IndexedDB (§4.1.1). Los cambios sin conexión (estados, notas, proyecto, checklist, lecciones leídas, ajustes, sesiones manuales y terminar el temporizador) quedan en una **cola**: mutaciones en pausa que se guardan con la caché, sobreviven a cerrar la app y se envían en orden al volver la conexión. **Sin duplicar:** cada sesión lleva un id generado en el dispositivo (el temporizador lo crea al empezar); la base ignora un segundo envío con el mismo id. Editar o borrar sesiones, el tutor y exportar necesitan conexión y lo dicen. Un indicador en la cabecera (móvil) y en la barra lateral muestra «Sin conexión · N sin subir», «Sincronizando…» y «Sincronizado». |
 
 ## 3. Navegación y diseño
 
@@ -36,7 +36,7 @@ La racha y la meta semanal cuentan todas las rutas juntas.
 - **Escritorio (≥ 1024 px):** barra lateral con las mismas secciones y el contenido centrado con ancho máximo.
 - **Tema:** claro/oscuro automático según el sistema, con interruptor manual en Ajustes (`system` / `light` / `dark`). Negro para lo que se toca y el marco, un solo acento vinotinto para lo de ahora y tu avance, y gris para lo demás; el error va en anaranjado. Los estados tienen forma o texto además de color, nunca solo color.
 - **Accesibilidad:** áreas táctiles de 44 px o más, foco visible, `aria-label` en español y contraste AA.
-- **Rutas:** `/`, `/ruta`, `/ruta/:phaseId`, `/ruta/tema/:topicId`, `/estudiar`, `/historial`, `/tutor`, `/tutor/:conversationId`, `/ajustes`, `/ajustes/diseno` (catálogo del sistema de diseño) y `/login`. Cualquier otra ruta muestra un 404. Sin sesión, todas redirigen a `/login`.
+- **Rutas:** `/`, `/ruta`, `/ruta/:phaseId`, `/ruta/tema/:topicId`, `/ruta/tema/:topicId/leccion`, `/estudiar`, `/historial`, `/tutor`, `/tutor/:conversationId`, `/ajustes`, `/ajustes/diseno` (catálogo del sistema de diseño) y `/login`. Cualquier otra ruta muestra un 404. Sin sesión, todas redirigen a `/login`.
 - **Parámetros de consulta:** `/ruta?ruta=<id>` muestra esa ruta y la deja como activa; `/historial?ruta=<id>` filtra por ruta; `/estudiar?tema=<id>` o `?proyecto=<id de fase>` preseleccionan el destino; `/tutor?tema=<id>` o `?proyecto=<id de fase>` preseleccionan el contexto del tutor.
 
 ## 4. Módulos
@@ -55,12 +55,14 @@ La racha y la meta semanal cuentan todas las rutas juntas.
   - Al final, la checklist final en su propia sección.
 - **Página de fase:**
   - Progreso de la fase.
-  - Lista de temas con su estado, que se cambia con un toque.
+  - Lista de temas con su estado, que se cambia con un toque, y «Lección leída» en los que ya leíste.
+  - «Descargar fase para leer sin conexión», si la fase tiene lecciones.
   - El proyecto de la fase, con estado, enlace al repositorio, enlace a la demo y notas.
 - **Página de tema:**
   - Título y detalles.
   - Estado (selector de tres opciones).
   - Minutos estudiados en ese tema (suma de sus sesiones).
+  - «Estudiar lección» con su tiempo y cuánto llevas, o «Lección en preparación» si aún no tiene.
   - Botones «Estudiar este tema» (`/estudiar?tema=<id>`) y «Preguntarle al tutor» (`/tutor?tema=<id>`).
   - Notas con autoguardado.
 - **Checklist final:** los ítems de la ruta, con casilla y la fecha en que se lograron. Cada ruta tiene la suya.
@@ -91,6 +93,30 @@ La racha y la meta semanal cuentan todas las rutas juntas.
   - Si falla, el texto escrito no se borra.
 - **Enlaces del proyecto:** opcionales. Si se escribe uno, debe empezar por `http://` o `https://` (igual que el check de la base). Mientras sea inválido, no se guarda y el campo muestra el error.
 - **Sincronización entre dispositivos:** el progreso se vuelve a pedir cada vez que la app vuelve a primer plano (o al recuperar la conexión). Un cambio hecho en el PC aparece en el móvil al abrir o volver a la app.
+
+#### 4.1.1 Lecciones
+
+Cada tema puede tener una lección en Markdown, siempre con las mismas secciones: Objetivo, Lo esencial, Explicación, Ejemplo práctico, Errores comunes, Práctica, Repaso, Respuestas y Para profundizar.
+
+**Página de la lección** (`/ruta/tema/:topicId/leccion`, desde «Estudiar lección»)
+- **Lectura:** `react-markdown` + `remark-gfm`, sin HTML crudo. Letra de 17 px y 70 caracteres de ancho como máximo.
+  - Las tablas de 3 columnas o más se desplazan de lado en el móvil.
+  - El código lleva su lenguaje, colores (`refractor`, con los lenguajes de las rutas) y «Copiar».
+  - Los enlaces externos abren en otra pestaña.
+- **Índice** de secciones y subtítulos: fijo en el PC (desde 1280 px), con lo que se está leyendo marcado; desplegable en el móvil.
+- **Respuestas:** ocultas tras «Ver respuestas».
+- **Tiempo estimado:** los `minutes` de la lección (incluye la práctica). También la fecha de actualización y cuándo la leíste.
+- **«Estudiar con temporizador»** empieza un Pomodoro de ese tema sin salir de la lección. Si ya hay una sesión, lleva a ella.
+- **«Preguntarle al tutor sobre esta lección»** abre el Tutor con ese tema.
+- **Leída:** al llegar al final se marca sola. Solo cuenta lo que bajas: abrirla no la marca (salvo que quepa entera en la pantalla). Se guarda también hasta dónde llegaste, de 10 en 10 %.
+- **Sin lección:** «Lección en preparación», en el tema y en la página de la lección. Lo demás sigue igual.
+
+**Sin conexión**
+- Una lección abierta con internet queda guardada en el dispositivo (IndexedDB, `lessonStore.ts`) y se lee sin conexión.
+- «Descargar fase» guarda todas las de la fase de una vez. Dice cuántas hay en el dispositivo y cuántas cambiaron desde entonces, y solo pide las que faltan. Necesita conexión.
+- Con internet siempre se pide la versión nueva; si la red falla, se muestra la copia.
+- Marcarla como leída sin conexión entra en la cola.
+- Al cerrar sesión se borran las copias.
 
 ### 4.2 Temporizador (sección «Estudiar»)
 
@@ -288,6 +314,10 @@ Todos los días y semanas se calculan en hora de Bogotá. Una sesión cuenta en 
 **Contexto del modelo.** Lo arma el servidor en cada mensaje (`_shared/tutorContext.ts`), nunca el navegador:
 - La fecha de hoy en Colombia.
 - **Tema** (Explicar y Quiz): su ruta con la meta, su fase (título y resumen), el título y los detalles del tema, su estado y tus notas. Las notas se recortan a 3000 caracteres y se marcan como datos, no como instrucciones.
+- **Lección del tema**, si tiene (tabla `lessons`): completa, entre `<leccion>` y `</leccion>`, marcada como material de estudio y no como instrucciones. Hasta 30 000 caracteres.
+  - En **Explicar** se apoya en ella y, si va más allá, lo dice.
+  - En **Quiz**, las 5 preguntas salen de su contenido, de secciones distintas, sin copiar el «Repaso», y cada explicación dice en qué sección está.
+  - Si no se pudo leer, el tutor responde sin ella.
 - **Proyecto** (Revisar proyecto): su ruta con la meta, enunciado, temas de la fase, estado, repositorio, demo y notas.
 - Resumen corto del progreso en la ruta del tema o del proyecto. En «Hoy», el de todas las rutas, y cuál es la activa:
   - temas hechos y proyectos hechos;
@@ -357,7 +387,7 @@ Todos los días y semanas se calculan en hora de Bogotá. Una sesión cuenta en 
   - botón «Instalar app» cuando el navegador lo permite (Chrome y Edge);
   - en iPhone y iPad, los pasos Compartir → Agregar a inicio;
   - si ya está instalada, lo dice.
-- **Exportar mis datos (JSON):** ajustes, progreso con notas, sesiones, conversaciones con el tutor (con sus mensajes) y resultados de quiz, más un resumen general y otro por ruta (`rutas`). Cada registro lleva el id de su ruta (`ruta`; nulo en «¿Qué estudio hoy?»). `formato: 2`. No incluye `user_id`. Archivo `learnai-datos-AAAA-MM-DD.json`.
+- **Exportar mis datos (JSON):** ajustes, progreso con notas, lecciones leídas, sesiones, conversaciones con el tutor (con sus mensajes) y resultados de quiz, más un resumen general y otro por ruta (`rutas`). Cada registro lleva el id de su ruta (`ruta`; nulo en «¿Qué estudio hoy?»). `formato: 3`. No incluye `user_id`. Archivo `learnai-datos-AAAA-MM-DD.json`.
 - Cerrar sesión.
 
 ### 4.7 Autenticación
@@ -389,7 +419,12 @@ Se carga desde todos los JSON de `src/data/routes/` con `npm run seed` (`scripts
 - Antes de escribir revisa la forma de cada archivo, que no haya ids repetidos (en una ruta ni entre rutas) y que ningún id sea, en la base, de otra ruta. Con un error no escribe nada.
 - Avisa (sin borrar) de los ids que estén en la base pero ya no en los JSON, para no perder el progreso ligado a ellos.
 - Los ids del JSON (`f0`, `f0-t1`, `c1`, `de-f0`…) son las claves primarias y no se renombran nunca.
-- Solo escribe `tracks`, `phases`, `topics` y `checklist_items`.
+- Solo escribe `tracks`, `phases`, `topics`, `checklist_items` y `lessons`.
+
+Las **lecciones** salen de todos los `.md` de `content/`, con upsert por `topic_id`:
+- El frontmatter lleva `id`, `track`, `phase`, `title`, `minutes` y `updated`. La tabla guarda el Markdown sin él.
+- Se detiene sin escribir nada (ni las rutas) si un id no existe en `topics`, si la ruta o la fase no son las del tema, si dos archivos son del mismo tema, si el archivo no se llama como el id o si el frontmatter está mal. Los errores de todos los archivos salen juntos.
+- Avisa, sin detenerse, si falta una sección, si el título no es el del tema o si en la base hay una lección sin archivo.
 
 `curriculum_meta` ya no se usa. Se conserva para las apps instaladas antes de las rutas, que aún la leen.
 
@@ -400,6 +435,8 @@ phases(id text pk, track_id text fk → tracks, sort_order int, title text, summ
        project_title text, project_description text)
 topics(id text pk, phase_id text fk → phases, sort_order int, title text, details text)
 checklist_items(id text pk, track_id text fk → tracks, sort_order int, text text)
+lessons(topic_id text pk fk → topics, content_md text, minutes int > 0, updated date, content_hash text)
+  content_hash: sha256 del archivo; dice si la copia de un dispositivo está al día
 ```
 
 ### 5.2 Datos del usuario
@@ -418,6 +455,10 @@ project_progress(user_id, phase_id fk → phases, status, repo_url text null, de
 
 checklist_progress(user_id, item_id fk → checklist_items, done bool, done_at null)
   pk (user_id, item_id)
+
+lesson_progress(user_id, topic_id fk → topics, read_at null, scroll_pct smallint 0–100 default 0)
+  pk (user_id, topic_id)
+  va ligada al tema y no a la lección: si la lección se quita o se reemplaza, se conserva
 
 study_sessions(id uuid pk, user_id, topic_id fk null, project_phase_id fk null,
                started_at, ended_at, duration_minutes int, mode, notes text default '',
@@ -476,6 +517,8 @@ study_week_totals(p_from date?)             → (week_start, minutes, sessions) 
 study_phase_totals()                        → (phase_id, minutes, sessions)    temas + proyecto de cada fase
 append_topic_notes(p_topic_id, p_text)      agrega un fragmento al final de las notas del tema (crea la fila)
 append_project_notes(p_phase_id, p_text)    lo mismo con las notas del proyecto
+save_lesson_progress(p_topic_id, p_scroll_pct, p_read_at?)
+                                            hasta dónde leíste; queda el % más alto y la primera lectura
 ```
 
 ### 5.3 Cambios frente a la propuesta original y por qué
@@ -502,10 +545,10 @@ append_project_notes(p_phase_id, p_text)    lo mismo con las notas del proyecto
 
 ### 5.4 Row Level Security
 
-- **Contenido** (`curriculum_meta`, `phases`, `topics`, `checklist_items`): RLS activa, con política de `select` para `authenticated` y sin políticas de escritura.
+- **Contenido** (`curriculum_meta`, `tracks`, `phases`, `topics`, `checklist_items`, `lessons`): RLS activa, con política de `select` para `authenticated` y sin políticas de escritura.
 - **Datos del usuario:** RLS activa y una política por tabla `for all to authenticated using (user_id = (select auth.uid())) with check (user_id = (select auth.uid()))`.
 - **Permisos explícitos:** `anon` no tiene acceso a ninguna tabla. `authenticated` solo lee el contenido y opera sus tablas. `service_role` (el seed) escribe el contenido.
-- **Pruebas pgTAP** en `supabase/tests/database/` (`npm run db:test`, 78 comprobaciones en 4 archivos; `rls.test.sql` tiene 32):
+- **Pruebas pgTAP** en `supabase/tests/database/` (`npm run db:test`):
   - con dos usuarios, ninguno ve ni modifica las filas del otro;
   - nadie puede escribir en el contenido;
   - sin sesión no se lee nada;
@@ -524,7 +567,7 @@ append_project_notes(p_phase_id, p_text)    lo mismo con las notas del proyecto
   - En local, en `supabase/functions/.env`, que está en `.gitignore`.
   - En producción, con `supabase secrets set`.
 - **Antes de cada despliegue:** se busca en `dist/` que no haya claves de IA ni la clave secreta de Supabase.
-- **Markdown del tutor:** se renderiza sin HTML crudo.
+- **Markdown del tutor y de las lecciones:** se renderiza sin HTML crudo.
 - **Prueba de seguridad en la base** (`supabase/tests/database/security.test.sql`). Falla si:
   - una tabla queda sin RLS;
   - una tabla con `user_id` no tiene política con `auth.uid()`;
@@ -568,6 +611,10 @@ Las variables de la Edge Function van en `supabase/functions/.env` en local y co
   - Límite de 50 mensajes al día.
   - Quiz de 5 preguntas con JSON de esquema fijo y resultado en `quiz_results`.
   - Sin `ALLOWED_ORIGINS`: la protección es el token del usuario.
+- **Lecciones (fase 10):**
+  - El texto se guarda en IndexedDB y no en la caché persistida: `localStorage` tiene unos 5 MB y, si se llenara, dejaría de guardarse la cola de cambios.
+  - El progreso de lectura es un RPC que se queda con el máximo y la primera lectura: se puede repetir y llegar en cualquier orden.
+  - El resaltado usa `refractor` (Prism) porque trae HCL (Terraform), que la ruta Cloud necesita.
 - **Historial (fase 5):**
   - Gráficas con Recharts, que reemplaza la idea inicial de SVG propio; lo pidió Diego.
   - Recharts se carga aparte para no pesar en el arranque.

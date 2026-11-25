@@ -39,6 +39,38 @@ describe('prompt de sistema', () => {
   })
 })
 
+describe('con la lección del tema', () => {
+  const lesson = { hasLesson: true }
+
+  it('el quiz sale del contenido de la lección', () => {
+    const prompt = buildSystemPrompt('quiz', [cloud], 'ctx', lesson)
+    expect(prompt).toContain('Las 5 preguntas salen del contenido de la lección')
+    expect(prompt).toContain('No preguntes por nada que la lección no diga')
+    expect(prompt).toContain('No copies tal cual las preguntas de «Repaso»')
+  })
+
+  it('el enfoque que pida el estudiante se respeta dentro de la lección', () => {
+    const prompt = buildSystemPrompt('quiz', [cloud], 'ctx', lesson)
+    expect(prompt).toContain('dentro de lo que cubre la lección')
+  })
+
+  it('explicar se apoya en la lección, sin limitarse a ella', () => {
+    const prompt = buildSystemPrompt('explain', [cloud], 'ctx', lesson)
+    expect(prompt).toContain('Apóyate en la lección')
+    expect(prompt).toContain('si vas más allá de la lección, dilo')
+  })
+
+  it('sin lección, o en otros modos, no se menciona', () => {
+    for (const mode of ['explain', 'quiz'] as const) {
+      expect(buildSystemPrompt(mode, [cloud], 'ctx')).not.toMatch(/lección/i)
+      expect(buildSystemPrompt(mode, [cloud], 'ctx', { hasLesson: false })).not.toMatch(/lección/i)
+    }
+    for (const mode of ['project_review', 'daily_plan'] as const) {
+      expect(buildSystemPrompt(mode, [cloud], 'ctx', lesson)).not.toMatch(/lección/i)
+    }
+  })
+})
+
 describe('se adapta a la ruta', () => {
   it('automatización conserva sus ejemplos de pequeños negocios', () => {
     const prompt = buildSystemPrompt('explain', [automation], 'ctx')

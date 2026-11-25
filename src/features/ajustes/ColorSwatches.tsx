@@ -35,6 +35,15 @@ const groups = [
     swatches: [{ name: 'danger', className: 'bg-danger' }],
   },
   {
+    title: 'Código de las lecciones',
+    swatches: [
+      { name: 'code-keyword', className: 'bg-code-keyword' },
+      { name: 'code-string', className: 'bg-code-string' },
+      { name: 'code-value', className: 'bg-code-value' },
+      { name: 'code-comment', className: 'bg-code-comment' },
+    ],
+  },
+  {
     title: 'Mapa de calor',
     swatches: [
       { name: 'heat-0', className: 'bg-heat-0' },

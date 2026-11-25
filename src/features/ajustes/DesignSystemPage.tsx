@@ -3,6 +3,7 @@ import { useState } from 'react'
 import { Badge } from '@/components/ui/Badge'
 import { Button } from '@/components/ui/Button'
 import { Card } from '@/components/ui/Card'
+import { CodeBlock } from '@/components/ui/CodeBlock'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ErrorState } from '@/components/ui/ErrorState'
 import { Hero } from '@/components/ui/Hero'
@@ -162,6 +163,15 @@ export function DesignSystemPage() {
               </Button>
             </div>
           </Card>
+        </Section>
+
+        <Section
+          title="Código"
+          description="Con su lenguaje y un botón para copiarlo. En las lecciones, además, con colores."
+        >
+          <CodeBlock>
+            <code className="language-bash">aws sts get-caller-identity</code>
+          </CodeBlock>
         </Section>
 
         <Section title="Formularios, vacíos y errores">

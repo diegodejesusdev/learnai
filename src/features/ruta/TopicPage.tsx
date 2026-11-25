@@ -4,6 +4,8 @@ import { NotFoundPage } from '@/app/NotFoundPage'
 import { ButtonLink } from '@/components/ui/ButtonLink'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { Section } from '@/components/ui/Section'
+import { LessonEntry } from '@/features/leccion/LessonEntry'
+import { useLessonAvailability } from '@/features/leccion/useLesson'
 import {
   findTopicIn,
   trackOfTarget,
@@ -25,6 +27,7 @@ interface TopicViewProps extends TopicWithPhase {
 
 function TopicView({ track, topic, phase, progress }: TopicViewProps) {
   const { status, notes } = topicProgressOf(progress, topic.id)
+  const lesson = useLessonAvailability(topic.id)
 
   return (
     <>
@@ -37,7 +40,13 @@ function TopicView({ track, topic, phase, progress }: TopicViewProps) {
       <div className="grid gap-12 xl:grid-cols-[minmax(0,5fr)_minmax(0,7fr)]">
         <div className="flex flex-col gap-8">
           <div className="flex flex-col gap-3">
-            <ButtonLink to={`/estudiar?tema=${topic.id}`} size="lg">
+            <LessonEntry topicId={topic.id} lesson={lesson} />
+            {/* Con lección, el botón principal es el suyo. */}
+            <ButtonLink
+              to={`/estudiar?tema=${topic.id}`}
+              variant={lesson.status === 'missing' ? 'primary' : 'secondary'}
+              size="lg"
+            >
               <Play className="size-5 fill-current" />
               Estudiar este tema
             </ButtonLink>

@@ -58,6 +58,15 @@ vi.mock('@/features/historial/sessionsApi', async (importOriginal) => {
   }
 })
 
+// Las páginas de un tema, de una fase y del Tutor preguntan si hay lección: por defecto, ninguna.
+vi.mock('@/features/leccion/lessonApi', () => ({
+  fetchLessonIndex: vi.fn(() => Promise.resolve({})),
+  fetchLesson: vi.fn(() => Promise.resolve(null)),
+  fetchLessons: vi.fn(() => Promise.resolve([])),
+  fetchLessonProgress: vi.fn(() => Promise.resolve({})),
+  saveLessonProgress: vi.fn(() => Promise.resolve()),
+}))
+
 afterEach(() => {
   cleanup()
   localStorage.clear()

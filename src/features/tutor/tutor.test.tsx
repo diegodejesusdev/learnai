@@ -3,6 +3,7 @@ import userEvent from '@testing-library/user-event'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { TutorStreamEvent } from '@shared/tutorTypes'
 import { defaultSettings, fetchUserSettings } from '@/features/ajustes/settingsApi'
+import { fetchLessonIndex } from '@/features/leccion/lessonApi'
 import { fetchProgress, fetchTopicMinutes } from '@/features/ruta/progressApi'
 import { emptySnapshot } from '@/features/ruta/progressModel'
 import { fetchRoadmap } from '@/features/ruta/roadmapApi'
@@ -409,5 +410,38 @@ describe('panel del PC', () => {
     expect(panel.getByRole('link', { name: 'Roles del mundo de datos' })).toBeInTheDocument()
     expect(panel.getByText('0 de 122 temas')).toBeInTheDocument()
     expect(panel.getByRole('link', { name: 'Qué es la nube' })).toBeInTheDocument()
+  })
+})
+
+describe('con la lección del tema', () => {
+  beforeEach(() => {
+    vi.mocked(fetchLessonIndex).mockResolvedValue({
+      'cl-f0-t1': { topicId: 'cl-f0-t1', minutes: 25, updated: '2026-11-24', hash: 'abc' },
+    })
+  })
+
+  it('dice que tiene a mano la lección del tema', async () => {
+    renderApp('/tutor?tema=cl-f0-t1')
+    expect(
+      await screen.findByText('Tiene a mano la lección de este tema, tus notas y tu progreso.'),
+    ).toBeInTheDocument()
+  })
+
+  it('el quiz sale de la lección', async () => {
+    renderApp('/tutor?modo=quiz&tema=cl-f0-t1')
+    expect(
+      await screen.findByText(
+        '5 preguntas sacadas de la lección. Al terminar ves tu puntaje y queda guardado.',
+      ),
+    ).toBeInTheDocument()
+  })
+
+  it('en un tema sin lección no la menciona', async () => {
+    renderApp('/tutor?modo=quiz&tema=cl-f0-t9')
+    expect(
+      await screen.findByText(
+        '5 preguntas de opción múltiple. Al terminar ves tu puntaje y queda guardado.',
+      ),
+    ).toBeInTheDocument()
   })
 })

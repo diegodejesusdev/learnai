@@ -64,6 +64,19 @@ El estudiante pega su solución (código, configuración, README o descripción)
 No puedes abrir enlaces: si solo hay un enlace, dilo y pide que pegue el README, el código o la configuración. No des por hecho lo que no está en lo que pegó.`,
 }
 
+/** Lo que cambia cuando el tema tiene lección (va en el contexto, entre <leccion> y </leccion>). */
+const lessonInstructions: Partial<Record<TutorMode, string>> = {
+  explain: `# Lección del tema
+El estudiante tiene a mano la lección de este tema (en el contexto, entre <leccion> y </leccion>). Apóyate en la lección: usa sus mismos términos y ejemplos, y cuando ayude dile qué sección releer. No la repitas entera. Puedes explicar cosas que no están en ella; si vas más allá de la lección, dilo.`,
+  quiz: `# Lección del tema
+Las ${QUIZ_QUESTIONS} preguntas salen del contenido de la lección de este tema (en el contexto, entre <leccion> y </leccion>):
+- No preguntes por nada que la lección no diga: cada respuesta correcta debe poder comprobarse leyéndola.
+- Reparte las preguntas entre secciones distintas (lo esencial, la explicación, el ejemplo práctico, los errores comunes).
+- No copies tal cual las preguntas de «Repaso» ni sus respuestas: pregunta lo mismo de otra forma o con un caso.
+- Si el estudiante pide un enfoque, respétalo dentro de lo que cubre la lección.
+- En explanation, di en qué sección de la lección está.`,
+}
+
 function dailyPlanInstructions(tracks: readonly TrackInfo[]): string {
   const choose =
     tracks.length > 1
@@ -86,12 +99,14 @@ export function buildSystemPrompt(
   mode: TutorMode,
   tracks: readonly TrackInfo[],
   context: string,
-  extras: { avoidQuestions?: readonly string[] } = {},
+  extras: { avoidQuestions?: readonly string[]; hasLesson?: boolean } = {},
 ): string {
   const [track] = tracks
   const parts = [baseInstructions(tracks)]
   if (mode === 'daily_plan') parts.push(dailyPlanInstructions(tracks))
   else if (track) parts.push(modeInstructions[mode](trackProfile(track)))
+  const aboutLesson = lessonInstructions[mode]
+  if (extras.hasLesson && aboutLesson !== undefined) parts.push(aboutLesson)
   if (mode === 'quiz' && extras.avoidQuestions && extras.avoidQuestions.length > 0) {
     parts.push(
       `No repitas estas preguntas de quizzes anteriores:\n${extras.avoidQuestions.map((question) => `- ${question}`).join('\n')}`,

@@ -57,6 +57,12 @@
   --danger: #b3360b;
   --danger-fg: #ffffff;
 
+  /* Código de las lecciones, sobre surface. */
+  --code-keyword: #8a1538;
+  --code-string: #6a4b12;
+  --code-value: #5b3a78;
+  --code-comment: #6b6064;
+
   /* Mapa de calor: un solo tono, de claro (poco) a oscuro (mucho). */
   --heat-0: #ece7e9;
   --heat-1: #dda9b8;
@@ -105,6 +111,11 @@
   --danger: #ff8f5c;
   --danger-fg: #2a0d00;
 
+  --code-keyword: #f08aa3;
+  --code-string: #e3c48f;
+  --code-value: #c9a9e6;
+  --code-comment: #a4969c;
+
   /* En oscuro la escala se invierte: poco = oscuro, mucho = brillante. */
   --heat-0: #262023;
   --heat-1: #6b2239;
@@ -149,6 +160,11 @@
 
   --color-danger: var(--danger);
   --color-danger-fg: var(--danger-fg);
+
+  --color-code-keyword: var(--code-keyword);
+  --color-code-string: var(--code-string);
+  --color-code-value: var(--code-value);
+  --color-code-comment: var(--code-comment);
 
   --color-heat-0: var(--heat-0);
   --color-heat-1: var(--heat-1);
@@ -329,7 +345,7 @@ html[data-keyboard='open'] .keyboard-hidden {
   display: none;
 }
 
-/* ── Markdown de las respuestas del tutor ──────────────────────────────────── */
+/* ── Markdown: respuestas del tutor y lecciones ────────────────────────────── */
 .markdown {
   overflow-wrap: anywhere;
   font-size: 1rem;
@@ -417,4 +433,83 @@ html[data-keyboard='open'] .keyboard-hidden {
   border: 1px solid var(--border);
   padding: 0.35rem 0.6rem;
   text-align: left;
+}
+
+/* ── Lecciones ───────────────────────────────────────────────────────────────
+   Textos largos: letra algo mayor, más aire entre líneas y un ancho que no cansa. */
+.lesson {
+  font-size: 1.0625rem;
+  line-height: 1.75;
+  max-width: 70ch;
+}
+
+.lesson > * + * {
+  margin-top: 1.125rem;
+}
+
+.lesson h3 {
+  margin-top: 2.25rem;
+  font-size: 1.1875rem;
+  text-wrap: balance;
+}
+
+.lesson > h3:first-child {
+  margin-top: 0;
+}
+
+.lesson li + li {
+  margin-top: 0.5rem;
+}
+
+.lesson li::marker {
+  color: var(--fg-muted);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Con 3 columnas o más, en el móvil se desplazan de lado en vez de apretarse. */
+.lesson table {
+  width: 100%;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  overflow-wrap: normal;
+}
+
+.lesson table:has(th:nth-child(3)) {
+  min-width: 34rem;
+}
+
+.lesson th,
+.lesson td {
+  padding: 0.6rem 0.75rem;
+  vertical-align: top;
+}
+
+.lesson th {
+  background: var(--surface-muted);
+}
+
+.lesson pre code {
+  font-size: 0.875rem;
+}
+
+/* Colores del código (refractor, con los nombres de Prism). */
+.lesson .token:is(.keyword, .function, .builtin, .selector, .tag, .atrule, .important) {
+  color: var(--code-keyword);
+}
+
+.lesson .token:is(.string, .char, .attr-value, .regex, .url, .inserted) {
+  color: var(--code-string);
+}
+
+.lesson .token:is(.number, .boolean, .constant, .variable, .symbol, .property, .attr-name, .key) {
+  color: var(--code-value);
+}
+
+.lesson .token:is(.comment, .prolog, .doctype, .cdata) {
+  color: var(--code-comment);
+  font-style: italic;
+}
+
+.lesson .token.deleted {
+  color: var(--danger);
 }

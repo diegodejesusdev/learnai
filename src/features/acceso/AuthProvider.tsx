@@ -1,5 +1,6 @@
 import { useQueryClient } from '@tanstack/react-query'
 import { useEffect, useMemo, useState, type ReactNode } from 'react'
+import { clearSavedLessons } from '@/features/leccion/lessonStore'
 import { supabase } from '@/lib/supabase'
 import { AuthContext, type AuthContextValue, type AuthState } from './AuthContext'
 import { signOut } from './authApi'
@@ -12,7 +13,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     // Emite INITIAL_SESSION al arrancar (incluido el token que trae el enlace mágico en la URL)
     // y luego cada inicio o cierre de sesión, también desde otras pestañas.
     const { data } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_OUT') queryClient.clear()
+      if (event === 'SIGNED_OUT') {
+        queryClient.clear()
+        void clearSavedLessons()
+      }
       setState(
         session
           ? {

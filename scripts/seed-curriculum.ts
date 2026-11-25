@@ -1,5 +1,6 @@
-// Carga todas las rutas de src/data/routes/ en tracks, phases, topics y checklist_items.
-// Usa upsert por id: se puede correr las veces que quieras sin duplicar.
+// Carga todas las rutas de src/data/routes/ en tracks, phases, topics y checklist_items, y todas
+// las lecciones de content/ en lessons.
+// Usa upsert por id (topic_id en las lecciones): se puede correr las veces que quieras sin duplicar.
 //
 //   npm run seed         → Supabase local (lee .env.local)
 //   npm run seed:cloud   → Supabase en la nube (lee .env.cloud)
@@ -8,8 +9,10 @@
 // Esa clave nunca va con prefijo VITE_ ni en Vercel.
 import { createClient } from '@supabase/supabase-js'
 import type { Database } from '../src/types/database.ts'
+import { CONTENT_DIR, loadLessons } from './lessonFiles.ts'
 import { loadRoutes, ROUTES_DIR } from './routeFiles.ts'
-import { seedRoutes, type ContentTable, type SeedRow, type SeedStore } from './seedRoutes.ts'
+import { seedContent, type ContentStore } from './seedLessons.ts'
+import type { ContentTable, SeedRow } from './seedRoutes.ts'
 
 const url = process.env.SUPABASE_URL ?? process.env.VITE_SUPABASE_URL
 const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY
@@ -26,8 +29,10 @@ const supabase = createClient<Database>(url, serviceKey, {
 
 /** Supabase devuelve como máximo 1000 filas por consulta: se piden por tandas. */
 const PAGE = 1000
+/** Las lecciones son textos largos: se suben de a pocas por petición. */
+const LESSON_BATCH = 50
 
-const store: SeedStore = {
+const store: ContentStore = {
   async read(table) {
     const rows: SeedRow[] = []
     for (let from = 0; ; from += PAGE) {
@@ -45,19 +50,42 @@ const store: SeedStore = {
     const { error } = await supabase.from(table).upsert(rows as never, { onConflict: 'id' })
     if (error) throw new Error(`Error en ${table}: ${error.message}`)
   },
+  async readLessonIds() {
+    const ids: string[] = []
+    for (let from = 0; ; from += PAGE) {
+      const { data, error } = await supabase
+        .from('lessons')
+        .select('topic_id')
+        .order('topic_id')
+        .range(from, from + PAGE - 1)
+      if (error) throw new Error(`Error leyendo lessons: ${error.message}`)
+      ids.push(...data.map((row) => row.topic_id))
+      if (data.length < PAGE) return ids
+    }
+  },
+  async upsertLessons(rows) {
+    for (let from = 0; from < rows.length; from += LESSON_BATCH) {
+      const { error } = await supabase
+        .from('lessons')
+        .upsert(rows.slice(from, from + LESSON_BATCH), { onConflict: 'topic_id' })
+      if (error) throw new Error(`Error en lessons: ${error.message}`)
+    }
+  },
 }
 
 try {
   const routes = await loadRoutes(ROUTES_DIR)
-  console.log(`Cargando ${routes.length} rutas en ${url}:`)
+  const lessons = await loadLessons(CONTENT_DIR)
+  console.log(`Cargando ${routes.length} rutas y ${lessons.length} lecciones en ${url}:`)
   for (const route of routes) {
     const topics = route.phases.reduce((sum, phase) => sum + phase.topics.length, 0)
     console.log(
       `  ${route.track.title} (versión ${route.version}): ${route.phases.length} fases, ` +
-        `${topics} temas, ${route.final_checklist.length} ítems`,
+        `${topics} temas, ${route.final_checklist.length} ítems, ` +
+        `${lessons.filter((lesson) => lesson.track === route.track.id).length} lecciones`,
     )
   }
-  await seedRoutes(store, routes, console)
+  await seedContent(store, { routes, lessons }, console)
   console.log('Listo.')
 } catch (error) {
   console.error(error instanceof Error ? error.message : error)

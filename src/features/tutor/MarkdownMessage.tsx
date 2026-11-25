@@ -1,6 +1,6 @@
 import Markdown, { type Components } from 'react-markdown'
 import remarkGfm from 'remark-gfm'
-import { CodeBlock } from './CodeBlock'
+import { CodeBlock } from '@/components/ui/CodeBlock'
 
 // react-markdown no interpreta HTML crudo y limpia los enlaces peligrosos (javascript:…):
 // lo que escribe el modelo no puede inyectar código en la página.

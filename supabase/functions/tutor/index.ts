@@ -5,7 +5,7 @@ import { withSupabase } from '@supabase/server'
 import type { Database } from '../../../src/types/database.ts'
 import { startOfBogotaDay } from '../_shared/bogota.ts'
 import { quizQuestionTexts } from '../_shared/quiz.ts'
-import { buildTutorContext, contextTracks } from '../_shared/tutorContext.ts'
+import { buildTutorContext, contextTracks, hasLesson } from '../_shared/tutorContext.ts'
 import { dailyLimitFrom, dailyLimitMessage, TutorError } from '../_shared/tutorErrors.ts'
 import { buildSystemPrompt } from '../_shared/tutorPrompts.ts'
 import { parseTutorRequest } from '../_shared/tutorRequest.ts'
@@ -82,7 +82,7 @@ export default {
         request.mode,
         contextTracks(context),
         buildTutorContext(context, now),
-        { avoidQuestions },
+        { avoidQuestions, hasLesson: hasLesson(context) },
       )
       const messages: ProviderMessage[] = [
         ...(request.mode === 'quiz' ? [] : trimToUserStart(history)),

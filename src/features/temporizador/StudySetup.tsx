@@ -6,18 +6,15 @@ import { ButtonLink } from '@/components/ui/ButtonLink'
 import { Hero } from '@/components/ui/Hero'
 import { SegmentedControl, type SegmentedOption } from '@/components/ui/SegmentedControl'
 import { Spinner } from '@/components/ui/Spinner'
-import { defaultSettings } from '@/features/ajustes/settingsApi'
-import { useUserSettings } from '@/features/ajustes/useUserSettings'
 import { topicStatuses } from '@/features/ruta/progressModel'
 import type { RoadmapData } from '@/features/ruta/RoadmapGate'
-import { unlockAudio } from '@/lib/alerts'
 import { nextTopic } from '@/lib/progress'
 import { activeFirst } from '@/lib/roadmap'
 import { NotificationToggle } from './NotificationToggle'
 import { studyTargets, type StudyTarget } from './studyTargets'
 import { TargetSearch } from './TargetSearch'
-import { createTimer, type TimerMode } from './timerModel'
-import { useTimerChange } from './useActiveTimer'
+import type { TimerMode } from './timerModel'
+import { useStartSession } from './useStartSession'
 
 const modeOptions: readonly SegmentedOption<TimerMode>[] = [
   { value: 'pomodoro', label: 'Pomodoro', icon: Timer },
@@ -45,24 +42,8 @@ export function StudySetup({ roadmap, progress, activeTrack }: RoadmapData) {
     defaultTargetKey(params, targets, suggestion && `tema:${suggestion.topic.id}`),
   )
   const [mode, setMode] = useState<TimerMode>('pomodoro')
-  const settings = useUserSettings().data ?? defaultSettings
-  const change = useTimerChange()
+  const { start, isPending, settings } = useStartSession()
   const selected = targets.find((target) => target.key === selectedKey)
-
-  function start() {
-    if (!selected) return
-    unlockAudio() // el toque en «Iniciar» permite que luego suene el aviso
-    change.mutate({
-      kind: 'start',
-      timer: createTimer({
-        mode,
-        target: selected.ref,
-        workMin: settings.pomodoro_work_min,
-        breakMin: settings.pomodoro_break_min,
-        now: new Date(),
-      }),
-    })
-  }
 
   const manualQuery = selected?.ref.topicId
     ? `?tema=${selected.ref.topicId}`
@@ -82,10 +63,10 @@ export function StudySetup({ roadmap, progress, activeTrack }: RoadmapData) {
         <Button
           variant="inverse"
           size="xl"
-          onClick={start}
-          disabled={!selected || change.isPending}
+          onClick={() => selected && start(mode, selected.ref)}
+          disabled={!selected || isPending}
         >
-          {change.isPending ? <Spinner /> : <Play className="size-6 fill-current" />}
+          {isPending ? <Spinner /> : <Play className="size-6 fill-current" />}
           Iniciar
         </Button>
       </Hero>

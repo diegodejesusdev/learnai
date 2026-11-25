@@ -31,7 +31,7 @@ export async function loadContextData(
   now: Date,
 ): Promise<TutorContextData> {
   const dailyPlan = request.mode === 'daily_plan'
-  const [tracks, phases, topics, statuses, topicNotes, projects, sessions, settings, week] =
+  const [tracks, phases, topics, statuses, topicNotes, lesson, projects, sessions, settings, week] =
     await Promise.all([
       db.from('tracks').select('id, title, goal').order('sort_order'),
       db
@@ -42,6 +42,9 @@ export async function loadContextData(
       db.from('topic_progress').select('topic_id, status'),
       request.topicId
         ? db.from('topic_progress').select('notes').eq('topic_id', request.topicId).maybeSingle()
+        : null,
+      request.topicId
+        ? db.from('lessons').select('content_md').eq('topic_id', request.topicId).maybeSingle()
         : null,
       db.from('project_progress').select('phase_id, status, notes, repo_url, demo_url'),
       db
@@ -55,6 +58,7 @@ export async function loadContextData(
       dailyPlan ? db.rpc('study_week_totals', { p_from: bogotaMondayKey(now) }) : null,
     ])
 
+  if (lesson?.error) console.error('tutor: no se pudo leer la lección', lesson.error.message)
   const topicRows = rows(topics)
   const toPhase = (phase: NonNullable<typeof phases.data>[number]): ContextPhase => ({
     id: phase.id,
@@ -80,7 +84,14 @@ export async function loadContextData(
     activeTrackId: settings?.data?.active_track_id ?? null,
     topicStatuses: Object.fromEntries(rows(statuses).map((row) => [row.topic_id, row.status])),
     projectStatuses: Object.fromEntries(projectRows.map((row) => [row.phase_id, row.status])),
-    topic: request.topicId ? { id: request.topicId, notes: topicNotes?.data?.notes ?? '' } : null,
+    topic: request.topicId
+      ? {
+          id: request.topicId,
+          notes: topicNotes?.data?.notes ?? '',
+          // Si no se pudo leer, el tutor responde igual, sin la lección.
+          lesson: lesson?.data?.content_md ?? null,
+        }
+      : null,
     project: request.phaseId
       ? {
           phaseId: request.phaseId,

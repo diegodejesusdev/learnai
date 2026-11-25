@@ -26,9 +26,11 @@ function contextLines(system: string): string[] {
   const start = system.indexOf('# Contexto del estudiante')
   const context = system
     .slice(start === -1 ? system.length : start)
+    // De la lección basta saber que llegó y qué tan larga es.
+    .replace(/<leccion>[^]*<\/leccion>/, (lesson) => `Lección: ${lesson.length} caracteres`)
     .split('\n')
     .filter((line) =>
-      /^(Ruta del|Tema:|Estado del tema:|Proyecto:|## Progreso|Temas hechos:|Esta semana|- )/.test(
+      /^(Ruta del|Tema:|Estado del tema:|Lección|Este tema aún|Proyecto:|## Progreso|Temas hechos:|Esta semana|- )/.test(
         line,
       ),
     )

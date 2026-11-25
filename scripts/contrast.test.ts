@@ -49,6 +49,11 @@ const textPairs: readonly [text: string, background: string, min: number][] = [
   ['done-fg', 'done', 7],
   ['danger', 'bg', 4.5],
   ['danger', 'surface', 4.5],
+  // El código de las lecciones va sobre surface.
+  ['code-keyword', 'surface', 4.5],
+  ['code-string', 'surface', 4.5],
+  ['code-value', 'surface', 4.5],
+  ['code-comment', 'surface', 4.5],
   ['danger-fg', 'danger', 4.5],
 ]
 

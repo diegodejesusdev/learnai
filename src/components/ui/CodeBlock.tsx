@@ -37,7 +37,12 @@ export function CodeBlock({ children }: { children?: ReactNode }) {
           {copied ? 'Copiado' : 'Copiar'}
         </button>
       </div>
-      <pre ref={preRef} className="overflow-x-auto p-3 text-sm leading-relaxed">
+      {/* tabIndex: un bloque ancho se desplaza de lado también con las flechas. */}
+      <pre
+        ref={preRef}
+        tabIndex={0}
+        className="overflow-x-auto p-3 text-sm leading-relaxed focus-visible:-outline-offset-4"
+      >
         {children}
       </pre>
     </div>

@@ -32,7 +32,8 @@ select is_empty(
 select is_empty(
   $$ select table_name, privilege_type from information_schema.role_table_grants
      where grantee = 'authenticated' and table_schema = 'public'
-       and table_name in ('curriculum_meta', 'tracks', 'phases', 'topics', 'checklist_items')
+       and table_name in
+         ('curriculum_meta', 'tracks', 'phases', 'topics', 'checklist_items', 'lessons')
        and privilege_type <> 'SELECT' $$,
   'El contenido de la ruta es de solo lectura para los usuarios'
 );

@@ -40,6 +40,11 @@ export const routes: RouteObject[] = [
               import('@/features/ruta/TopicPage').then((m) => ({ Component: m.TopicPage })),
           },
           {
+            path: 'ruta/tema/:topicId/leccion',
+            lazy: () =>
+              import('@/features/leccion/LessonPage').then((m) => ({ Component: m.LessonPage })),
+          },
+          {
             path: 'estudiar',
             lazy: () =>
               import('@/features/temporizador/StudyPage').then((m) => ({

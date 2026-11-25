@@ -387,6 +387,30 @@ A partir de la fase 2, también `npx supabase test db`.
 
 ---
 
+## Fase 10: Lecciones en local (24 nov 2026) · nube: pendiente de publicar
+
+**Objetivo:** leer la lección de cada tema en la app, también sin conexión, y que el tutor la conozca.
+
+**Decisiones de esta fase**
+- **Base:** tablas `lessons` (contenido, solo lectura) y `lesson_progress`, y la función `save_lesson_progress` (migración `20261125033638_lessons.sql`). Solo agrega.
+- **Contenido:** un `.md` por tema en `content/`. El seed los carga con las rutas; agregar lecciones no exige tocar código ni desplegar.
+- **Sin conexión:** el texto va en IndexedDB, no en la caché de `localStorage`.
+- **Dependencias nuevas:** `refractor`, `hast-util-to-jsx-runtime` e `idb` (y `fake-indexeddb` en los tests).
+
+**Entregables**
+- **Seed** de lecciones con revisión previa: un id que no existe en `topics` lo detiene sin escribir nada.
+- **Página de la lección** (`features/leccion`), «Estudiar lección» en el tema, «Lección leída» y «Descargar fase» en la fase.
+- **Tutor:** la lección en el contexto y el quiz sacado de ella.
+- **Exportar mis datos:** incluye las lecciones leídas (`formato: 3`).
+- **Tests:** parser de frontmatter, seed con un id inválido, lección con tabla y código, sin conexión, cola y pgTAP.
+
+**Cómo verificarla**
+- `npm test`, `npm run db:test` (126 comprobaciones) y `npm run seed` (debe mostrar `lessons: 9`).
+- **Orden en producción:** respaldo → `db push --remote` → `functions deploy tutor` → push → `npm run seed:cloud`.
+- **Móvil:** leer `cl-f0-t1` hasta el final (queda «Lección leída»), y abrirla en modo avión.
+
+---
+
 ## Decisiones pendientes
 
 | Decisión | Cuándo |

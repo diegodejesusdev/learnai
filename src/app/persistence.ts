@@ -42,13 +42,18 @@ const storage = {
   },
 }
 
+/**
+ * Lo que no se guarda aquí:
+ *  - las conversaciones del tutor (sin conexión no funciona);
+ *  - el temporizador activo (su copia local se reconcilia con Supabase: timerStorage.ts);
+ *  - el texto de las lecciones, que va en IndexedDB (lessonStore.ts): llenaría localStorage y
+ *    dejaría de guardarse la cola.
+ */
+const notPersisted: readonly unknown[] = ['tutor', 'active-timer', 'lesson', 'lesson-saved']
+
 const dehydrateOptions: DehydrateOptions = {
-  // No se guardan las conversaciones del tutor (sin conexión no funciona) ni el temporizador
-  // activo (ya tiene su propia copia local, que se reconcilia con Supabase: timerStorage.ts).
   shouldDehydrateQuery: (query) =>
-    query.state.status === 'success' &&
-    query.queryKey[0] !== 'tutor' &&
-    query.queryKey[0] !== 'active-timer',
+    query.state.status === 'success' && !notPersisted.includes(query.queryKey[0]),
   // La cola: cambios en pausa por falta de conexión. Los del temporizador (iniciar, pausar…)
   // no hacen falta: su copia local se sube sola al volver (reconcileTimer).
   shouldDehydrateMutation: (mutation) =>

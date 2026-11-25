@@ -1,7 +1,7 @@
 import type { ExportRows } from './exportApi'
 
 /** Versión del formato del archivo, por si algún día cambia. */
-export const EXPORT_FORMAT = 2
+export const EXPORT_FORMAT = 3
 
 /** Quita user_id: en un archivo de una sola persona no aporta nada. */
 function withoutUser<T extends { user_id: string }>(row: T): Omit<T, 'user_id'> {
@@ -28,9 +28,9 @@ const minutesOf = (sessions: readonly { duration_minutes: number }[]) =>
   sessions.reduce((sum, session) => sum + session.duration_minutes, 0)
 
 /**
- * El archivo que se descarga: tus ajustes, progreso con notas, sesiones y conversaciones con
- * el tutor (cada una con sus mensajes), más un resumen para revisarlo de un vistazo. Cada
- * registro lleva el id de su ruta.
+ * El archivo que se descarga: tus ajustes, progreso con notas, lecciones leídas, sesiones y
+ * conversaciones con el tutor (cada una con sus mensajes), más un resumen para revisarlo de un
+ * vistazo. Cada registro lleva el id de su ruta.
  */
 export function buildExport(rows: ExportRows, meta: { email: string; now: Date }) {
   const messagesByConversation = new Map<
@@ -62,6 +62,7 @@ export function buildExport(rows: ExportRows, meta: { email: string; now: Date }
       minutos_estudiados: minutesOf(rows.sessions),
       temas_con_notas: rows.topicProgress.filter((topic) => topic.notes.trim() !== '').length,
       temas_hechos: rows.topicProgress.filter((topic) => topic.status === 'hecho').length,
+      lecciones_leidas: rows.lessons.filter((lesson) => lesson.read_at !== null).length,
       conversaciones_con_el_tutor: rows.conversations.length,
       mensajes_con_el_tutor: rows.messages.length,
       quizzes: rows.quizResults.length,
@@ -88,6 +89,10 @@ export function buildExport(rows: ExportRows, meta: { email: string; now: Date }
       checklist: rows.checklist.map((item) => ({
         ...withoutUser(item),
         ruta: track.ofItem(item.item_id),
+      })),
+      lecciones: rows.lessons.map((lesson) => ({
+        ...withoutUser(lesson),
+        ruta: track.ofTarget(lesson.topic_id, null),
       })),
     },
     sesiones: sessions,

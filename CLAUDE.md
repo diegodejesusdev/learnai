@@ -5,14 +5,17 @@ App web personal para seguir varias rutas de estudio, definidas en `src/data/rou
 - **Ingeniería de datos** (`data-engineering.json`): 13 fases, 110 temas, 13 proyectos y una checklist final de 15 ítems. Sus ids empiezan por `de-`.
 - **Cloud** (`cloud.json`): 14 fases, 122 temas, 14 proyectos y una checklist final de 15 ítems. Sus ids empiezan por `cl-`.
 
+Cada tema puede tener una **lección** en Markdown (`content/<ruta>/<fase>/<id-del-tema>.md`).
+
 La usa una sola persona, en PC y en móvil. Toda la interfaz está en español.
 
 Módulos:
 - **Inicio**: minutos de hoy, racha, meta semanal, último tema, botón «Seguir estudiando» y progreso de cada ruta.
 - **Ruta**: elegir ruta; fases, temas, estados, notas, proyecto por fase, checklist final y progreso de cada una.
+- **Lecciones**: página de lectura de cada tema (índice, código con colores, respuestas ocultas), marcada como leída al llegar al final, y disponible sin conexión.
 - **Temporizador**: sesiones ligadas a un tema o a un proyecto, en modo Pomodoro o libre, y registro manual.
 - **Historial**: mapa de calor, rachas, horas por semana, por ruta y por fase, filtro por ruta, lista editable y exportación CSV.
-- **Tutor IA**: chat que conoce las rutas y el progreso, y se adapta a la ruta del tema. Modos: explicar, quiz, revisar proyecto y qué estudiar hoy.
+- **Tutor IA**: chat que conoce las rutas, el progreso y la lección del tema, y se adapta a su ruta. Modos: explicar, quiz, revisar proyecto y qué estudiar hoy.
 
 Especificación completa: `docs/SPEC.md`. Plan por fases: `docs/PLAN.md`. Configuración fuera del código (Supabase en la nube, Google, Vercel): `docs/SETUP.md`.
 
@@ -26,6 +29,7 @@ Especificación completa: `docs/SPEC.md`. Plan por fases: `docs/PLAN.md`. Config
 - vite-plugin-pwa
 - Supabase: Postgres con RLS, Auth (enlace mágico por correo con código de respaldo, y Google) y Edge Functions (Deno). Cliente `@supabase/supabase-js` con tipos generados.
 - Tutor: Edge Function `tutor` con proveedor según `TUTOR_PROVIDER` (`gemini` por defecto, `anthropic` como alternativa, `demo` para probar en local) y `TUTOR_MODEL`. Auth con `@supabase/server`; SDK oficiales `@google/genai` y `@anthropic-ai/sdk`. Markdown con `react-markdown` + `remark-gfm`
+- Lecciones: `react-markdown` + `remark-gfm`, `refractor` (colores del código) e `idb` (IndexedDB)
 - Fechas: `date-fns` + `@date-fns/tz`
 - Gráficas: Recharts 3, cargado con `lazy` solo en el Historial
 - Pruebas: Vitest (lógica pura) y pgTAP (`supabase test db`, para RLS)
@@ -37,10 +41,12 @@ Especificación completa: `docs/SPEC.md`. Plan por fases: `docs/PLAN.md`. Config
 ```
 LearnAI/
 ├── CLAUDE.md
+├── content/                   # Lecciones: <ruta>/<fase>/<id-del-tema>.md (frontmatter + Markdown)
 ├── docs/                      # SPEC.md, PLAN.md
 ├── public/                    # icon-wine.svg e íconos de la PWA
 ├── scripts/                   # seed-curriculum.ts (npm run seed) + routeFiles.ts, curriculumRows.ts y seedRoutes.ts
-│                              #   (lógica con test), test-tracks-migration.ts (npm run db:test:migracion)
+│                              #   (rutas), frontmatter.ts, lessonFiles.ts y seedLessons.ts (lecciones): lógica
+│                              #   con test; test-tracks-migration.ts (npm run db:test:migracion)
 ├── src/
 │   ├── main.tsx               # Monta providers + router
 │   ├── app/                   # routes.tsx, Providers (caché persistida), ThemeProvider, 404, error,
@@ -52,6 +58,7 @@ LearnAI/
 │   ├── features/              # Una carpeta por sección (nombres en español)
 │   │   ├── inicio/
 │   │   ├── ruta/
+│   │   ├── leccion/           # Página de la lección, lo leído y las copias sin conexión
 │   │   ├── temporizador/      # Sección «Estudiar»
 │   │   ├── historial/
 │   │   ├── tutor/
@@ -60,7 +67,8 @@ LearnAI/
 │   ├── data/
 │   │   ├── routes/            # Fuente de verdad del contenido: un JSON por ruta (se edita aquí)
 │   │   ├── curriculum.ts      # Las rutas para los tests: tracks, automationTrack, dataTrack, cloudTrack, phases
-│   ├── lib/                   # supabase.ts, env.ts, dates.ts, progress.ts, roadmap.ts (Track y rutas), theme.ts…
+│   ├── lib/                   # supabase.ts, env.ts, dates.ts, progress.ts, roadmap.ts (Track y rutas),
+│   │                          #   lessonSections.ts (parte una lección en secciones), theme.ts…
 │   ├── types/                 # database.ts (generado, no editar), curriculum.ts, progress.ts
 │   ├── styles/index.css       # Tailwind + tokens de color claro/oscuro
 │   └── test/setup.ts          # jest-dom + limpieza entre tests
@@ -102,6 +110,12 @@ LearnAI/
   - «Fase 1» existe en varias rutas: fuera de la página de una ruta se usa `trackPhaseLabel`.
   - La racha, la meta semanal, el mapa y las semanas cuentan todas las rutas juntas.
 - **Caché del dispositivo:** si cambia la forma de los datos de una consulta, cambia su clave (como `roadmapKey`). `CACHE_VERSION` no se toca: borraría también los cambios en cola que aún no se han subido (`src/app/upgradeFromV1.test.ts`).
+- **Lecciones:**
+  - El texto no va en la caché de TanStack Query: las claves `lesson` y `lesson-saved` están excluidas en `persistence.ts`, porque llenarían `localStorage` (unos 5 MB) y dejaría de guardarse la cola. Va en IndexedDB (`lessonStore.ts`): al abrir una lección o al descargar la fase. Al cerrar sesión se borra.
+  - `useLesson` muestra primero la copia del dispositivo y luego la de Supabase. `lesson-index` (qué temas tienen lección, sin texto) y `lesson-progress` (lo leído) sí van en la caché.
+  - Lo leído se guarda con `save_lesson_progress`: se queda con el porcentaje más alto y la primera lectura, así que la cola puede repetir o llegar tarde. Se guarda de 10 en 10 %.
+  - Un tema sin lección dice «Lección en preparación». Si el índice no cargó (`unknown`), se ofrece el enlace y la página de la lección decide.
+  - El resaltado (`HighlightedCode.tsx`) solo trae los lenguajes de las rutas; otro se agrega ahí.
 - **Temporizador:** el tiempo se calcula siempre desde la hora de inicio guardada (`timerModel.ts`). Nunca se cuentan segundos en memoria; `useNow` solo sirve para repintar.
 - **Sesiones y totales:**
   - Los totales (por día, semana y fase) los calculan las funciones SQL `study_*_totals`, en hora de Bogotá. No se suman sesiones en el navegador; solo el CSV las descarga todas.
@@ -117,7 +131,7 @@ LearnAI/
   - Los colores van con tokens (`fill="var(--meter)"`; los ejes, `var(--fg-muted)`).
   - Cada gráfica lleva una tabla «Ver los datos» (`ChartDataTable`).
   - El mapa de calor usa los tokens `heat-0` … `heat-4`.
-- **Tests de integración de UI:** usa `renderApp(ruta)` de `src/test/renderApp.tsx` y simula los `*Api.ts` con `vi.mock`. `src/test/setup.ts` ya simula `timerApi`, `settingsApi`, `historyApi` y `sessionsApi` (sin temporizador, con los ajustes por defecto y sin sesiones); cámbialos por test con `vi.mocked(...)`. `vi.clearAllMocks()` no deshace `mockResolvedValue`: vuelve a los valores por defecto en `beforeEach`.
+- **Tests de integración de UI:** usa `renderApp(ruta)` de `src/test/renderApp.tsx` y simula los `*Api.ts` con `vi.mock`. `src/test/setup.ts` ya simula `timerApi`, `settingsApi`, `historyApi`, `sessionsApi` y `lessonApi` (sin temporizador, con los ajustes por defecto, sin sesiones y sin lecciones); cámbialos por test con `vi.mocked(...)`. `vi.clearAllMocks()` no deshace `mockResolvedValue`: vuelve a los valores por defecto en `beforeEach`.
 - Imports con el alias `@/` → `src/` (por ejemplo `@/components/ui/Button`).
 - **Secciones nuevas:**
   - Se agregan en `src/app/routes.tsx` con `lazy` (se descargan al abrirlas).
@@ -161,6 +175,11 @@ LearnAI/
   - **Agregar una ruta** = agregar un JSON con su bloque `track` (`id`, `title`, `order`) y correr el seed. El tutor usa un perfil genérico; para afinarlo, se agrega uno en `_shared/tutorTracks.ts` (`always` = lo que recuerda en todas sus respuestas, como los costos en Cloud).
   - El seed hace upsert por id: se puede repetir sin duplicar. Antes de escribir revisa todas las rutas: un id repetido, o que en la base es de otra ruta, lo detiene. No borra ids que ya no estén en los JSON; los lista como aviso.
   - El test `src/data/curriculum.test.ts` falla si cambia algún id de una ruta.
+- **Lecciones (contenido)**:
+  - **Agregar lecciones** = copiar los `.md` a `content/<ruta>/<fase>/` y correr `npm run seed` (y `npm run seed:cloud`). No hace falta tocar código ni desplegar la app.
+  - El archivo se llama como el id del tema. Frontmatter: `id`, `track`, `phase`, `title`, `minutes` y `updated` (AAAA-MM-DD). Las secciones (`##`) son siempre las mismas (`LESSON_SECTIONS` en `src/lib/lessonSections.ts`).
+  - El seed falla, sin escribir nada, si el id no existe en `topics`, si la ruta o la fase no son las del tema, o si el frontmatter está mal. Solo avisa si falta una sección, si el título no es el del tema o si en la base hay una lección sin archivo (no la borra).
+  - Las lecciones se mantienen tal como las escribió Diego: no se les pasa Prettier.
 - **Git**: Claude hace commits solo cuando Diego lo pide, y no hace push sin permiso.
 
 ## Comandos
@@ -189,8 +208,8 @@ npm run db:reset      # Recrea la base local con todas las migraciones (luego: n
 npm run db:test       # Pruebas pgTAP de RLS y restricciones
 npm run db:test:migracion   # La migración de rutas sobre una copia con datos (no toca tu base)
 npm run db:types      # Regenera src/types/database.ts desde la base local
-npm run seed          # Carga las rutas de src/data/routes en Supabase local (.env.local)
-npm run seed:cloud    # Carga las rutas en la nube (.env.cloud)
+npm run seed          # Carga las rutas (src/data/routes) y las lecciones (content) en local (.env.local)
+npm run seed:cloud    # Lo mismo en la nube (.env.cloud)
 npm run seed:sesiones -- --correo <correo>   # 17 sesiones de prueba en local (--borrar las quita)
 
 npx supabase migration new <nombre>

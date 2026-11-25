@@ -9,6 +9,7 @@ export interface ExportRows {
   topicProgress: Tables<'topic_progress'>[]
   projectProgress: Tables<'project_progress'>[]
   checklist: Tables<'checklist_progress'>[]
+  lessons: Tables<'lesson_progress'>[]
   sessions: Tables<'study_sessions'>[]
   conversations: Tables<'tutor_conversations'>[]
   messages: Tables<'tutor_messages'>[]
@@ -44,6 +45,7 @@ export async function fetchExportRows(): Promise<ExportRows> {
     topicProgress,
     projectProgress,
     checklist,
+    lessons,
     sessions,
     conversations,
     messages,
@@ -62,6 +64,9 @@ export async function fetchExportRows(): Promise<ExportRows> {
     ),
     allRows((from, to) =>
       supabase.from('checklist_progress').select('*').order('item_id').range(from, to),
+    ),
+    allRows((from, to) =>
+      supabase.from('lesson_progress').select('*').order('topic_id').range(from, to),
     ),
     allRows((from, to) =>
       supabase.from('study_sessions').select('*').order('started_at').order('id').range(from, to),
@@ -99,6 +104,7 @@ export async function fetchExportRows(): Promise<ExportRows> {
     topicProgress,
     projectProgress,
     checklist,
+    lessons,
     sessions,
     conversations,
     messages,

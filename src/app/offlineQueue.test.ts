@@ -6,6 +6,8 @@ import {
   type DehydratedState,
 } from '@tanstack/react-query'
 import { afterEach, describe, expect, it, vi } from 'vitest'
+import { saveLessonProgress } from '@/features/leccion/lessonApi'
+import { saveLessonKey } from '@/features/leccion/lessonKeys'
 import { recordManualSession, type ManualSessionInput } from '@/features/temporizador/timerApi'
 import { manualSessionKey } from '@/features/temporizador/useActiveTimer'
 import { registerOfflineMutations } from './offlineMutations'
@@ -53,5 +55,27 @@ describe('cola sin conexión', () => {
     // Reanudar de nuevo no la repite (y si llegara dos veces, la base la ignora por su id).
     await after.resumePausedMutations()
     expect(recordManualSession).toHaveBeenCalledTimes(1)
+  })
+
+  it('una lección leída sin conexión se marca al volver, aunque cierres la app', async () => {
+    onlineManager.setOnline(false)
+    const before = new QueryClient()
+    registerOfflineMutations(before)
+    const read = { topicId: 'cl-f0-t1', scrollPct: 100, readAt: '2026-11-24T15:00:00.000Z' }
+    void before
+      .getMutationCache()
+      .build(before, { mutationKey: saveLessonKey })
+      .execute(read)
+      .catch(() => undefined)
+    await vi.waitFor(() => expect(before.getMutationCache().getAll()[0]?.state.isPaused).toBe(true))
+
+    const saved = JSON.parse(JSON.stringify(dehydrate(before))) as DehydratedState
+    const after = new QueryClient()
+    registerOfflineMutations(after)
+    hydrate(after, saved)
+
+    onlineManager.setOnline(true)
+    await after.resumePausedMutations()
+    expect(saveLessonProgress).toHaveBeenCalledExactlyOnceWith(read)
   })
 })

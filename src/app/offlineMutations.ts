@@ -1,6 +1,8 @@
 import type { QueryClient } from '@tanstack/react-query'
 import { saveUserSettings, type UserSettings } from '@/features/ajustes/settingsApi'
 import { settingsKey } from '@/features/ajustes/useUserSettings'
+import { saveLessonProgress, type LessonProgressInput } from '@/features/leccion/lessonApi'
+import { lessonProgressKey, saveLessonKey } from '@/features/leccion/lessonKeys'
 import {
   saveChecklistItem,
   saveProject,
@@ -66,6 +68,11 @@ export function registerOfflineMutations(queryClient: QueryClient): void {
       saveChecklistItem(itemId, done),
     scope: syncScope,
     onSettled: refreshProgress,
+  })
+  queryClient.setMutationDefaults(saveLessonKey, {
+    mutationFn: (input: LessonProgressInput) => saveLessonProgress(input),
+    scope: syncScope,
+    onSettled: () => queryClient.invalidateQueries({ queryKey: lessonProgressKey }),
   })
   queryClient.setMutationDefaults(settingsKey, {
     mutationFn: (patch: Partial<UserSettings>) => saveUserSettings(patch),

@@ -35,6 +35,15 @@ const rows: ExportRows = {
   ],
   projectProgress: [],
   checklist: [{ user_id: USER, item_id: 'de-c1', done: true, done_at: '2026-11-20T10:00:00Z' }],
+  lessons: [
+    {
+      user_id: USER,
+      topic_id: 'de-f1-t4',
+      read_at: '2026-11-20T10:00:00Z',
+      scroll_pct: 100,
+    },
+    { user_id: USER, topic_id: 'f1-t5', read_at: null, scroll_pct: 40 },
+  ],
   sessions: [
     {
       id: 's1',
@@ -151,11 +160,12 @@ describe('exportar mis datos', () => {
       minutos_estudiados: 75,
       temas_con_notas: 1,
       temas_hechos: 1,
+      lecciones_leidas: 1,
       conversaciones_con_el_tutor: 2,
       mensajes_con_el_tutor: 2,
       quizzes: 1,
     })
-    expect(data).toMatchObject({ app: 'LearnAI', formato: 2, cuenta: 'diego@prueba.local' })
+    expect(data).toMatchObject({ app: 'LearnAI', formato: 3, cuenta: 'diego@prueba.local' })
   })
 
   it('pone los mensajes dentro de su conversación', () => {
@@ -167,6 +177,18 @@ describe('exportar mis datos', () => {
   it('conserva notas y sesiones, sin el user_id', () => {
     expect(data.progreso.temas[0]).toMatchObject({ topic_id: 'f1-t5', notes: 'Firmas HMAC' })
     expect(JSON.stringify(data)).not.toContain(USER)
+  })
+
+  it('incluye las lecciones que leíste y las que llevas a medias', () => {
+    expect(data.progreso.lecciones).toEqual([
+      {
+        topic_id: 'de-f1-t4',
+        read_at: '2026-11-20T10:00:00Z',
+        scroll_pct: 100,
+        ruta: 'ingenieria-datos',
+      },
+      { topic_id: 'f1-t5', read_at: null, scroll_pct: 40, ruta: 'automatizacion' },
+    ])
   })
 
   it('cada registro lleva su ruta', () => {
