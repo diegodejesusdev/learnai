@@ -1,6 +1,7 @@
 import { CircleCheck, Download } from 'lucide-react'
 import { Button } from '@/components/ui/Button'
 import { Spinner } from '@/components/ui/Spinner'
+import { lessonAssetBase } from '@/lib/lessonImages'
 import { useOnline } from '@/lib/offline'
 import type { Phase } from '@/types/curriculum'
 import type { DownloadState } from './lessonModel'
@@ -16,7 +17,7 @@ function stateText({ pending, saved, changed }: DownloadState): string {
 }
 
 /** Guarda en el dispositivo todas las lecciones de la fase. Sin lecciones, no muestra nada. */
-export function DownloadPhase({ phase }: { phase: Phase }) {
+export function DownloadPhase({ phase, trackId }: { phase: Phase; trackId: string }) {
   const state = useDownloadState(phase.topics.map((topic) => topic.id))
   const download = useDownloadLessons()
   const online = useOnline()
@@ -38,7 +39,12 @@ export function DownloadPhase({ phase }: { phase: Phase }) {
         variant="secondary"
         className="py-2.5"
         disabled={!online || download.isPending}
-        onClick={() => download.mutate(state.pending)}
+        onClick={() =>
+          download.mutate({
+            topicIds: state.pending,
+            assetBase: lessonAssetBase(trackId, phase.id),
+          })
+        }
       >
         {download.isPending ? <Spinner /> : <Download className="size-4 shrink-0" />}
         Descargar fase para leer sin conexión

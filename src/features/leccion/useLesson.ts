@@ -1,5 +1,7 @@
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { fetchLesson, fetchLessonIndex, type Lesson, type LessonInfo } from './lessonApi'
+import { lessonImageUrls } from '@/lib/lessonImages'
+import { cacheLessonImages } from './lessonImageCache'
 import { lessonIndexKey, lessonKey, savedLessonKey, savedLessonsKey } from './lessonKeys'
 import { readSavedLesson, saveLessons } from './lessonStore'
 
@@ -42,7 +44,7 @@ export type LessonState =
  * La lección: primero la copia del dispositivo (al instante y sin conexión) y, si hay internet, la
  * de Supabase, que además queda guardada.
  */
-export function useLesson(topicId: string): LessonState {
+export function useLesson(topicId: string, assetBase: string): LessonState {
   const queryClient = useQueryClient()
   const availability = useLessonAvailability(topicId)
   const saved = useQuery({
@@ -60,6 +62,7 @@ export function useLesson(topicId: string): LessonState {
         void saveLessons([lesson]).then(() =>
           queryClient.invalidateQueries({ queryKey: savedLessonsKey }),
         )
+        void cacheLessonImages(lessonImageUrls(lesson.content, assetBase))
       }
       return lesson
     },

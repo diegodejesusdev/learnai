@@ -33,10 +33,16 @@ describe('lecciones guardadas en el dispositivo', () => {
     expect(await savedHashes(['cl-f0-t1', 'cl-f0-t2'])).toEqual({ 'cl-f0-t1': 'hash-cl-f0-t1' })
   })
 
-  it('al cerrar sesión se borran', async () => {
+  it('al cerrar sesión se borran, con sus imágenes', async () => {
+    const deleted: string[] = []
+    vi.stubGlobal('caches', {
+      delete: (name: string) => Promise.resolve(void deleted.push(name)),
+    })
     await saveLessons([lesson('cl-f0-t1')])
     await clearSavedLessons()
     expect(await readSavedLesson('cl-f0-t1')).toBeNull()
+    expect(deleted).toEqual(['learnai-lesson-images'])
+    vi.unstubAllGlobals()
   })
 })
 

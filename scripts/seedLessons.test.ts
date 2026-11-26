@@ -30,6 +30,7 @@ function lesson(overrides: Partial<LessonFile> = {}): LessonFile {
     updated: '2026-11-24',
     content: SECTIONS.map((section) => `## ${section}\n\nTexto.\n`).join('\n'),
     hash: 'abc',
+    images: [],
     ...overrides,
   }
 }

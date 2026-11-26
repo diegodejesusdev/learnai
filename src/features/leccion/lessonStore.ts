@@ -1,5 +1,6 @@
 import { openDB, type DBSchema, type IDBPDatabase } from 'idb'
 import type { Lesson } from './lessonApi'
+import { clearLessonImages } from './lessonImageCache'
 
 // Lecciones guardadas en el dispositivo (IndexedDB), para leerlas sin conexión. No van en la copia
 // de TanStack Query (src/app/persistence.ts): esa está en localStorage, que solo tiene unos 5 MB;
@@ -59,6 +60,7 @@ export async function savedHashes(
 
 /** Al cerrar sesión: en el dispositivo no queda nada. */
 export async function clearSavedLessons(): Promise<void> {
+  await clearLessonImages()
   try {
     await (await open()).clear('lessons')
   } catch {

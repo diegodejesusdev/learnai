@@ -20,6 +20,10 @@ Saber exactamente qué protege AWS y qué te toca proteger a ti, para no dejar h
 
 ## Explicación
 
+![Dos bloques: arriba lo que proteges tú (datos, permisos, redes, sistema operativo y configuración); abajo lo que protege AWS (centros de datos, hardware, virtualización y software administrado); al pie, una flecha que muestra que tu trabajo disminuye de EC2 a RDS y a S3 o Lambda](img/cl-f0-t4-responsabilidad.svg)
+
+*La línea entre los dos bloques se mueve según el servicio, pero tus datos y tus permisos siempre son tuyos.*
+
 ### Las dos mitades
 
 | AWS protege (DE la nube) | Tú proteges (EN la nube) |

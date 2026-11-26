@@ -139,6 +139,13 @@ describe('lección del tema', () => {
     expect(context).toContain(`<leccion>\n${lesson.trim()}\n</leccion>`)
   })
 
+  it('explica cómo aparecen las imágenes: su descripción dice qué muestra el diagrama', () => {
+    const context = withLesson('## Explicación\n\n![Dos barras: arriba tú, abajo AWS](img/a.svg)\n')
+    expect(context).toContain('![descripción](archivo)')
+    expect(context).toContain('Dos barras: arriba tú, abajo AWS')
+    expect(withLesson(null)).not.toContain('![descripción]')
+  })
+
   it('sin lección lo dice, y no deja un bloque vacío', () => {
     for (const text of [null, '   ']) {
       const context = withLesson(text)

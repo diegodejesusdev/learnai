@@ -63,6 +63,9 @@
   --code-value: #5b3a78;
   --code-comment: #6b6064;
 
+  /* Fondo de los diagramas de las lecciones: blanco también en oscuro (son imágenes con fondo propio). */
+  --diagram: #ffffff;
+
   /* Mapa de calor: un solo tono, de claro (poco) a oscuro (mucho). */
   --heat-0: #ece7e9;
   --heat-1: #dda9b8;
@@ -116,6 +119,8 @@
   --code-value: #c9a9e6;
   --code-comment: #a4969c;
 
+  --diagram: #ffffff;
+
   /* En oscuro la escala se invierte: poco = oscuro, mucho = brillante. */
   --heat-0: #262023;
   --heat-1: #6b2239;
@@ -160,6 +165,8 @@
 
   --color-danger: var(--danger);
   --color-danger-fg: var(--danger-fg);
+
+  --color-diagram: var(--diagram);
 
   --color-code-keyword: var(--code-keyword);
   --color-code-string: var(--code-string);

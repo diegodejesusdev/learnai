@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" role="img" aria-label="Cómo se leen los permisos -rwxr-x--- y su valor 750" font-family="DejaVu Sans, system-ui, -apple-system, Segoe UI, Roboto, sans-serif">
+  <rect x="1" y="1" width="638" height="398" rx="16" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="2"/>
+  <text x="32" y="44" font-size="22" font-weight="700" fill="#0F172A">Cómo se leen los permisos</text>
+  <g font-family="DejaVu Sans Mono, monospace" font-size="26" font-weight="700" text-anchor="middle">
+    <rect x="40" y="80" width="44" height="56" rx="8" fill="#F1F5F9" stroke="#94A3B8"/><text x="62" y="117" fill="#334155">-</text>
+    <rect x="104" y="80" width="44" height="56" rx="8" fill="#DCFCE7" stroke="#16A34A"/><text x="126" y="117" fill="#14532D">r</text>
+    <rect x="150" y="80" width="44" height="56" rx="8" fill="#DCFCE7" stroke="#16A34A"/><text x="172" y="117" fill="#14532D">w</text>
+    <rect x="196" y="80" width="44" height="56" rx="8" fill="#DCFCE7" stroke="#16A34A"/><text x="218" y="117" fill="#14532D">x</text>
+    <rect x="262" y="80" width="44" height="56" rx="8" fill="#DBEAFE" stroke="#2563EB"/><text x="284" y="117" fill="#1E3A8A">r</text>
+    <rect x="308" y="80" width="44" height="56" rx="8" fill="#DBEAFE" stroke="#2563EB"/><text x="330" y="117" fill="#1E3A8A">-</text>
+    <rect x="354" y="80" width="44" height="56" rx="8" fill="#DBEAFE" stroke="#2563EB"/><text x="376" y="117" fill="#1E3A8A">x</text>
+    <rect x="420" y="80" width="44" height="56" rx="8" fill="#F1F5F9" stroke="#94A3B8"/><text x="442" y="117" fill="#475569">-</text>
+    <rect x="466" y="80" width="44" height="56" rx="8" fill="#F1F5F9" stroke="#94A3B8"/><text x="488" y="117" fill="#475569">-</text>
+    <rect x="512" y="80" width="44" height="56" rx="8" fill="#F1F5F9" stroke="#94A3B8"/><text x="534" y="117" fill="#475569">-</text>
+  </g>
+  <g font-size="15" text-anchor="middle">
+    <text x="62" y="166" fill="#475569">tipo</text>
+    <text x="62" y="186" fill="#475569">(- archivo,</text>
+    <text x="62" y="204" fill="#475569">d carpeta)</text>
+    <text x="172" y="166" font-size="17" font-weight="700" fill="#14532D">Dueño</text>
+    <text x="330" y="166" font-size="17" font-weight="700" fill="#1E3A8A">Grupo</text>
+    <text x="488" y="166" font-size="17" font-weight="700" fill="#334155">Otros</text>
+    <text x="172" y="196" fill="#14532D">4 + 2 + 1</text>
+    <text x="330" y="196" fill="#1E3A8A">4 + 0 + 1</text>
+    <text x="488" y="196" fill="#334155">0 + 0 + 0</text>
+    <circle cx="172" cy="236" r="24" fill="#16A34A"/><text x="172" y="245" font-size="24" font-weight="700" fill="#FFFFFF">7</text>
+    <circle cx="330" cy="236" r="24" fill="#2563EB"/><text x="330" y="245" font-size="24" font-weight="700" fill="#FFFFFF">5</text>
+    <circle cx="488" cy="236" r="24" fill="#64748B"/><text x="488" y="245" font-size="24" font-weight="700" fill="#FFFFFF">0</text>
+  </g>
+  <rect x="32" y="284" width="576" height="88" rx="12" fill="#F8FAFC" stroke="#E2E8F0"/>
+  <g font-size="16" fill="#334155"><text x="52" y="316">r = leer (4)</text><text x="190" y="316">w = escribir (2)</text><text x="358" y="316">x = ejecutar o entrar (1)</text></g>
+  <text x="52" y="350" font-size="18" fill="#0F172A" font-family="DejaVu Sans Mono, monospace" font-weight="700">chmod 750 archivo</text>
+  <text x="290" y="350" font-size="16" fill="#334155">deja exactamente estos permisos</text>
+</svg>

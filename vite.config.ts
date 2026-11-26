@@ -1,13 +1,50 @@
+import { createReadStream } from 'node:fs'
+import { readFile, stat } from 'node:fs/promises'
 import { fileURLToPath } from 'node:url'
 import tailwindcss from '@tailwindcss/vite'
 import react from '@vitejs/plugin-react'
 import { VitePWA } from 'vite-plugin-pwa'
-import { defineConfig } from 'vitest/config'
+import { defineConfig, type Plugin } from 'vitest/config'
+import { LESSON_IMAGES_CACHE } from './src/lib/lessonImages.ts'
+import { contentFileForUrl, imageContentType, listLessonImages } from './scripts/lessonImages.ts'
+
+const CONTENT_DIR = fileURLToPath(new URL('./content', import.meta.url))
+
+/**
+ * Las imágenes de las lecciones (content/<ruta>/<fase>/img/) se publican en lessons/<ruta>/<fase>/img/.
+ * Agregar una lección con diagramas = copiar el .md y su img/ y desplegar la app (el texto va a la
+ * base con el seed; las imágenes, con el build).
+ */
+function lessonImages(): Plugin {
+  return {
+    name: 'learnai-lesson-images',
+    async generateBundle() {
+      for (const { source, url } of await listLessonImages(CONTENT_DIR)) {
+        this.emitFile({ type: 'asset', fileName: url, source: await readFile(source) })
+      }
+    },
+    // En desarrollo se sirven desde content/, sin copiarlas.
+    configureServer(server) {
+      server.middlewares.use((request, response, next) => {
+        const file = contentFileForUrl(CONTENT_DIR, (request.url ?? '').split('?')[0] ?? '')
+        if (file === null) return next()
+        stat(file).then(
+          () => {
+            response.setHeader('Content-Type', imageContentType(file))
+            createReadStream(file).pipe(response)
+          },
+          () => next(),
+        )
+      })
+    },
+  }
+}
 
 export default defineConfig({
   plugins: [
     react(),
     tailwindcss(),
+    lessonImages(),
     VitePWA({
       // La app avisa cuando hay una versión nueva y la instala al tocar «Actualizar»
       // (src/app/UpdatePrompt.tsx registra el service worker).
@@ -50,7 +87,20 @@ export default defineConfig({
         // la app abre sin conexión. Los datos se guardan aparte (TanStack Query persistido).
         globPatterns: ['**/*.{js,css,html,svg,png,ico,woff2}'],
         // De la fuente Inter basta el latín (con tildes y ñ); los demás alfabetos no se usan.
-        globIgnores: ['**/*-{cyrillic,cyrillic-ext,greek,greek-ext,vietnamese}-*.woff2'],
+        globIgnores: [
+          '**/*-{cyrillic,cyrillic-ext,greek,greek-ext,vietnamese}-*.woff2',
+          'lessons/**',
+        ],
+        // Los diagramas de las lecciones no se bajan todos al instalar: se guardan con su lección,
+        // al verlos, al abrirla o al descargar la fase (src/features/leccion/lessonImageCache.ts).
+        // Se sirven de la caché y se renuevan por detrás.
+        runtimeCaching: [
+          {
+            urlPattern: ({ url }) => url.pathname.startsWith('/lessons/'),
+            handler: 'StaleWhileRevalidate',
+            options: { cacheName: LESSON_IMAGES_CACHE },
+          },
+        ],
         navigateFallback: '/index.html',
         cleanupOutdatedCaches: true,
       },

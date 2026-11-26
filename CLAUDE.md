@@ -41,7 +41,8 @@ Especificación completa: `docs/SPEC.md`. Plan por fases: `docs/PLAN.md`. Config
 ```
 LearnAI/
 ├── CLAUDE.md
-├── content/                   # Lecciones: <ruta>/<fase>/<id-del-tema>.md (frontmatter + Markdown)
+├── content/                   # Lecciones: <ruta>/<fase>/<id-del-tema>.md (frontmatter + Markdown) y sus
+│                              #   diagramas en <ruta>/<fase>/img/ (el build los copia a lessons/)
 ├── docs/                      # SPEC.md, PLAN.md
 ├── public/                    # icon-wine.svg e íconos de la PWA
 ├── scripts/                   # seed-curriculum.ts (npm run seed) + routeFiles.ts, curriculumRows.ts y seedRoutes.ts
@@ -115,6 +116,8 @@ LearnAI/
   - `useLesson` muestra primero la copia del dispositivo y luego la de Supabase. `lesson-index` (qué temas tienen lección, sin texto) y `lesson-progress` (lo leído) sí van en la caché.
   - Lo leído se guarda con `save_lesson_progress`: se queda con el porcentaje más alto y la primera lectura, así que la cola puede repetir o llegar tarde. Se guarda de 10 en 10 %.
   - Un tema sin lección dice «Lección en preparación». Si el índice no cargó (`unknown`), se ofrece el enlace y la página de la lección decide.
+  - **Imágenes:** el Markdown las llama `![descripción](img/archivo.svg)`; `vite.config.ts` copia `content/*/*/img/` al build como `lessons/<ruta>/<fase>/img/` y `LessonImage` reescribe la ruta (`lessonAssetBase`). Una imagen sola en su párrafo es una `<figure>` y la cursiva de justo debajo, su pie (`remarkLessonFigure.ts`). Se muestra a todo el ancho sobre `bg-diagram` (blanco también en oscuro) y se amplía en `ImageLightbox`.
+  - Las imágenes no están en la instalación del service worker (`globIgnores: lessons/**`): van en la caché `learnai-lesson-images` (`runtimeCaching`), que se llena al verlas, al abrir la lección y al descargar la fase (`lessonImageCache.ts`). Al cerrar sesión se borra.
   - El resaltado (`HighlightedCode.tsx`) solo trae los lenguajes de las rutas; otro se agrega ahí.
 - **Temporizador:** el tiempo se calcula siempre desde la hora de inicio guardada (`timerModel.ts`). Nunca se cuentan segundos en memoria; `useNow` solo sirve para repintar.
 - **Sesiones y totales:**
@@ -176,7 +179,8 @@ LearnAI/
   - El seed hace upsert por id: se puede repetir sin duplicar. Antes de escribir revisa todas las rutas: un id repetido, o que en la base es de otra ruta, lo detiene. No borra ids que ya no estén en los JSON; los lista como aviso.
   - El test `src/data/curriculum.test.ts` falla si cambia algún id de una ruta.
 - **Lecciones (contenido)**:
-  - **Agregar lecciones** = copiar los `.md` a `content/<ruta>/<fase>/` y correr `npm run seed` (y `npm run seed:cloud`). No hace falta tocar código ni desplegar la app.
+  - **Agregar lecciones** = copiar los `.md` a `content/<ruta>/<fase>/` y correr `npm run seed` (y `npm run seed:cloud`). No hace falta tocar código. **Si traen imágenes** (`img/`), también hay que desplegar la app (commit y push): el texto va a la base con el seed, pero las imágenes viajan con el build.
+  - El archivo debe estar en `content/<track>/<phase>/` (la carpeta es la ruta y la fase del frontmatter): de ahí sale la dirección de sus imágenes. Solo se admiten imágenes de la carpeta `img/` de su fase (svg, png, jpg o webp); una externa o inexistente detiene el seed. Los SVG no llevan scripts (lo revisa un test).
   - El archivo se llama como el id del tema. Frontmatter: `id`, `track`, `phase`, `title`, `minutes` y `updated` (AAAA-MM-DD). Las secciones (`##`) son siempre las mismas (`LESSON_SECTIONS` en `src/lib/lessonSections.ts`).
   - El seed falla, sin escribir nada, si el id no existe en `topics`, si la ruta o la fase no son las del tema, o si el frontmatter está mal. Solo avisa si falta una sección, si el título no es el del tema o si en la base hay una lección sin archivo (no la borra).
   - Las lecciones se mantienen tal como las escribió Diego: no se les pasa Prettier.

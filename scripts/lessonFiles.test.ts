@@ -70,6 +70,29 @@ describe('parseLesson', () => {
     }
   })
 
+  it('el archivo va en la carpeta de su ruta y de su fase (de ahí salen las direcciones de las imágenes)', () => {
+    expect(() => parseLesson(lessonText(), 'cloud/cl-f1/cl-f0-t1.md')).toThrow(
+      'cloud/cl-f1/cl-f0-t1.md: debe estar en content/cloud/cl-f0/ (ruta «cloud», fase «cl-f0»).',
+    )
+    expect(() => parseLesson(lessonText(), 'cl-f0-t1.md')).toThrow(
+      'debe estar en content/cloud/cl-f0/',
+    )
+  })
+
+  it('anota las imágenes que usa, sin repetirlas', () => {
+    const body = '## Objetivo\n\n![Uno](img/a.svg)\n\n![Otra vez](img/a.svg)\n\n![Dos](img/b.png)'
+    expect(parseLesson(lessonText({}, body), PATH).images).toEqual(['img/a.svg', 'img/b.png'])
+    expect(parseLesson(lessonText(), PATH).images).toEqual([])
+  })
+
+  it('solo se admiten imágenes de img/: una externa o de otra carpeta se rechaza', () => {
+    for (const src of ['https://sitio.com/a.svg', '../otra/img/a.svg', 'a.svg']) {
+      expect(() => parseLesson(lessonText({}, `![x](${src})`), PATH)).toThrow(
+        `cloud/cl-f0/cl-f0-t1.md: la imagen «${src}» no sirve: usa una ruta como img/archivo.svg (svg, png, jpg o webp).`,
+      )
+    }
+  })
+
   it('el id debe ser el nombre del archivo', () => {
     expect(() => parseLesson(lessonText({ id: 'cl-f0-t2' }), PATH)).toThrow(
       'cloud/cl-f0/cl-f0-t1.md: el id «cl-f0-t2» no coincide con el nombre del archivo.',
@@ -100,6 +123,10 @@ describe('loadLessons', () => {
       [1, 2, 3, 4, 5, 6, 7, 8, 9].map((n) => `cl-f0-t${n}`),
     )
     expect(first[0]?.content.startsWith('## Objetivo')).toBe(true)
+    // Las imágenes que usan existen (si no, loadLessons falla) y quedan anotadas.
+    expect(lessons.find((lesson) => lesson.id === 'cl-f0-t1')?.images).toEqual([
+      'img/cl-f0-t1-capacidad.svg',
+    ])
   })
 
   it('busca en todas las carpetas y solo mira los .md', async () => {
@@ -117,6 +144,23 @@ describe('loadLessons', () => {
   it('los archivos ocultos que copia el Mac (._x.md) no son lecciones', async () => {
     await write('cloud/cl-f0/cl-f0-t1.md', lessonText())
     await write('cloud/cl-f0/._cl-f0-t1.md', 'basura')
+    expect(await loadLessons(dir)).toHaveLength(1)
+  })
+
+  it('una imagen que no está en img/ lo dice, con el archivo y el nombre', async () => {
+    await write(
+      'cloud/cl-f0/cl-f0-t1.md',
+      lessonText({}, '![x](img/falta.svg)\n\n![y](img/esta.svg)'),
+    )
+    await write('cloud/cl-f0/img/esta.svg', '<svg/>')
+    await expect(loadLessons(dir)).rejects.toThrow(
+      'cloud/cl-f0/cl-f0-t1.md: falta la imagen img/falta.svg (debe estar en content/cloud/cl-f0/img/).',
+    )
+  })
+
+  it('con todas sus imágenes, carga', async () => {
+    await write('cloud/cl-f0/cl-f0-t1.md', lessonText({}, '![y](img/esta.svg)'))
+    await write('cloud/cl-f0/img/esta.svg', '<svg/>')
     expect(await loadLessons(dir)).toHaveLength(1)
   })
 

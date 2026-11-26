@@ -21,6 +21,10 @@ Entender qué son las regiones, las zonas de disponibilidad y las ubicaciones de
 
 ## Explicación
 
+![Una región con tres zonas de disponibilidad, cada una con dos centros de datos y unidas por fibra; abajo, un usuario que se conecta a una ubicación de borde de CloudFront, que va a la región si el contenido no está en caché](img/cl-f0-t5-regiones.svg)
+
+*Una región tiene al menos tres zonas separadas. El borde acerca el contenido al usuario.*
+
 ### Regiones
 
 AWS tiene decenas de regiones en el mundo; con la región de Chile, que abrió a clientes seleccionados en noviembre de 2026, son 39. Cada una es independiente: lo que creas en una región no aparece en otra a menos que lo copies.

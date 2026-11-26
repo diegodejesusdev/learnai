@@ -39,6 +39,18 @@ const CONTENT = [
   '',
   '## Explicación',
   '',
+  '![Dos gráficas: capacidad fija frente a capacidad elástica](img/cl-f0-t1-capacidad.svg)',
+  '',
+  '*Con capacidad fija pagas por el pico todo el tiempo.*',
+  '',
+  '![Sin pie](img/cl-f0-t4-responsabilidad.svg)',
+  '',
+  'Un párrafo normal, y después uno en cursiva que no es pie de nada:',
+  '',
+  '*Esta cursiva no va debajo de una imagen.*',
+  '',
+  '![Externa](https://sitio.com/rastreo.svg)',
+  '',
   '### Las cinco características',
   '',
   '| Característica | Ejemplo |',
@@ -238,6 +250,130 @@ describe('leer una lección', () => {
       expect(screen.getByRole('button', { name: 'Ver respuestas' })).toBeInTheDocument()
       unmount()
     }
+  })
+})
+
+describe('imágenes', () => {
+  const SRC = '/lessons/cloud/cl-f0/img/cl-f0-t1-capacidad.svg'
+  const open = async () => {
+    const view = renderApp(URL)
+    await section('Objetivo')
+    return view
+  }
+  const trigger = () =>
+    screen.getByRole('button', {
+      name: 'Ampliar: Dos gráficas: capacidad fija frente a capacidad elástica',
+    })
+
+  it('la ruta relativa se reescribe a la del build de su fase', async () => {
+    await open()
+    const image = trigger().querySelector('img')
+    expect(image).toHaveAttribute('src', SRC)
+    expect(
+      screen.getByRole('button', { name: /^Ampliar: Sin pie/ }).querySelector('img'),
+    ).toHaveAttribute('src', '/lessons/cloud/cl-f0/img/cl-f0-t4-responsabilidad.svg')
+  })
+
+  it('va a todo el ancho y sobre fondo blanco, también en modo oscuro', async () => {
+    await open()
+    const figure = trigger().closest('figure')
+    expect(figure).not.toBeNull()
+    // bg-diagram es blanco en los dos temas (src/styles/index.css).
+    expect(trigger()).toHaveClass('bg-diagram', 'w-full')
+    expect(trigger().querySelector('img')).toHaveClass('w-full')
+  })
+
+  it('la cursiva de justo debajo es el pie de la imagen', async () => {
+    await open()
+    const caption = screen.getByText('Con capacidad fija pagas por el pico todo el tiempo.')
+    expect(caption.tagName).toBe('FIGCAPTION')
+    expect(caption.closest('figure')).toBe(trigger().closest('figure'))
+  })
+
+  it('una imagen sin cursiva debajo no lleva pie, y una cursiva suelta sigue siendo texto', async () => {
+    await open()
+    const bare = screen.getByRole('button', { name: /^Ampliar: Sin pie/ }).closest('figure')
+    expect(bare?.querySelector('figcaption')).toBeNull()
+    const loose = screen.getByText('Esta cursiva no va debajo de una imagen.')
+    expect(loose.tagName).toBe('EM')
+    expect(loose.closest('figure')).toBeNull()
+  })
+
+  it('una imagen externa no se pide: queda su descripción', async () => {
+    await open()
+    expect(document.querySelector('img[src*="sitio.com"]')).toBeNull()
+    expect(screen.getByText(/No se pudo mostrar la imagen: Externa/)).toBeInTheDocument()
+  })
+
+  it('si no carga (sin conexión y sin copia), muestra su descripción y la lección sigue', async () => {
+    await open()
+    fireEvent.error(trigger().querySelector('img') as HTMLImageElement)
+    expect(
+      await screen.findByText(
+        'No se pudo mostrar la imagen: Dos gráficas: capacidad fija frente a capacidad elástica',
+      ),
+    ).toBeInTheDocument()
+    expect(screen.getByRole('heading', { level: 2, name: 'Repaso' })).toBeInTheDocument()
+  })
+
+  it('tocarla la amplía: más grande, con zoom y se cierra con Escape', async () => {
+    const user = userEvent.setup()
+    await open()
+    await user.click(trigger())
+    const dialog = await screen.findByRole('dialog', { name: 'Imagen ampliada' })
+    expect(within(dialog).getByRole('img')).toHaveAttribute('src', SRC)
+    expect(within(dialog).getByRole('button', { name: 'Cerrar' })).toHaveFocus()
+
+    const zoom = within(dialog).getByRole('button', { name: 'Acercar' })
+    expect(within(dialog).getByTestId('lightbox-image')).toHaveClass('w-full')
+    await user.click(zoom)
+    expect(within(dialog).getByRole('button', { name: 'Alejar' })).toBeInTheDocument()
+    expect(within(dialog).getByTestId('lightbox-image')).toHaveClass('w-[220%]')
+    // Tocar la imagen también alterna el zoom.
+    await user.click(within(dialog).getByRole('img'))
+    expect(within(dialog).getByRole('button', { name: 'Acercar' })).toBeInTheDocument()
+
+    await user.keyboard('{Escape}')
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    // El foco vuelve a la imagen que tocaste.
+    expect(trigger()).toHaveFocus()
+  })
+
+  it('«Cerrar» la cierra, y mientras está abierta la página de atrás no se desplaza', async () => {
+    const user = userEvent.setup()
+    await open()
+    await user.click(trigger())
+    await screen.findByRole('dialog')
+    expect(document.body.style.overflow).toBe('hidden')
+    await user.click(screen.getByRole('button', { name: 'Cerrar' }))
+    expect(screen.queryByRole('dialog')).not.toBeInTheDocument()
+    expect(document.body.style.overflow).toBe('')
+  })
+
+  it('el Tab se queda dentro de la ventana', async () => {
+    const user = userEvent.setup()
+    await open()
+    await user.click(trigger())
+    const dialog = await screen.findByRole('dialog')
+    const close = within(dialog).getByRole('button', { name: 'Cerrar' })
+    const zoom = within(dialog).getByRole('button', { name: 'Acercar' })
+    await user.tab()
+    expect(zoom).toHaveFocus()
+    await user.tab()
+    expect(close).toHaveFocus()
+  })
+
+  it('al abrir una lección con internet, sus imágenes quedan guardadas junto a ella', async () => {
+    const added: string[] = []
+    vi.stubGlobal('caches', {
+      open: () => Promise.resolve({ add: (url: string) => Promise.resolve(void added.push(url)) }),
+      delete: () => Promise.resolve(true),
+    })
+    await open()
+    await waitFor(() =>
+      expect(added).toEqual([SRC, '/lessons/cloud/cl-f0/img/cl-f0-t4-responsabilidad.svg']),
+    )
+    vi.unstubAllGlobals()
   })
 })
 
@@ -507,6 +643,25 @@ describe('sin conexión', () => {
 
 describe('descargar una fase', () => {
   const button = 'Descargar fase para leer sin conexión'
+
+  it('guarda también las imágenes de sus lecciones', async () => {
+    const added: string[] = []
+    vi.stubGlobal('caches', {
+      open: () => Promise.resolve({ add: (url: string) => Promise.resolve(void added.push(url)) }),
+      delete: () => Promise.resolve(true),
+    })
+    renderApp('/ruta/cl-f0')
+    await userEvent.click(await screen.findByRole('button', { name: button }))
+    await screen.findByText('Las 3 lecciones de esta fase están en este dispositivo.')
+    // Las tres lecciones de la prueba traen las mismas dos imágenes.
+    expect(new Set(added)).toEqual(
+      new Set([
+        '/lessons/cloud/cl-f0/img/cl-f0-t1-capacidad.svg',
+        '/lessons/cloud/cl-f0/img/cl-f0-t4-responsabilidad.svg',
+      ]),
+    )
+    vi.unstubAllGlobals()
+  })
 
   it('guarda todas sus lecciones de una vez', async () => {
     renderApp('/ruta/cl-f0')

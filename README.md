@@ -119,12 +119,13 @@ Cada ruta es un archivo de [`src/data/routes`](src/data/routes). Para cambiar un
 Una lección es un archivo `content/<ruta>/<fase>/<id-del-tema>.md`. No hay que tocar código:
 
 1. Copia los archivos a su carpeta. Por ejemplo, los de la fase 1 de Cloud, a `content/cloud/cl-f1/`.
-2. Cárgalos:
+2. Si traen diagramas, copia también su carpeta `img/` (`content/cloud/cl-f1/img/`).
+3. Cárgalos:
    ```bash
    npm run seed          # base local
-   npm run seed:cloud    # nube: aparecen en la app al volver a abrirla
+   npm run seed:cloud    # nube: el texto aparece en la app al volver a abrirla
    ```
-3. Guárdalos en git cuando quieras (la app los lee de Supabase, no del repo).
+4. **Sin imágenes** ya terminaste: la app lee el texto de Supabase. **Con imágenes**, haz commit y push: los diagramas viajan con el build de Vercel, y hasta entonces la lección los muestra como «No se pudo mostrar la imagen».
 
 Cada archivo empieza con su frontmatter y sigue con las secciones de siempre (Objetivo, Lo esencial, Explicación, Ejemplo práctico, Errores comunes, Práctica, Repaso, Respuestas y Para profundizar):
 
@@ -141,7 +142,8 @@ updated: 2026-11-30
 ## Objetivo
 ```
 
-- El archivo se llama como el `id`, y ese tema debe existir. Si no existe, si la ruta o la fase no son las suyas, o si el frontmatter está mal, el seed se detiene **sin cargar nada** y dice qué archivo corregir.
+- Las imágenes se escriben `![descripción](img/archivo.svg)`; la descripción dice qué muestra el diagrama (la lee el tutor). Si debajo va un párrafo todo en cursiva, es el pie de la imagen.
+- El archivo se llama como el `id`, va en `content/<ruta>/<fase>/` y ese tema debe existir. Si no existe, si la ruta o la fase no son las suyas, o si el frontmatter está mal, el seed se detiene **sin cargar nada** y dice qué archivo corregir.
 - Para corregir una lección, edita el archivo y repite el seed.
 - Si quitas un archivo, la lección no se borra de la base: el seed lo avisa.
 

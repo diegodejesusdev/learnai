@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 640" role="img" aria-label="Una cadena de comandos con pipes que encuentra las rutas con más errores 404" font-family="DejaVu Sans, system-ui, -apple-system, Segoe UI, Roboto, sans-serif">
+  <defs><marker id="fl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#475569"/></marker></defs>
+  <rect x="1" y="1" width="638" height="638" rx="16" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="2"/>
+  <text x="32" y="44" font-size="22" font-weight="700" fill="#0F172A">Una cadena de comandos con pipes</text>
+  <g font-size="15">
+    <rect x="32" y="68" width="576" height="64" rx="10" fill="#F1F5F9" stroke="#94A3B8" stroke-width="1.5"/>
+    <text x="52" y="96" font-size="17" font-weight="700" fill="#0F172A">access.log</text>
+    <text x="52" y="119" fill="#475569">6 líneas: IP, método, ruta y código de respuesta</text>
+    <line x1="320" y1="134" x2="320" y2="166" stroke="#475569" stroke-width="2.5" marker-end="url(#fl)"/><text x="334" y="156" font-size="18" font-weight="700" fill="#EA580C">|</text>
+
+    <rect x="32" y="172" width="576" height="64" rx="10" fill="#EFF6FF" stroke="#2563EB" stroke-width="1.5"/>
+    <text x="52" y="200" font-size="17" font-weight="700" fill="#1E3A8A" font-family="DejaVu Sans Mono, monospace">grep " 404"</text>
+    <text x="52" y="223" fill="#1E3A8A">deja solo las 4 líneas con error 404</text>
+    <line x1="320" y1="238" x2="320" y2="270" stroke="#475569" stroke-width="2.5" marker-end="url(#fl)"/><text x="334" y="260" font-size="18" font-weight="700" fill="#EA580C">|</text>
+
+    <rect x="32" y="276" width="576" height="64" rx="10" fill="#EFF6FF" stroke="#2563EB" stroke-width="1.5"/>
+    <text x="52" y="304" font-size="17" font-weight="700" fill="#1E3A8A" font-family="DejaVu Sans Mono, monospace">awk '{print $3}'</text>
+    <text x="52" y="327" fill="#1E3A8A">toma la tercera columna: la ruta</text>
+    <line x1="320" y1="342" x2="320" y2="374" stroke="#475569" stroke-width="2.5" marker-end="url(#fl)"/><text x="334" y="364" font-size="18" font-weight="700" fill="#EA580C">|</text>
+
+    <rect x="32" y="380" width="576" height="64" rx="10" fill="#EFF6FF" stroke="#2563EB" stroke-width="1.5"/>
+    <text x="52" y="408" font-size="17" font-weight="700" fill="#1E3A8A" font-family="DejaVu Sans Mono, monospace">sort | uniq -c</text>
+    <text x="52" y="431" fill="#1E3A8A">ordena y cuenta cuántas veces aparece cada ruta</text>
+    <line x1="320" y1="446" x2="320" y2="478" stroke="#475569" stroke-width="2.5" marker-end="url(#fl)"/><text x="334" y="468" font-size="18" font-weight="700" fill="#EA580C">|</text>
+
+    <rect x="32" y="484" width="576" height="64" rx="10" fill="#EFF6FF" stroke="#2563EB" stroke-width="1.5"/>
+    <text x="52" y="512" font-size="17" font-weight="700" fill="#1E3A8A" font-family="DejaVu Sans Mono, monospace">sort -rn | head -5</text>
+    <text x="52" y="535" fill="#1E3A8A">de mayor a menor, y solo las 5 primeras</text>
+
+    <rect x="32" y="564" width="576" height="56" rx="10" fill="#DCFCE7" stroke="#16A34A" stroke-width="1.5"/>
+    <g font-size="16" fill="#14532D" font-family="DejaVu Sans Mono, monospace"><text x="52" y="598">2 /wp-admin</text><text x="230" y="598">1 /wp-login.php</text><text x="450" y="598">1 /.env</text></g>
+  </g>
+</svg>

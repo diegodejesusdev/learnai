@@ -70,7 +70,7 @@ function PhaseView({ track, phase, progress }: PhaseViewProps) {
               ))}
             </ul>
           )}
-          <DownloadPhase phase={phase} />
+          <DownloadPhase phase={phase} trackId={track.id} />
         </Section>
         <Section title="Proyecto de la fase" className="self-start">
           {/* key: el formulario se reinicia si cambias de fase */}

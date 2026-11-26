@@ -1,0 +1,52 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 600" role="img" aria-label="Una región de AWS con tres zonas de disponibilidad y una ubicación de borde cerca del usuario" font-family="DejaVu Sans, system-ui, -apple-system, Segoe UI, Roboto, sans-serif">
+  <defs>
+    <marker id="fl" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#475569"/></marker>
+  </defs>
+  <rect x="1" y="1" width="638" height="598" rx="16" fill="#FFFFFF" stroke="#E2E8F0" stroke-width="2"/>
+  <text x="32" y="44" font-size="22" font-weight="700" fill="#0F172A">Región, zonas de disponibilidad y borde</text>
+
+  <rect x="32" y="66" width="576" height="300" rx="14" fill="#EFF6FF" stroke="#2563EB" stroke-width="2.5"/>
+  <text x="52" y="100" font-size="19" font-weight="700" fill="#1E3A8A">Región sa-east-1 (São Paulo)</text>
+
+  <g font-size="16" fill="#1E3A8A">
+    <g transform="translate(52,122)">
+      <rect width="164" height="190" rx="10" fill="#FFFFFF" stroke="#60A5FA" stroke-width="2" stroke-dasharray="6 4"/>
+      <text x="82" y="30" text-anchor="middle" font-weight="700">sa-east-1a</text>
+      <rect x="22" y="52" width="120" height="44" rx="6" fill="#DBEAFE"/><text x="82" y="80" text-anchor="middle" font-size="14">Centro de datos</text>
+      <rect x="22" y="108" width="120" height="44" rx="6" fill="#DBEAFE"/><text x="82" y="136" text-anchor="middle" font-size="14">Centro de datos</text>
+    </g>
+    <g transform="translate(238,122)">
+      <rect width="164" height="190" rx="10" fill="#FFFFFF" stroke="#60A5FA" stroke-width="2" stroke-dasharray="6 4"/>
+      <text x="82" y="30" text-anchor="middle" font-weight="700">sa-east-1b</text>
+      <rect x="22" y="52" width="120" height="44" rx="6" fill="#DBEAFE"/><text x="82" y="80" text-anchor="middle" font-size="14">Centro de datos</text>
+      <rect x="22" y="108" width="120" height="44" rx="6" fill="#DBEAFE"/><text x="82" y="136" text-anchor="middle" font-size="14">Centro de datos</text>
+    </g>
+    <g transform="translate(424,122)">
+      <rect width="164" height="190" rx="10" fill="#FFFFFF" stroke="#60A5FA" stroke-width="2" stroke-dasharray="6 4"/>
+      <text x="82" y="30" text-anchor="middle" font-weight="700">sa-east-1c</text>
+      <rect x="22" y="52" width="120" height="44" rx="6" fill="#DBEAFE"/><text x="82" y="80" text-anchor="middle" font-size="14">Centro de datos</text>
+      <rect x="22" y="108" width="120" height="44" rx="6" fill="#DBEAFE"/><text x="82" y="136" text-anchor="middle" font-size="14">Centro de datos</text>
+    </g>
+  </g>
+  <g stroke="#2563EB" stroke-width="3">
+    <line x1="216" y1="292" x2="238" y2="292"/>
+    <line x1="402" y1="292" x2="424" y2="292"/>
+  </g>
+  <text x="320" y="346" font-size="15" fill="#1E3A8A" text-anchor="middle">Zonas separadas físicamente, unidas por fibra de baja latencia</text>
+
+  <g transform="translate(32,400)">
+    <circle cx="40" cy="40" r="18" fill="#CBD5E1"/>
+    <path d="M10,100 Q40,58 70,100 Z" fill="#CBD5E1"/>
+    <text x="40" y="128" font-size="15" fill="#334155" text-anchor="middle">Usuario</text>
+    <line x1="84" y1="70" x2="168" y2="70" stroke="#475569" stroke-width="2.5" marker-end="url(#fl)"/>
+    <rect x="176" y="34" width="210" height="72" rx="10" fill="#F5F3FF" stroke="#7C3AED" stroke-width="2"/>
+    <text x="281" y="64" font-size="16" font-weight="700" fill="#4C1D95" text-anchor="middle">Ubicación de borde</text>
+    <text x="281" y="88" font-size="14" fill="#4C1D95" text-anchor="middle">copia en caché (CloudFront)</text>
+    <path d="M386,70 H470 V-28" fill="none" stroke="#475569" stroke-width="2.5" marker-end="url(#fl)"/>
+    <text x="486" y="60" font-size="14" fill="#475569">si no está</text>
+    <text x="486" y="80" font-size="14" fill="#475569">en caché, va</text>
+    <text x="486" y="100" font-size="14" fill="#475569">a la región</text>
+    <text x="0" y="170" font-size="15" fill="#334155">Regla: reparte tu app en al menos 2 zonas para que siga</text>
+    <text x="0" y="192" font-size="15" fill="#334155">funcionando si una falla.</text>
+  </g>
+</svg>

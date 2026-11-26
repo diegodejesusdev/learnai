@@ -103,6 +103,12 @@ Cada tema puede tener una lección en Markdown, siempre con las mismas secciones
   - Las tablas de 3 columnas o más se desplazan de lado en el móvil.
   - El código lleva su lenguaje, colores (`refractor`, con los lenguajes de las rutas) y «Copiar».
   - Los enlaces externos abren en otra pestaña.
+- **Imágenes:** diagramas de `content/<ruta>/<fase>/img/`, escritos `![descripción](img/archivo.svg)`.
+  - El build los copia a `lessons/<ruta>/<fase>/img/` y la app reescribe la ruta al mostrar. Solo se admiten los de la propia carpeta `img/` (svg, png, jpg o webp).
+  - A todo el ancho, sobre fondo blanco también en modo oscuro (token `diagram`).
+  - La cursiva de justo debajo es el pie de la imagen (`<figure>` con `<figcaption>`).
+  - Se tocan para ampliar: pantalla completa con «Acercar» (o tocar la imagen) para recorrerla con el dedo; en el móvil también se pellizca. Escape o «Cerrar» la cierran y el foco vuelve a la imagen.
+  - Si una imagen no carga, se muestra su descripción y la lección sigue.
 - **Índice** de secciones y subtítulos: fijo en el PC (desde 1280 px), con lo que se está leyendo marcado; desplegable en el móvil.
 - **Respuestas:** ocultas tras «Ver respuestas».
 - **Tiempo estimado:** los `minutes` de la lección (incluye la práctica). También la fecha de actualización y cuándo la leíste.
@@ -113,7 +119,8 @@ Cada tema puede tener una lección en Markdown, siempre con las mismas secciones
 
 **Sin conexión**
 - Una lección abierta con internet queda guardada en el dispositivo (IndexedDB, `lessonStore.ts`) y se lee sin conexión.
-- «Descargar fase» guarda todas las de la fase de una vez. Dice cuántas hay en el dispositivo y cuántas cambiaron desde entonces, y solo pide las que faltan. Necesita conexión.
+- Sus imágenes van con ella, en la caché `learnai-lesson-images` del service worker: se guardan al verlas, al abrir la lección y al descargar la fase. No se bajan todas al instalar la app.
+- «Descargar fase» guarda todas las de la fase de una vez, con sus imágenes. Dice cuántas hay en el dispositivo y cuántas cambiaron desde entonces, y solo pide las que faltan. Necesita conexión.
 - Con internet siempre se pide la versión nueva; si la red falla, se muestra la copia.
 - Marcarla como leída sin conexión entra en la cola.
 - Al cerrar sesión se borran las copias.
@@ -317,6 +324,7 @@ Todos los días y semanas se calculan en hora de Bogotá. Una sesión cuenta en 
 - **Lección del tema**, si tiene (tabla `lessons`): completa, entre `<leccion>` y `</leccion>`, marcada como material de estudio y no como instrucciones. Hasta 30 000 caracteres.
   - En **Explicar** se apoya en ella y, si va más allá, lo dice.
   - En **Quiz**, las 5 preguntas salen de su contenido, de secciones distintas, sin copiar el «Repaso», y cada explicación dice en qué sección está.
+  - Las imágenes llegan como `![descripción](archivo)`: la descripción le dice qué muestra el diagrama.
   - Si no se pudo leer, el tutor responde sin ella.
 - **Proyecto** (Revisar proyecto): su ruta con la meta, enunciado, temas de la fase, estado, repositorio, demo y notas.
 - Resumen corto del progreso en la ruta del tema o del proyecto. En «Hoy», el de todas las rutas, y cuál es la activa:
@@ -424,7 +432,10 @@ Se carga desde todos los JSON de `src/data/routes/` con `npm run seed` (`scripts
 Las **lecciones** salen de todos los `.md` de `content/`, con upsert por `topic_id`:
 - El frontmatter lleva `id`, `track`, `phase`, `title`, `minutes` y `updated`. La tabla guarda el Markdown sin él.
 - Se detiene sin escribir nada (ni las rutas) si un id no existe en `topics`, si la ruta o la fase no son las del tema, si dos archivos son del mismo tema, si el archivo no se llama como el id o si el frontmatter está mal. Los errores de todos los archivos salen juntos.
+- También lo detienen las imágenes: una que no está en `img/` de su carpeta, o que no es una ruta `img/archivo.ext`.
+- El archivo debe estar en `content/<ruta>/<fase>/` (las del frontmatter).
 - Avisa, sin detenerse, si falta una sección, si el título no es el del tema o si en la base hay una lección sin archivo.
+- Las imágenes no van a la base: se publican con el build, así que agregar una lección con diagramas exige también desplegar la app.
 
 `curriculum_meta` ya no se usa. Se conserva para las apps instaladas antes de las rutas, que aún la leen.
 
@@ -614,6 +625,8 @@ Las variables de la Edge Function van en `supabase/functions/.env` en local y co
 - **Lecciones (fase 10):**
   - El texto se guarda en IndexedDB y no en la caché persistida: `localStorage` tiene unos 5 MB y, si se llenara, dejaría de guardarse la cola de cambios.
   - El progreso de lectura es un RPC que se queda con el máximo y la primera lectura: se puede repetir y llegar en cualquier orden.
+  - Las imágenes viajan con el build y no con la base: así funcionan con el service worker y sin servicios nuevos. A cambio, una lección con diagramas exige desplegar la app además del seed.
+  - Los diagramas se guardan en una caché propia y no en la instalación del service worker: no pesan al instalar y se guardan con su lección.
   - El resaltado usa `refractor` (Prism) porque trae HCL (Terraform), que la ruta Cloud necesita.
 - **Historial (fase 5):**
   - Gráficas con Recharts, que reemplaza la idea inicial de SVG propio; lo pidió Diego.

@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto'
-import { readdir, readFile } from 'node:fs/promises'
-import { basename, join, sep } from 'node:path'
+import { access, readdir, readFile } from 'node:fs/promises'
+import { basename, dirname, join, sep } from 'node:path'
+import { lessonImageSources, localImagePath } from '../src/lib/lessonImages.ts'
 import { normalizeText, parseFrontmatter } from './frontmatter.ts'
 
 /** Una lección por tema: content/<ruta>/<fase>/<id-del-tema>.md. Agregar es copiar el archivo. */
@@ -19,6 +20,8 @@ export interface LessonFile {
   content: string
   /** sha256 del archivo: cambia si cambia cualquier cosa. */
   hash: string
+  /** Imágenes que usa, como las escribe el Markdown (img/archivo.svg). */
+  images: string[]
 }
 
 const KEYS = ['id', 'track', 'phase', 'title', 'minutes', 'updated'] as const
@@ -52,9 +55,45 @@ export function parseLesson(text: string, file: string): LessonFile {
   }
   if (!isDate(updated)) return fail(`updated debe ser una fecha AAAA-MM-DD (dice «${updated}»).`)
   if (body.trim() === '') return fail('no tiene contenido.')
+  // Las imágenes se buscan en la carpeta de la fase y el build las pone en lessons/<ruta>/<fase>/.
+  if (dirname(file).split(/[\\/]/).join('/') !== `${track}/${phase}`) {
+    return fail(`debe estar en content/${track}/${phase}/ (ruta «${track}», fase «${phase}»).`)
+  }
+  const images = lessonImageSources(body)
+  const badImage = images.find((src) => localImagePath(src) === null)
+  if (badImage !== undefined) {
+    return fail(
+      `la imagen «${badImage}» no sirve: usa una ruta como img/archivo.svg (svg, png, jpg o webp).`,
+    )
+  }
 
   const hash = createHash('sha256').update(normalizeText(text)).digest('hex')
-  return { file, id, track, phase, title, minutes: Number(minutes), updated, content: body, hash }
+  return {
+    file,
+    id,
+    track,
+    phase,
+    title,
+    minutes: Number(minutes),
+    updated,
+    content: body,
+    hash,
+    images: images.map((src) => localImagePath(src) ?? src),
+  }
+}
+
+/** Las imágenes que la lección usa y no están en img/ de su carpeta. */
+async function missingImages(dir: string, lesson: LessonFile): Promise<string[]> {
+  const folder = join(dir, dirname(lesson.file))
+  const found = await Promise.all(
+    lesson.images.map((image) =>
+      access(join(folder, image)).then(
+        () => true,
+        () => false,
+      ),
+    ),
+  )
+  return lesson.images.filter((_, index) => !found[index])
 }
 
 /** Todas las lecciones de la carpeta. Si hay errores, los reúne todos. */
@@ -70,7 +109,13 @@ export async function loadLessons(dir: string): Promise<LessonFile[]> {
     if (basename(file).startsWith('.')) continue
     try {
       const text = await readFile(join(dir, file), 'utf8')
-      lessons.push(parseLesson(text, file.split(sep).join('/')))
+      const lesson = parseLesson(text, file.split(sep).join('/'))
+      lessons.push(lesson)
+      for (const image of await missingImages(dir, lesson)) {
+        errors.push(
+          `${lesson.file}: falta la imagen ${image} (debe estar en content/${lesson.track}/${lesson.phase}/img/).`,
+        )
+      }
     } catch (error) {
       errors.push(error instanceof Error ? error.message : String(error))
     }

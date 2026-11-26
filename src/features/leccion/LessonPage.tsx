@@ -7,12 +7,13 @@ import { ErrorState } from '@/components/ui/ErrorState'
 import { LoadingState } from '@/components/ui/LoadingState'
 import { PageHeader } from '@/components/ui/PageHeader'
 import { RoadmapGate } from '@/features/ruta/RoadmapGate'
+import { lessonAssetBase } from '@/lib/lessonImages'
 import { findTopicIn, trackOfTarget, trackPhaseLabel } from '@/lib/roadmap'
 import { LessonReader } from './LessonReader'
 import { useLesson } from './useLesson'
 
-function LessonContent({ topicId }: { topicId: string }) {
-  const state = useLesson(topicId)
+function LessonContent({ topicId, assetBase }: { topicId: string; assetBase: string }) {
+  const state = useLesson(topicId, assetBase)
   const backToTopic = (
     <ButtonLink to={`/ruta/tema/${topicId}`} variant="secondary">
       Volver al tema
@@ -20,7 +21,7 @@ function LessonContent({ topicId }: { topicId: string }) {
   )
   switch (state.status) {
     case 'ready':
-      return <LessonReader lesson={state.lesson} />
+      return <LessonReader lesson={state.lesson} assetBase={assetBase} />
     case 'loading':
       return <LoadingState label="Cargando la lección…" />
     case 'missing':
@@ -62,7 +63,11 @@ export function LessonPage() {
               back={{ to: `/ruta/tema/${topicId}`, label: 'Tema' }}
             />
             {/* key: al pasar a otra lección, todo arranca de nuevo */}
-            <LessonContent key={topicId} topicId={topicId} />
+            <LessonContent
+              key={topicId}
+              topicId={topicId}
+              assetBase={lessonAssetBase(track.id, found.phase.id)}
+            />
           </>
         )
       }}

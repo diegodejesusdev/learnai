@@ -28,6 +28,10 @@ Una empresa que quería lanzar una app tenía que comprar servidores, esperar se
 
 Un proveedor (AWS, Azure, Google Cloud) ya tiene centros de datos enormes. Tú pides lo que necesitas desde una consola web, una línea de comandos o código, y en minutos lo tienes. Cuando no lo necesitas, lo apagas y dejas de pagar.
 
+![Dos gráficas: con servidores propios la capacidad es fija, sobra casi siempre y falta en el pico; en la nube la capacidad sube y baja siguiendo la demanda](img/cl-f0-t1-capacidad.svg)
+
+*Con capacidad fija pagas por el pico todo el tiempo y aun así puedes quedarte corto. En la nube la capacidad sigue a la demanda.*
+
 ### Las cinco características
 
 | Característica | Qué significa | Ejemplo |

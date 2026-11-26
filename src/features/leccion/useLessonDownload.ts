@@ -1,6 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from '@/lib/toast'
+import { lessonImageUrls } from '@/lib/lessonImages'
 import { fetchLessons } from './lessonApi'
+import { cacheLessonImages } from './lessonImageCache'
 import { lessonKey, savedHashesKey, savedLessonsKey } from './lessonKeys'
 import { downloadState, type DownloadState } from './lessonModel'
 import { savedHashes, saveLessons } from './lessonStore'
@@ -33,10 +35,18 @@ export function useDownloadLessons() {
   const queryClient = useQueryClient()
   return useMutation({
     networkMode: 'always',
-    mutationFn: async (topicIds: readonly string[]) => {
+    mutationFn: async ({
+      topicIds,
+      assetBase,
+    }: {
+      topicIds: readonly string[]
+      assetBase: string
+    }) => {
       const lessons = await fetchLessons(topicIds)
       if (!(await saveLessons(lessons))) throw new LessonStorageError()
       await keepStorage()
+      // Con el texto, los diagramas: sin ellos, offline la lección quedaría con huecos.
+      await cacheLessonImages(lessons.flatMap(({ content }) => lessonImageUrls(content, assetBase)))
       return lessons
     },
     onSuccess: (lessons) => {

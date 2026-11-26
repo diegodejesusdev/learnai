@@ -65,7 +65,7 @@ function idMaker() {
 }
 
 /** Dice, línea por línea, si está dentro de un bloque de código (``` o ~~~). */
-function fenceTracker() {
+export function fenceTracker() {
   let open: string | null = null
   return (line: string): boolean => {
     const fence = /^\s*(`{3,}|~{3,})(.*)$/.exec(line)
